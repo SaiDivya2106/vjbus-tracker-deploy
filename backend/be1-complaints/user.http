@@ -1,0 +1,46 @@
+
+#Creating complaints
+POST http://localhost:4000/user-api/add-complaint
+Content-Type: application/json
+
+{
+    "complaint_id": "C1010",
+    "title": "Faculty Unavailability",
+    "description": "Some faculty members are not attending scheduled lectures.",
+    "category": "Faculty and Staff",
+    "user_id": "U2004"
+}
+
+###View all complaints
+GET http://localhost:4000/user-api/view-complaints
+
+### View complaints of the specific User
+GET http://localhost:4000/user-api/view-complaints/shaikshaaz18@gmail.com
+
+### Fetch users complaints
+GET http://localhost:4000/user-api/my-complaints/shaikshaaz18@gmail.com
+
+
+### Like Complaint
+POST  http://localhost:4000/user-api/like-complaint/C1010
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBjYmJiZDI2NjNhY2U4OTU4YTFhOTY4ZmZjNDQxN2U4MDEyYmVmYmUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2hhaWsgU2hhYXogSHVzc2FpbiAiLCJwaWN0dXJlIjoiaHR0cHM6Ly9hdmF0YXJzLmdpdGh1YnVzZXJjb250ZW50LmNvbS91LzEzMDg1MzY4Nz92PTQiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZ2l0aC1lOGY2YSIsImF1ZCI6ImdpdGgtZThmNmEiLCJhdXRoX3RpbWUiOjE3Mzk5NjEzMDUsInVzZXJfaWQiOiJuRkpueWpSNDlaZnNhVkNqWmQ4NGFrdWVBMEcyIiwic3ViIjoibkZKbnlqUjQ5WmZzYVZDalpkODRha3VlQTBHMiIsImlhdCI6MTczOTk2MTMwNSwiZXhwIjoxNzM5OTY0OTA1LCJlbWFpbCI6InNoYWlrc2hhYXoxOEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ2l0aHViLmNvbSI6WyIxMzA4NTM2ODciXSwiZW1haWwiOlsic2hhaWtzaGFhejE4QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6ImdpdGh1Yi5jb20ifX0.TO9B0afgZIt8p-5crO0qcdLNzvgZBx6xOaJ0MvHrQuc-GFDYKLD9Ilh0dlLs6pTC9cd3TP1v9ccp8LcVStmnlS_nJ9xC1Oa8_ZyuRE4fpddYX2dxWjVQTr9ONHVzmubd0KXMwjIHnaOhpyvOWWtO0MwSJ8NLv_gWUQYIPcdw40cWASPkODy1n4sTANOc02gGwMp-qeBqszhwEnSulG-a0js40N13b4NcQC3KaNMFAnRJOq6t58143kwoj9ElvBbMPsprhdISs5AlEXgSEojmGIA4Gaj3AABxf6RmquP1cYRa04kj-ONdL8wBlKe5HAvJ-E-st1lnzR86fXrW5BlIgQ
+
+
+### Dislike complaint
+POST  http://localhost:4000/user-api/dislike-complaint/C1002
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjBjYmJiZDI2NjNhY2U4OTU4YTFhOTY4ZmZjNDQxN2U4MDEyYmVmYmUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2hhaWsgU2hhYXogSHVzc2FpbiAiLCJwaWN0dXJlIjoiaHR0cHM6Ly9hdmF0YXJzLmdpdGh1YnVzZXJjb250ZW50LmNvbS91LzEzMDg1MzY4Nz92PTQiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZ2l0aC1lOGY2YSIsImF1ZCI6ImdpdGgtZThmNmEiLCJhdXRoX3RpbWUiOjE3Mzk5NjEzMDUsInVzZXJfaWQiOiJuRkpueWpSNDlaZnNhVkNqWmQ4NGFrdWVBMEcyIiwic3ViIjoibkZKbnlqUjQ5WmZzYVZDalpkODRha3VlQTBHMiIsImlhdCI6MTczOTk2MTMwNSwiZXhwIjoxNzM5OTY0OTA1LCJlbWFpbCI6InNoYWlrc2hhYXoxOEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ2l0aHViLmNvbSI6WyIxMzA4NTM2ODciXSwiZW1haWwiOlsic2hhaWtzaGFhejE4QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6ImdpdGh1Yi5jb20ifX0.TO9B0afgZIt8p-5crO0qcdLNzvgZBx6xOaJ0MvHrQuc-GFDYKLD9Ilh0dlLs6pTC9cd3TP1v9ccp8LcVStmnlS_nJ9xC1Oa8_ZyuRE4fpddYX2dxWjVQTr9ONHVzmubd0KXMwjIHnaOhpyvOWWtO0MwSJ8NLv_gWUQYIPcdw40cWASPkODy1n4sTANOc02gGwMp-qeBqszhwEnSulG-a0js40N13b4NcQC3KaNMFAnRJOq6t58143kwoj9ElvBbMPsprhdISs5AlEXgSEojmGIA4Gaj3AABxf6RmquP1cYRa04kj-ONdL8wBlKe5HAvJ-E-st1lnzR86fXrW5BlIgQ
+
+###Filter complaints by status and catrgory
+GET http://localhost:4000/user-api/filter-complaints?category=Transport&status=Pending
+
+### Filter by Weekly
+GET http://localhost:4000/user-api/filter-complaints?dateRange=weekly
+
+### Filters by Monthly
+GET http://localhost:4000/user-api/filter-complaints?category=Hostel&status=Resolved&dateRange=monthly
+
+###Filters by text
+GET http://localhost:4000/user-api/filter-complaints?searchKeyword=FOOD
+
