@@ -1,3 +1,5 @@
+# This script reads user data from an Excel file and inserts it into a SQLite database.
+#git push test
 import sqlite3
 import pandas as pd
 
