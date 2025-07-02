@@ -1,5 +1,5 @@
 // ===== CONFIGURATION CONSTANTS =====
-const API_URL = "https://auth.vjstartup.com";
+const API_URL = "https://dev-auth.vjstartup.com";
 let socket; // Will be initialized after scripts are loaded
 
 // ===== GLOBAL VARIABLES =====

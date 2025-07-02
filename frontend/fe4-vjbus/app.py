@@ -70,6 +70,25 @@ def icon():
 def marker():
     return send_file('bus.png',mimetype='image/png')
 
+# import subprocess
+
+# @app.route('/restart-liveshare', methods=['POST'])
+# def restart_liveshare():
+#     subprocess.call(["./restart_liveshare.sh"])
+#     return jsonify({"status": "Live Share restarted"})
+
+# @app.route('/get-liveshare-link', methods=['GET'])
+# def get_liveshare_link():
+#     if os.path.exists("share_link.txt"):
+#         with open("share_link.txt", "r") as f:
+#             link = f.read().strip()
+#             return jsonify({"link": link})
+#     return jsonify({"link": None})
+
+# @app.route('/liveshare')
+# def liveshare():
+#     return render_template('liveshare.html')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3104, debug=True)

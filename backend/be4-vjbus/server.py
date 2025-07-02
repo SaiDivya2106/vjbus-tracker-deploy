@@ -76,38 +76,6 @@ init_db()
 
 
 
-#App routes
-@app.route("/get_all_locations", methods=["GET"])
-def get_all_locations():
-    return jsonify(all_routes)
-
-@app.route("/get_all_connections", methods=["GET"])
-def get_all_connections():
-    # Assume all_routes is a list of dicts, each representing a route
-    connections = []
-    
-    for route in all_routes:
-        sid = route.get("socketId")
-        route_id = route.get("route_id")
-        status = route.get("status")
-        latitude = route.get("latitude")
-        longitude = route.get("longitude")
-        
-        # Update the route dictionary with extra info
-        route.update({
-            "socketId": sid,
-            "route_id": route_id,
-            "status": status,
-        })
-        
-        connections.append(route)
-    # print("Returned connections:  ",connections)
-    return jsonify(connections)
-
-@app.route("/get_all_uis", methods=["GET"])
-def get_all_uis():
-    return jsonify(all_uis)
-
 #functions to be used later
 def is_in_college(lon, lat):
     COLLEGE=(17.539873, 78.386514)
@@ -228,7 +196,7 @@ def handle_check_location(data):
         distance = geodesic(driver_location, (17.519913, 78.377975)).meters
 
         print(f"Driver {sid} checking location. Distance to target: {distance:.2f}m")
-        if distance <= 2050:
+        if distance <= 20050:
             socketio.emit("start_now", {'message': 'You are in the designated area. Start broadcasting.'}, room=sid)
             print(f"✅ Driver {sid} is in the zone. Sending 'start_now' command.")
 
@@ -463,6 +431,34 @@ def handle_message(data):
         "message": message,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }, room=room)
+
+#New http to socket
+
+@socketio.on("all_uis")
+def get_all_uis(data=None):
+    # print("All UIs: ", all_uis)
+    return {k: all_uis[k] for k in all_uis.keys() - all_ids.keys()}
+
+
+@socketio.on("all_connections")
+def get_all_connections(data=None):
+    connections = []
+    for route in all_routes:
+        route.update({
+            "socketId": route.get("socketId"),
+            "route_id": route.get("route_id"),
+            "status": route.get("status"),
+            "latitude": route.get("latitude"),
+            "longitude": route.get("longitude")
+        })
+        connections.append(route)
+    # print("All Connections: ", connections)
+    return connections  # This sends data via the Socket.IO callback
+
+@socketio.on("all_locations")
+def get_all_locations():
+    # print("All Locations: ", all_routes)
+    return all_routes
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=PORT, debug=True)

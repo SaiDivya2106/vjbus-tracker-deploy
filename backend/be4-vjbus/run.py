@@ -38,3 +38,32 @@ conn.commit()
 conn.close()
 
 print("User data inserted successfully!")
+
+
+@socketio.on("all_uis")
+def get_all_uis():
+    return jsonify(all_uis)
+
+
+@socketio.on("all_connections")
+def get_all_connections():
+    # Assume all_routes is a list of dicts, each representing a route
+    connections = []
+    
+    for route in all_routes:
+        sid = route.get("socketId")
+        route_id = route.get("route_id")
+        status = route.get("status")
+        latitude = route.get("latitude")
+        longitude = route.get("longitude")
+        
+        # Update the route dictionary with extra info
+        route.update({
+            "socketId": sid,
+            "route_id": route_id,
+            "status": status,
+        })
+        
+        connections.append(route)
+    # print("Returned connections:  ",connections)
+    return jsonify(connections)

@@ -143,7 +143,6 @@ function fetchActiveConnections() {
             console.error("Error fetching active connections:", error);
         });
 }
-
 /**
  * Handle location update from socket
  * @param {Object} data - Location data from socket
