@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server:{
     host: '0.0.0.0',
-    port:3109,
+    port:3000,
     allowedHosts: [
       '127.0.0.1', // or 'localhost' - Important for dev server access
       'easyfind.vnrzone.site',  // Add this line!

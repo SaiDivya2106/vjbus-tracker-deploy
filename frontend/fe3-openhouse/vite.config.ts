@@ -16,7 +16,7 @@ export default defineConfig({
       '103.248.208.119',
       'openhouse.vnrzone.site'
     ],
-    port: 3119,
+    port: 3000,
     strictPort: true,
     open: true,
     cors: true, // ✅ Enable CORS
