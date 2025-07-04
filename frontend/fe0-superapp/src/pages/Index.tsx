@@ -172,7 +172,7 @@ const Index = () => {
                     {/* Inner glow effect */}
                     <div className="absolute inset-1 bg-gradient-to-br from-red-400/30 to-transparent rounded-lg"></div>
                     {/* CS text with Superman styling */}
-                    <span className="text-white font-black text-2xl tracking-wider relative z-10 text-shadow-lg drop-shadow-xl">CS</span>
+                    <span className="text-white font-black text-2xl tracking-wider relative z-10 text-shadow-lg drop-shadow-xl">CL</span>
                   </div>
                   {/* Top highlight */}
                   <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-white/20 rounded-full blur-sm"></div>
@@ -186,9 +186,9 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-700 bg-clip-text text-transparent">
-                  Campus Sphere
+                  Campus Life
                 </h1>
-                <p className="text-gray-600 mt-1 font-medium">Campus Automation Suite</p>
+                <p className="text-gray-600 mt-1 font-medium">Student Centric Campus Automation Suite</p>
               </div>
             </div>
             
@@ -214,7 +214,7 @@ const Index = () => {
           
           <div className="text-center mt-8 max-w-3xl mx-auto">
             <p className="text-lg text-gray-700 leading-relaxed font-medium">
-              Your unified ecosystem for streamlined campus operations. Access all automation tools through one elegant interface.
+              Your unified ecosystem for student centric campus experience. Simplfied Life.
             </p>
           </div>
         </div>
