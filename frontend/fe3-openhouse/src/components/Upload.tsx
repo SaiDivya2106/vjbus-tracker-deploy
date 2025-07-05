@@ -4,8 +4,6 @@ import './Upload.css'; // Make sure this is the CSS with the 'upld-' prefixed cl
 // --- Image Import ---
 import siteLogo from '../images/collegeLogo.jpg'; // Example path
 
-const API_URL = 'https://openhouse.vnrzone.site/api'; // Base URL for API requests
-
 // --- Constants ---
 const MAX_TITLE_WORDS = 20;
 const MAX_ABSTRACT_WORDS = 200;
@@ -78,7 +76,7 @@ const performActualUpload = async (formDataObject: any) => {
   if (formDataObject.pdfPosterFile) data.append('pdf_poster', formDataObject.pdfPosterFile, formDataObject.pdfPosterFile.name);
 
   // ---===[ Backend Endpoint URL ]===---
-  const endpointUrl = `${API_URL}/projects/upload-project`;
+  const endpointUrl = `${import.meta.env.VITE_API_URL || ''}/projects/upload-project`;
   // ---=============================---
 
   console.log(`Attempting to POST to: ${endpointUrl}`);

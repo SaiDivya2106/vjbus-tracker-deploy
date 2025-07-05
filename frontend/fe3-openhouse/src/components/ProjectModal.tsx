@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Code2, Tags, MessageCircle, Trash, ThumbsUp, PlayCircle } from 'lucide-react';
 import { Project } from '../types';
 
-const API_URL = 'https://openhouse.vnrzone.site/api';
-
+const API_URL = `${import.meta.env.VITE_API_URL || ''}`;
 interface ProjectModalProps {
   user: {
     name: string;

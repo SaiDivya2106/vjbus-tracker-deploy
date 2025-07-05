@@ -3,7 +3,7 @@ import { Project } from '../types';
 import { Trash, MessageCircle, PlayCircle, ThumbsUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_URL = 'https://openhouse.vnrzone.site/api';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}`;
 
 
 interface MyProjectsProps {

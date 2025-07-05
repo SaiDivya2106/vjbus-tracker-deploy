@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const API_URL = 'https://openhouse.vnrzone.site/api';
+const API_URL = `${import.meta.env.VITE_API_URL || ''}`;
 // Shuffle function
 const shuffleArray = (array: Project[]): Project[] => {
   return [...array].sort(() => Math.random() - 0.5);
