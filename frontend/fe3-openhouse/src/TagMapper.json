@@ -1,0 +1,1254 @@
+[
+  {
+    "old_tag": "Deep Learning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Medical Imaging",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "TensorFlow",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Keras",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Xray Analysis",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Transfer Learning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Ensemble Learning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Osteoarthritis",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Google Colab",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "CNNAI",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "NLP",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "ML",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "File Organization",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Web",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "React",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "MongoDB",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Resume Generation",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Activity Tracking",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Machine Learning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Career Guidance",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "GitHub Integration",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "AR",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Boosting",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Bagging",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "AutoEncoders",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "SMOTE",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "AndroidApp",
+    "new_tag": "Mobile Development"
+  },
+  {
+    "old_tag": "CyberSecurity",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "PhishingDetection",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "RealTimeProtection",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "MachinelLearning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "MobileSecurity",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "LinkScanner",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "MLinCybersecurity",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "SafeMessaging",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "UserPrivacy",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "IOT",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Web development",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Indoor maps",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "College Tech",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Navigation",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Smart Campus",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Generative Adversarial Networks (GAN)",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Deepfake Detection",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Image Classification",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Discriminator Network",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Synthetic Image Generation",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "F++ Dataset",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Computer vision",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Mobile App",
+    "new_tag": "Mobile Development"
+  },
+  {
+    "old_tag": "Database",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Dashboard",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "None",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Electric microcar",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "Solar assisted",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Solar urban cruiser",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Transformers",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "BERT",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Health Care",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Disease Prediction",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Capsule Network",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Wireless communication",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Web development (html)",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "css",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "js",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "php)",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Full Stack Web",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Seq-Former",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Signal Processing",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Image processing",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Image segmentation",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "ADC",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "VLSI",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Low power electronics",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Multipliers",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "SRAMs",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "hipice",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "TIGFET",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Electronics",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "AMD",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "OCT",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Eye",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Smart automation",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "Real time systems",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Energy efficient",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Occupancy detection",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Sustainable technology",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Chrome Extension",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "VADER",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Sentiment Analysis",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Bot",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Web Application",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Firebase",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Gemma 2B",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Low rank adaption(LoRA)",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Parameter fine tuning(PEFT)",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Web Development (MERN Stack)",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "RealTimeDashboard",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "ResponsiveUI",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "#SmartGlasses #HC_SR04 #UltrasonicSensor #AssistiveTech #WearableTech #ObstacleDetection #Arduino #EmbeddedSystems #IoT #RealTimeFeedback",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "FPGA",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Neural network",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "verilog",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "ESP32",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "MPU6050",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Gesture Recognition",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Edge Impulse",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Wireless Communication",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Embedded Systems",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Real-Time Processing",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Bluetooth/Wi-Fi",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Human-Computer Interaction",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Cloud Computing",
+    "new_tag": "Cloud Computing"
+  },
+  {
+    "old_tag": "Environmental Monitoring",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Faculty Chum Prediction",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Random Forest",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Support Vector Machine (SVM)",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Predictive Modeling",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Global Relationships",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Design Thinking",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Higher education",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Technology",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "#IoT",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "#HealthTech",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "web dev-front end",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "backend",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "sqlite3 (for DB)",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "UI",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "UX",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "LLM",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Agents",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "WebRTC",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Gamification",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "EdTech",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Peer Learning",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Mock Interviews",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "FUEL CELL TECHNOLOGY",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "AUTOMOTIVE POWER TRAIN SYSTEMS",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "EduTech",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Doubt Asking Platform",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Full Stack",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "MERN",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Websockets",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "HealthCare",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "#machinelearning #ml",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Airbags",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Sensor",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Assistive Technology (Expressive TTS for accessibility)",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "TTS",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Prosody Modification",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Energy Boosting",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Vibrate Synthesis",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "FFT (Fast Fourier Transform)",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "yolo",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "detr",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "gts",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Solidworks",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Ultimaker Cura",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Sustainable infrastructure",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "MERN Stack",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "API",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "VNRVJLLF",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "LLMs",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Healthcare AI",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "NER",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Named Entity Recognition",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "SBERT",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Recommendation System",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Cosine Similarity",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Python",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "simulation",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "pygame",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Neural Networks",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "OCT image classification",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Vision Transformer",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "CNNs",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "PYNQ",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "YoloV11 and RT-DETR",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Yolov11",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Precision agriculture",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Contemporary farming",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "microcontroller",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "sustainable land management",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "sustainable farming",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Ion-sensitive transistor",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "COMSOL Multiphysics(crack)",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "ESP 32",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Bluetooth",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Traffic",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Web-Insights",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Marketing",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Sales",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Revenue",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Country Based",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Device Based",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "IP address Based",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Referer Data",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "C",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "frequency reconfigurable antenna",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Arionza270",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Singal processing",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Yolov8",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "OpenCV",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Object Detection",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Traffic Management System",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "6G Communications",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Massive MIMO",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "Power Optimization",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "ECE",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Brent kung adder",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Reversible techniques",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Vedic technique",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Quantum computing",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "DSP applications",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Drone",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "Open cv",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "Intelligent",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Cloud",
+    "new_tag": "Cloud Computing"
+  },
+  {
+    "old_tag": "Iot",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "VegetableBpnessdetection",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "Ai",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "#ECEproject #HighbassSpeaker #TDA2030 #SpeakerSystem #PowerAmplifier #EngineeringProject #ElectronicsProject #AudioAmplifer #DiySpeaker #SoundSystem #BassBoost #AmpliferCircuit #MiniProject",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "MFA",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Thermoelectric Generator",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Boost Converter",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Dual Loop control",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "PI Controller",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "MATLAB Simulink",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "PWM Control",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Energy Harvesting",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Renewable Energy",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Small Signal Analysis",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Kogge-Stone Adder",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Vedic Multiplier",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Solar Energy",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Photovoltaic Design",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "PV System Simulation",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Solar Power",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Energy Modeling",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Solar Efficiency",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "System Sizing",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Solar Panel Layout",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Energy",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Production Analysis",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Solar Performance",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Grid-connected Systems",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Off-grid Systems",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Simulation Software",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Performance Monitoring",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "Solar Optimization",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Energy Storage",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "PV System Configuration",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Solar Power Generation",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "Energy Economics",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "DNA Enhancer Prediction",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Convolutional Neu-ral Networks",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "XGboost",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Stacked Ensemble",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Neural Network",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Gene Regulation",
+    "new_tag": "Healthcare Technology"
+  },
+  {
+    "old_tag": "Deep Learning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "C++",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "API Integration",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "System Design",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "PCB",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "Anymaxsowell software tool",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "cnn",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "blttzm",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "ocr",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "signal conditioning circuit",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "PCB designing",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "analysis",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "React.js",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Css",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Html",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "BMS",
+    "new_tag": "Hardware & Electronics"
+  },
+  {
+    "old_tag": "automation project",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "EasyEDA simulation",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Electric vehicles",
+    "new_tag": "Robotics & Automation"
+  },
+  {
+    "old_tag": "sensor technology",
+    "new_tag": "IoT & Embedded Systems"
+  },
+  {
+    "old_tag": "battery safety",
+    "new_tag": "Sustainable Technology/Green Tech"
+  },
+  {
+    "old_tag": "YOLO V5",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "AI-Agent",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Finetuning",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Streamlit",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "HuggingFace",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Transformers-Pipeline",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "SMTP",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Blockchain",
+    "new_tag": "Blockchain"
+  },
+  {
+    "old_tag": "Ethereum",
+    "new_tag": "Blockchain"
+  },
+  {
+    "old_tag": "Kecsak-256",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "AES-256",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Hashing",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Encryption",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Authentication",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Secure",
+    "new_tag": "Cybersecurity"
+  },
+  {
+    "old_tag": "Streamlit using python",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Development Environment in CVS Code",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Data Static (json)",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "openenv",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "numpy",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "pickle",
+    "new_tag": "Data Science & Analytics"
+  },
+  {
+    "old_tag": "sys",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "re",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "os",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "Prediction",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "Regression",
+    "new_tag": "Artificial Intelligence/Machine Learning (AI/ML)"
+  },
+  {
+    "old_tag": "RAG",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "MERN STACK",
+    "new_tag": "Web Development"
+  },
+  {
+    "old_tag": "Mediapipe",
+    "new_tag": "Computer Vision"
+  },
+  {
+    "old_tag": "VOSK",
+    "new_tag": "Natural Language Processing (NLP)"
+  },
+  {
+    "old_tag": "Car insurance",
+    "new_tag": "Software Engineering Principles"
+  },
+  {
+    "old_tag": "React Native",
+    "new_tag": "Mobile Development"
+  }
+]
