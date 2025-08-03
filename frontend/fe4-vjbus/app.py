@@ -34,6 +34,7 @@ def get_google_client_id():
 
 @app.route('/get-all-routes',methods=['GET'])
 def get_all_routes():
+    print()
     return ROUTES
 
 @app.route('/')

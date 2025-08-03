@@ -377,13 +377,33 @@
             fetchActiveConnections();
         });
 
+        socket.on('yet_to_be_bradcasted', () => {
+            fetchActiveConnections();
+        });
+        // socket.on("yet_to_be_bradcasted",(data1) =>{
+        //     console.log("Yet to be broadcasted data received:", data1);
+        //     socket.emit("all_connections", null, (data) => {
+        //         if (!data || data.length === 0) {
+        //             console.log("Yet to be broadcasted data received:", data1);
+        //             renderActiveConnections(data1);
+        //             updateMapMarkers(data1);
+        //         }
+        //         else{
+        //             const merged = { ...data, ...data1 };
+        //             console.log("Yet to be broadcasted data received:", merged);
+        //             renderActiveConnections(merged);
+        //             updateMapMarkers(merged);
+        //         }
+        //     });
+        // });
+
         socket.on('admin_disconnect_response', (res) => {
-            alert(res.message);
+            // alert(res.message);
             fetchActiveConnections(); // Refresh list after disconnect
         });
 
         socket.on('admin_start_location_response', (res) => {
-            alert(res.message);
+            // alert(res.message);
             fetchActiveUIs(); // Refresh to remove the started UI
             fetchActiveConnections(); // Refresh to show the new connection
         });

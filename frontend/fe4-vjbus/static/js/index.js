@@ -141,19 +141,23 @@ async function getRoutes() {
 async function fetchActiveRoutes() {
     console.log("Fetching active routes...");
     try {
-        const response = await fetch("https://dev-bus.vjstartup.com/bus-be/get_all_connections");
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const connections = await response.json();
-        console.log("Active connections received:", connections);
-        activeRoutes.clear();
-        connections.forEach(conn => {
-            if (conn.status === "tracking_active") {
-                activeRoutes.add(conn.route_id);
+        socket.emit("all_connections", null, (connections) => {
+            if (!connections || connections.length === 0) {
+                console.warn("No active connections found.");
+                return;
             }
+
+            console.log("Active connections received:", connections);
+
+            activeRoutes.clear();
+            connections.forEach(conn => {
+                if (conn.status === "tracking_active") {
+                    activeRoutes.add(conn.route_id);
+                }
+            });
+
+            updateRouteDropdown();
         });
-        updateRouteDropdown();
     } catch (error) {
         console.error("Error fetching active routes:", error);
         updateRouteDropdown(); // Still update dropdown with routes we have
@@ -319,8 +323,9 @@ function setupEventListeners() {
             fill_tracking_info();
             
             if (statusText) {
-                statusText.innerText = selectedRoute ? 
+                statusText.innerText === selectedRoute ? 
                     `Tracking ${selectedRoute}` : "Select a route to start tracking";
+                console.log("stat",statusText.innerText)
             }
             
             // Hide elements initially
@@ -675,14 +680,14 @@ async function getDistanceTime(origin, destination) {
 }
 
 function updateFindDistanceVisibility() {
-    if (!findDistanceBtn || !recenterBtn) return;
+    if (!findDistanceBtn ) return;
     
     if (latestBusLocation) {
         findDistanceBtn.style.display = "block";
-        recenterBtn.style.display = "block";
+        // recenterBtn.style.display = "block";
     } else {
         findDistanceBtn.style.display = "none";
-        recenterBtn.style.display = "none";
+        // recenterBtn.style.display = "none";
     }
 }
 
