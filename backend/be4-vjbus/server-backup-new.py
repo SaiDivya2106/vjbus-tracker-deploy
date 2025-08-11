@@ -192,7 +192,7 @@ def start_locations(socket_id):
     
     # Send Start to this specific socket
     print(f"Sending start to socket {socket_id} (route {route_id})")
-    socketio.emit("server_start", {
+    socketio.emit("admin_start", {
         "message": "Started by administrator",
         "socket_id": socket_id,
         "route_id": route_id
@@ -253,7 +253,7 @@ def handle_driver_connect(data):
         return
     else:
         # if route_id not in all_uis.keys():
-            # print(f"Driver connected: SID={sid}, Route ID={route_id}")
+            print(f"Driver connected: SID={sid}, Route ID={route_id}")
             key= get_key_by_value(all_uis, sid)
             if key!=None:
                 socketio.emit("server_message", {"message": f"Route {key} already connected!", "status": False})
@@ -301,7 +301,7 @@ def handle_check_location(data):
                 existing_route["heading"] = heading
                 existing_route["status"] = status
                 existing_route["socketId"] = sid
-        if distance <= 500:
+        if distance <= 12500:
             yet_to_be.remove(existing_route)
             socketio.emit("start_now", {'message': 'You are in the designated area. Start broadcasting.'}, room=sid)
             print(f"✅ Driver {sid} is in the zone. Sending 'start_now' command.")
@@ -403,12 +403,23 @@ def handle_final_update(data):
 def handle_disconnect():
     print("Client disconnected",request)
     session_id = request.sid
-    route_id = get_key_by_value(all_uis, session_id)
+    route_id = request.args.get("route_id", "Unkown")
     role= request.args.get("role")
     print(f"Session {session_id} disconnected. Route ID: {route_id}, Role: {role}")
+    # Remove from connected_routes & tracking_status
+    route_id = connected_routes.pop(session_id, None)
+    tracking_status.pop(session_id, None)
 
-    all_ids.pop(route_id, None)
-    all_uis.pop(route_id, None)
+    # Remove from route_subscriptions
+    if route_id and route_id in route_subscriptions:
+        if session_id in route_subscriptions[route_id]:
+            route_subscriptions[route_id].remove(session_id)
+
+    if route_id and all_ids.get(route_id) == session_id:
+        del all_ids[route_id]
+    # If this session_id was the UI for the route
+    if route_id and all_uis.get(route_id) == session_id:
+        del all_uis[route_id]
 
     # for Driver-UI
     if role=="Driver":
@@ -452,11 +463,6 @@ def handle_admin_disconnect_socket(data):
         "route_id": route_id
     }, room=socket_id)
     
-    socketio.emit("server_stop", {
-        "message": "Disconnected by administrator",
-        "socket_id": socket_id,
-        "route_id": route_id
-    }, room=socket_id) 
     # Update tracking status for this socket
     if socket_id in tracking_status:
         tracking_status[socket_id] = "stopped"
