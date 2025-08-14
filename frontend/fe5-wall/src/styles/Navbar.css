@@ -52,37 +52,23 @@
 /* Use palette for navbar background and text */
 .navbar {
   /* background: linear-gradient(135deg,rgb(102, 93, 93), #7c3aed, #a855f7,rgb(102, 93, 93)); */
-  background: linear-gradient(45deg,lightblue, rgb(128, 128, 221));
-  background:rgba(255, 255, 255,0.7);
-  color: white;
+  /* background: linear-gradient(45deg,lightblue, rgb(128, 128, 221)); */
+  background: var(--nav-bg, rgba(255, 255, 255,0.7));
+  color: var(--nav-text, white);
   backdrop-filter: blur(10px);
   padding: 1rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 32px var(--nav-shadow, rgba(124, 58, 237, 0.3));
+  box-shadow: 0 8px 32px var(--nav-shadow, rgba(124, 58, 237, 0.3));
   margin: 0;
   position: relative;
   overflow: hidden;
   width: 100vw;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+   box-shadow: 5px 5px 15px var(--nav-box-shadow, rgba(0, 0, 0, 0.5));
   height: 12vh !important;
 }
-/* 
-.navbar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-}
-
-.navbar:hover::before {
-  left: 100%;
-} */
 
 
 /* Logo and Branding */
@@ -92,54 +78,20 @@
   gap: 1rem;
   font-weight: 900;
   font-family: 'gilroy';
-  color: var(--primary);
+  color: var(--nav-brand-color, #a85cf9);
   /* filter: drop-shadow(0 4px 6px rgba(1, 1, 0, 0.9)); */
-}
-
-.navbar-brand h1{
-  font-size: 2rem;
-  font-family: 'gilroy';
-  color: var(--primary);
-  padding-top: 1.1vh;
 }
 
 
 .navbar-brand .logo {
   height: auto;
-  width: 15vw;
+  width:clamp(150px,15vw,400px);
   object-fit: contain;
   border-radius: 10px;
   /* box-shadow: 0 4px 12px rgba(0,0,0,0.2); */
-  
 }
 
 
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
-}
-
-.vnr-wall {
-  font-size: 1.6rem;
-  font-weight: 800;
-  font-family: 'Segoe UI', 'Arial Black', sans-serif;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-  letter-spacing: 1px;
-  color: var(--primary);
-}
-
-.verify-zone {
-  font-size: 1.2rem;
-  font-weight: 600;
-  font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-  letter-spacing: 0.5px;
-  margin-top: -2px;
-  color: var(--secondary);
-}
 
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
@@ -149,14 +101,9 @@
     z-index: 1000 !important;
   }
 
-  .navbar-brand h1 {
-    font-size: 1.5rem;
-    padding-top: 0.5vh;
-  }
   .navbar-brand .logo{
     position: absolute;
     left: 5%;
-    width: 30vw !important;
     height: auto;
   }
 
@@ -164,6 +111,49 @@
     position: relative;
     right: -35vw;
     margin: 1.5vh 0;
+  }
+  .vnr-wall {
+    font-size: 1.2rem;
+  }
+
+  .verify-zone {
+    font-size: 0.9rem;
+  }
+
+  .nav-link {
+    margin: 0 0.5rem;
+    padding: 0.8vh 0 !important;
+    font-size: clamp(0.8rem,1vw,2rem);
+  }
+
+  .nav-icon{
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem;
+    min-height: 9vh;
+    height: auto !important;
+  }
+
+  .navbar-brand h1 {
+    font-size: 1.5rem;
+    padding-top: 0.5vh;
+  }
+  .navbar-brand .logo{
+    position: absolute;
+    left: 5%;
+    width: 25vw;
+    height: auto;
+  }
+
+  .navbar-toggler{
+    position: relative;
+    right: -35vw;
+    margin: 0.5vh 0;
+    padding: 0 auto;
     
   }
   .vnr-wall {
@@ -178,12 +168,21 @@
     margin: 0 0.5rem;
     padding: 0.8vh 0 !important;
   }
+  
+  .nav{
+    margin-top: 1vh;
+  }
+  
+  
+
+  
 
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .navbar {
     padding: 0.5rem;
+    min-height: 9vh;
     height: auto !important;
   }
 
@@ -194,7 +193,7 @@
   .navbar-brand .logo{
     position: absolute;
     left: 5%;
-    width: 20vw;
+    width: 25vw;
     height: auto;
   }
 
@@ -221,6 +220,8 @@
 }
 
 
+
+
 @media (max-width:1024px) {
   .navbar{
     height:15vh;
@@ -228,7 +229,6 @@
 }
 
 .navbar {
-  /* background: linear-gradient(135deg, #0b0016, green); */
   position: fixed;
   top: 0;
   left: 0;
@@ -236,36 +236,34 @@
   z-index: 10;
 }
 
-
 .nav-item {
-  color: var(--text);
   font-weight: bold;
 }
 
 .navbar-nav .nav-item .nav-link {
-  color: var(--accent);
+  color: var(--nav-text);
   text-decoration: none !important;
   transition: color 0.3s, text-decoration 0.3s;
 }
 
 .navbar-nav .nav-item .nav-link.active {
   /* text-decoration: underline; */
-  color: var(--primary); /* Slightly lighter for active link */
+  color: var(--nav-text-after); /* Slightly lighter for active link */
 }
 
 .navbar-nav .nav-item .nav-link:hover {
-  /* text-decoration: underline; */
   font-weight: bold;
-  color: var(--secondary);
+  color:var(--nav-text-after);
 }
 
  .nav-link{
     position: relative;
-    color: var(--accent); /* Optional: your text color */
+    color: var(--nav-text); /* Optional: your text color */
     text-decoration: none;
     font-weight: bold;
     padding: 1.3vh 0 !important;
     margin: 0 1.5vw;
+    display: inline-block;
     font-family:'gilroy-medium';
   }
   
@@ -276,7 +274,7 @@
     bottom: 0;
     width: 0;
     height: 0.4vh;
-    background: var(--secondary);
+    background: var(--nav-text-after);
     transition: width 0.3s ease;
   }
   
@@ -284,21 +282,21 @@
     width: 103%;
   }
 
-  .nav{
-    text-decoration: none;
-  }
+.nav{
+  text-decoration: none;
+}
 
-  
-  .nav-icon{
-    padding-bottom: 4px;
-    font-size: 1.3rem;
-  }
+.nav-icon{
+  padding-bottom: 4px;
+  font-size: 1.3rem;
+}
 
-  li button:hover{
-    background-color: #4B1EAF !important;
-  }
+li button:hover{
+  background-color: var(--nav-button-hover, #4B1EAF) !important;
+}
 
-  /* Custom override to remove Bootstrap's collapsing behavior */
+
+/* Custom override to remove Bootstrap's collapsing behavior */
 .custom-collapse {
   overflow: hidden;
   transition: height 300ms ease;
@@ -306,4 +304,13 @@
 }
 .custom-collapse.showing {
   display: block;
+}
+
+.navbar-toggler {
+  background-color: var(--nav-toggler-bg, transparent);
+  border: 1px solid var(--nav-toggler-border, rgba(255, 255, 255, 0.3));
+}
+
+.navbar-toggler-icon {
+  background-image: var(--nav-toggler-icon, url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"));
 }

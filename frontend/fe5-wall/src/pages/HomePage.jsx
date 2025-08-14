@@ -7,6 +7,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 import { Album } from "../components/Album.jsx";
 import Hero from '../components/Hero.jsx';
+import '../styles/theme.css';
+import '../styles/HomePage.css'
+
+
 
 
 const HomePage = () => {

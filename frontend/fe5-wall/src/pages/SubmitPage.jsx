@@ -99,8 +99,8 @@ const SubmitPage = () => {
               value={formData.branch}
               onChange={handleChange}
               required
-            >
-              <option value="">Select your branch</option>
+            >  
+              <option value="" disabled>Select your branch</option>
               <option>CSE</option>
               <option>CS - AIML</option>
               <option>CS - DS</option>
@@ -161,41 +161,38 @@ const SubmitPage = () => {
           </div>
 
           <div className="input-group">
-            <label>Where was the message?</label>
-            <div className="radio-group">
-              {[
-                'Class Unofficial Group', 
-                'Class Official Group', 
-                'College Mail', 
-                'Personal Mail', 
-                'LinkedIn', 
-                'WhatsApp Message', 
-                'Call', 
-                'Other'
-              ].map(platform => (
-                <label key={platform} className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="platform" 
-                    value={platform} 
-                    checked={formData.platform === platform}
-                    onChange={handleChange}
-                    required
-                  />
-                  <span className="radio-custom"></span>
-                  {platform}
-                  {platform === 'Other' && formData.platform === 'Other' && (
-                    <input 
-                      type="text" 
-                      name="platform" 
-                      className="other-input"
-                      placeholder="Please specify..."
-                      onChange={handleChange}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
+            <label htmlFor="platform">Where was the message?</label>
+            <select
+              id="platform"
+              name="platform"
+              value={formData.platform}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>Select platform</option>
+              <option value="Class Unofficial Group">Class Unofficial Group</option>
+              <option value="Class Official Group">Class Official Group</option>
+              <option value="College Mail">College Mail</option>
+              <option value="Personal Mail">Personal Mail</option>
+              <option value="LinkedIn">LinkedIn</option>
+              <option value="WhatsApp Message">WhatsApp Message</option>
+              <option value="Call">Call</option>
+              <option value="Other">Other</option>
+            </select>
+            {formData.platform === 'Other' && (
+              <input
+                type="text"
+                name="platformOther"
+                className="other-input"
+                placeholder="Please specify..."
+                value={formData.platformOther || ''}
+                onChange={e => setFormData({
+                  ...formData,
+                  platformOther: e.target.value
+                })}
+                required
+              />
+            )}
           </div>
 
           <div className="input-group">
@@ -225,41 +222,38 @@ const SubmitPage = () => {
           </div>
 
           <div className="input-group">
-            <label>What is the category of message?</label>
-            <div className="radio-group">
-              {[
-                'Internship', 
-                'Placement', 
-                'Training', 
-                'Training and Internship', 
-                'Certificate Course', 
-                'Exam Drive', 
-                'Scholarship', 
-                'Other'
-              ].map(category => (
-                <label key={category} className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="category"
-                    value={category} 
-                    checked={formData.category === category}
-                    onChange={handleChange}
-                    required
-                  />
-                  <span className="radio-custom"></span>
-                  {category}
-                  {category === 'Other' && formData.category === 'Other' && (
-                    <input 
-                      type="text" 
-                      name="category" 
-                      className="other-input"
-                      placeholder="Please specify..."
-                      onChange={handleChange}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
+            <label htmlFor="category">What is the category of message?</label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>Select category</option>
+              <option value="Internship">Internship</option>
+              <option value="Placement">Placement</option>
+              <option value="Training">Training</option>
+              <option value="Training and Internship">Training and Internship</option>
+              <option value="Certificate Course">Certificate Course</option>
+              <option value="Exam Drive">Exam Drive</option>
+              <option value="Scholarship">Scholarship</option>
+              <option value="Other">Other</option>
+            </select>
+            {formData.category === 'Other' && (
+              <input
+                type="text"
+                name="categoryOther"
+                className="other-input"
+                placeholder="Please specify..."
+                value={formData.categoryOther || ''}
+                onChange={e => setFormData({
+                  ...formData,
+                  categoryOther: e.target.value
+                })}
+                required
+              />
+            )}
           </div>
         </div>
 
@@ -304,7 +298,7 @@ const SubmitPage = () => {
               ))}
             </div>
           </div>
-
+              
           <div className="input-group">
             <label>Have you responded to the opportunity?</label>
             <div className="radio-group">

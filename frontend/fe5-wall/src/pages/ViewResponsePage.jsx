@@ -71,7 +71,7 @@ const CategoryPage = ({
           <div className="category-page-title">
             <button
               onClick={onBackToHome}
-              className="back-button"
+              className="back-button" 
             >
               <ArrowLeft size={20} />
             </button>
@@ -141,9 +141,12 @@ const CategoryPage = ({
                   </div>
                 )}
               </div>
+              
               </div>
               
+              
             ))}
+            
           </div>
         )}
       </div>
@@ -182,10 +185,10 @@ const ViewResponses = () => {
           branch: item.branch || 'N/A',
           year: item.year || 'N/A',
           platform: item.platform || 'Unknown',
-          sender: item.name || 'Anonymous',
+          sender: item.sender || 'Anonymous',
           contact: item.contact || 'No Contact',
           responseStatus: item.responded || 'No',
-          detailsShared: item.detailsShared || 'N/A',
+          personalDetails: item.personalDetails || 'N/A',
           credibilityRating: parseInt(item.genuineRating) || 0,
           messageContent: item.message || '',
           tags: item.flags ? JSON.parse(item.flags) : [],

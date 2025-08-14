@@ -1,7 +1,6 @@
 import React from "react";
 import Typewriter from "./Typewriter";
 import "../styles/Hero.css";
-import { color } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -11,7 +10,6 @@ return (
         <div className="circle circle-2"></div>
 
         <div className="hero__content">
-            <p style={{ color: "#2d2e83", fontWeight: "bold", fontSize: "1.2rem", textAlign: "center" }}> </p>
             <h1>Verify WALL Helps<br />You to 
             </h1>
             <h2>

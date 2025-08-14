@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%);
+  background:var(--app-background);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   color: #333;
@@ -45,17 +45,7 @@ body {
   }
 }
 
-:root {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --primary-color: #7c3aed;
-}
 
-body.dark {
-  --bg-color: #121212;
-  --text-color: #ffffff;
-  --primary-color: #a855f7;
-}
 
 body {
   background-color: var(--bg-color);
@@ -64,11 +54,82 @@ body {
 }
 
 .theme-toggle-btn {
-  background: var(--primary-color);
-  color: var(--text-color);
+  background: var(--primary-color,grey);
+  color: var(black,--text-color);
+  border:2px solid var(--nav-text);
   padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   cursor: pointer;
   transition: 0.3s;
+  position:fixed;
+  left: clamp(90%,94%,96%);
+  /* top: 15vh; */
+  top: 15vh;
+  padding: 4px 20px;
+  font-size: 1rem;
+  border-radius: 30px;
+  border: none;
+  background-color: #D7AEFB;
+}
+
+.theme-icon {
+  height: 30px;
+    width: 30px;
+    /* border: 1px solid black; */
+    border-radius: 50%;
+    background-color:white;
+    /* box-shadow: 0 0 10px black; */
+    position: relative;
+    right: -50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* @media (max-width: 1024px) {
+  .theme-toggle-btn {
+    
+    bottom: auto;
+    z-index: 1000;
+    padding: 4px 20px;
+    font-size: 0.9rem;
+  }
+} */
+
+
+@media (max-width: 767px) {
+  .theme-toggle-btn {
+    position: fixed;
+    left: 70%;
+    top: 2%;
+    bottom: auto;
+    z-index: 1000;
+    padding: 4px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .theme-toggle-btn {
+    position: fixed;
+    left: 70%;
+    top: 2%;
+    bottom: auto;
+    z-index: 1000;
+    padding: 4px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .theme-toggle-btn {
+    position: fixed;
+    left: 58%;
+    top: 2%;
+    bottom: auto;
+    z-index: 1000;
+    padding: 4px 20px;
+    font-size: 0.9rem;
+  }
 }

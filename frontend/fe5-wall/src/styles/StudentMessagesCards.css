@@ -3,6 +3,11 @@
   padding: 24px;
   background-color: #f3f4f6;
   min-height: 100vh;
+  transition: all 0.3s ease-in-out;
+}
+
+[data-theme="dark"] .cards-container {
+  background-color: #0A0F1C;
 }
 
 .main-title {
@@ -10,6 +15,11 @@
   font-weight: bold;
   color: #1f2937;
   margin-bottom: 24px;
+  transition: all 0.3s ease-in-out;
+}
+
+[data-theme="dark"] .main-title {
+  color: #f1f5f9;
 }
 
 .cards-grid {
@@ -20,33 +30,39 @@
 
 /* Enhanced Card Styles */
 .student-card {
-  background-color: white;
+  background-color: var(--student-card-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-card-border);
   padding: 20px;
   margin-bottom: 20px;
   max-width: 450px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  color: var(--student-card-text);
 }
 
 /* Enhanced card with better hover effects */
 .student-card.enhanced-card {
-  background: white;
+  background: var(--student-card-bg);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--student-card-shadow);
+  border: 1px solid var(--student-card-border);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .enhanced-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--student-card-hover-shadow);
   border-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .enhanced-card:hover {
+  border-color: rgba(125, 211, 252, 0.2);
 }
 
 .enhanced-card::before {
@@ -59,6 +75,10 @@
   background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444, #10b981);
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+[data-theme="dark"] .enhanced-card::before {
+  background: linear-gradient(90deg, #7dd3fc, #c084fc, #fb7185, #34d399);
 }
 
 .enhanced-card:hover::before {
@@ -77,6 +97,10 @@
   transition: opacity 0.3s ease;
   pointer-events: none;
   border-radius: 16px;
+}
+
+[data-theme="dark"] .card-overlay {
+  background: linear-gradient(135deg, transparent, rgba(125, 211, 252, 0.02));
 }
 
 .enhanced-card:hover .card-overlay {
@@ -102,6 +126,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .category-exam-drive {
@@ -120,6 +145,22 @@
   background: linear-gradient(135deg, #6b7280, #4b5563);
 }
 
+[data-theme="dark"] .category-exam-drive {
+  background: linear-gradient(135deg, #c084fc, #a855f7);
+}
+
+[data-theme="dark"] .category-placement {
+  background: linear-gradient(135deg, #34d399, #10b981);
+}
+
+[data-theme="dark"] .category-internship {
+  background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+}
+
+[data-theme="dark"] .category-default {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+}
+
 .header-right {
   display: flex;
   align-items: center;
@@ -129,9 +170,9 @@
 .date-container {
   display: flex;
   align-items: center;
-  color: #6b7280;
+  color: var(--student-card-date-text);
   font-size: 12px;
-  background: rgba(107, 114, 128, 0.1);
+  background: var(--student-card-date-bg);
   padding: 4px 8px;
   border-radius: 12px;
   transition: all 0.3s ease;
@@ -140,6 +181,11 @@
 .enhanced-card:hover .date-container {
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
+}
+
+[data-theme="dark"] .enhanced-card:hover .date-container {
+  background: rgba(125, 211, 252, 0.1);
+  color: #7dd3fc;
 }
 
 .calendar-icon {
@@ -155,6 +201,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .status-inreview {
@@ -171,6 +218,22 @@
 
 .status-default {
   background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+[data-theme="dark"] .status-inreview {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+[data-theme="dark"] .status-genuine {
+  background: linear-gradient(135deg, #34d399, #10b981);
+}
+
+[data-theme="dark"] .status-fake {
+  background: linear-gradient(135deg, #fb7185, #f43f5e);
+}
+
+[data-theme="dark"] .status-default {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
 }
 
 /* Section Styles */
@@ -196,23 +259,33 @@
   transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .section-title {
+  color: #7dd3fc;
+  background: rgba(125, 211, 252, 0.1);
+}
+
 .enhanced-card:hover .section-title {
   background: rgba(37, 99, 235, 0.15);
   color: #1d4ed8;
 }
 
+[data-theme="dark"] .enhanced-card:hover .section-title {
+  background: rgba(125, 211, 252, 0.15);
+  color: #38bdf8;
+}
+
 /* Academic Info */
 .academic-info {
-  background: rgba(59, 130, 246, 0.05);
+  background: var(--student-card-section-bg);
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--student-card-section-border);
   transition: all 0.3s ease;
 }
 
 .enhanced-card:hover .academic-info {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.2);
+  background: var(--student-card-section-hover-bg);
+  border-color: var(--student-card-section-border);
 }
 
 .academic-details {
@@ -228,14 +301,16 @@
 }
 
 .label {
-  color: #6b7280;
+  color: var(--student-card-label);
   margin-right: 8px;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .value {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--student-card-text);
+  transition: all 0.3s ease;
 }
 
 .year-badge {
@@ -247,6 +322,13 @@
   font-weight: 600;
   margin-left: 8px;
   box-shadow: 0 2px 4px rgba(29, 78, 216, 0.1);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .year-badge {
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.2), rgba(125, 211, 252, 0.3));
+  color: #7dd3fc;
+  box-shadow: 0 2px 4px rgba(125, 211, 252, 0.1);
 }
 
 /* Dual Section Layout */
@@ -266,9 +348,19 @@
   transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .source-section {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
 .enhanced-card:hover .source-section {
   background: rgba(16, 185, 129, 0.08);
   border-color: rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .enhanced-card:hover .source-section {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.3);
 }
 
 .source-details {
@@ -296,21 +388,37 @@
   transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .platform-badge {
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.2), rgba(125, 211, 252, 0.3));
+  color: #7dd3fc;
+  box-shadow: 0 2px 4px rgba(125, 211, 252, 0.1);
+}
+
 .enhanced-card:hover .platform-badge {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(29, 78, 216, 0.15);
 }
 
+[data-theme="dark"] .enhanced-card:hover .platform-badge {
+  box-shadow: 0 4px 8px rgba(125, 211, 252, 0.15);
+}
+
 .sender-name {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--student-card-text);
   margin-top: 2px;
+  transition: all 0.3s ease;
 }
 
 .contact-info {
   color: #2563eb;
   margin-top: 2px;
   font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .contact-info {
+  color: #7dd3fc;
 }
 
 /* Feedback Section */
@@ -322,9 +430,19 @@
   transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .feedback-section {
+  background: rgba(192, 132, 252, 0.08);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+}
+
 .enhanced-card:hover .feedback-section {
   background: rgba(139, 92, 246, 0.08);
   border-color: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="dark"] .enhanced-card:hover .feedback-section {
+  background: rgba(192, 132, 252, 0.12);
+  border-color: rgba(192, 132, 252, 0.3);
 }
 
 .feedback-details {
@@ -341,6 +459,7 @@
   border-radius: 6px;
   font-size: 11px;
   width: fit-content;
+  transition: all 0.3s ease;
 }
 
 .status-yes {
@@ -358,10 +477,26 @@
   background: rgba(245, 158, 11, 0.1);
 }
 
+[data-theme="dark"] .status-yes {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+}
+
+[data-theme="dark"] .status-no {
+  color: #fb7185;
+  background: rgba(251, 113, 133, 0.1);
+}
+
+[data-theme="dark"] .status-considering {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+}
+
 .details-shared {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--student-card-text);
   margin-top: 2px;
+  transition: all 0.3s ease;
 }
 
 .credibility-rating {
@@ -379,25 +514,37 @@
   color: #fbbf24;
   fill: currentColor;
   filter: drop-shadow(0 1px 2px rgba(251, 191, 36, 0.3));
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .star-filled {
+  color: #fcd34d;
+  filter: drop-shadow(0 1px 2px rgba(252, 211, 77, 0.3));
 }
 
 .star-empty {
   color: #d1d5db;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .star-empty {
+  color: #6b7280;
 }
 
 .rating-text {
   margin-left: 6px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--student-card-label);
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 /* Message Content */
 .message-section {
-  background: rgba(107, 114, 128, 0.05);
+  background: var(--student-card-message-bg);
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid rgba(107, 114, 128, 0.1);
+  border: 1px solid var(--student-card-message-border);
   transition: all 0.3s ease;
 }
 
@@ -406,14 +553,19 @@
   border-color: rgba(107, 114, 128, 0.2);
 }
 
+[data-theme="dark"] .enhanced-card:hover .message-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 .message-section .section-header {
   justify-content: space-between;
 }
 
 .expand-button {
-  background: rgba(107, 114, 128, 0.1);
+  background: var(--student-card-expand-bg);
   border: none;
-  color: #6b7280;
+  color: var(--student-card-expand-text);
   cursor: pointer;
   padding: 6px;
   border-radius: 8px;
@@ -428,6 +580,11 @@
   transform: scale(1.1);
 }
 
+[data-theme="dark"] .expand-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
 .message-content {
   background: rgba(249, 250, 251, 0.8);
   padding: 14px;
@@ -435,13 +592,24 @@
   font-size: 14px;
   color: #374151;
   line-height: 1.6;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--student-card-message-border);
   transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .message-content {
+  background: rgba(255, 255, 255, 0.03);
+  color: #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .enhanced-card:hover .message-content {
   background: rgba(249, 250, 251, 1);
   border-color: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .enhanced-card:hover .message-content {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(125, 211, 252, 0.1);
 }
 
 .message-content.collapsed {
@@ -498,6 +666,27 @@
   box-shadow: 0 2px 4px rgba(55, 65, 81, 0.1);
 }
 
+[data-theme="dark"] .tag-urgent {
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0.3));
+  color: #fb7185;
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  box-shadow: 0 2px 4px rgba(251, 113, 133, 0.15);
+}
+
+[data-theme="dark"] .tag-incomplete {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.3));
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="dark"] .tag-default {
+  background: linear-gradient(135deg, rgba(156, 163, 175, 0.2), rgba(156, 163, 175, 0.3));
+  color: #d1d5db;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+  box-shadow: 0 2px 4px rgba(156, 163, 175, 0.15);
+}
+
 /* Line clamp utility for message content */
 .line-clamp-3 {
   display: -webkit-box;
@@ -511,6 +700,10 @@
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
+}
+
+[data-theme="dark"] .loading-skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
 }
 
 @keyframes loading {
@@ -544,6 +737,12 @@
 .status-badge:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+}
+
+[data-theme="dark"] .expand-button:focus,
+[data-theme="dark"] .category-badge:focus,
+[data-theme="dark"] .status-badge:focus {
+  outline: 2px solid #7dd3fc;
 }
 
 /* Print styles */

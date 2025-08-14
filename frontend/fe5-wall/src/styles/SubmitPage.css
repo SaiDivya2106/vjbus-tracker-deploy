@@ -1,7 +1,7 @@
 .form-container {
   max-width: 900px;
   margin: 15vh auto;
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  background:  var(--form-bg);
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 
@@ -27,7 +27,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa, #93c5fd);
+  background: var(--form-before);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
@@ -51,7 +51,7 @@
   letter-spacing: 1px;  
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  background: var(--form-header);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -88,7 +88,7 @@
 .form-section {
   margin-bottom: 2.5rem;
   padding: 1.8rem;
-  background: linear-gradient(145deg, #f8fafc, #ffffff);
+  background: var(--form-section);
   border-radius: 12px;
   box-shadow: 
     0 8px 16px rgba(0, 0, 0, 0.08),
@@ -106,7 +106,7 @@
 }
 
 .form-section h3 {
-  color: #1e40af;
+  color: var(--form-h3);
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
   font-weight: 600;
@@ -123,7 +123,7 @@
   transform: translateY(-50%);
   width: 4px;
   height: 20px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: var(--form-h3-before);
   border-radius: 2px;
 }
 
@@ -135,7 +135,7 @@
 label {
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: var(--form-label);
   display: block;
   position: relative;
   font-size: 1rem;
@@ -147,12 +147,12 @@ input[type="email"],
 select,
 textarea {
   padding: 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border: 3px solid var(--form-input-border);
+  border-radius: 8px !important;
   font-size: 1rem;
   width: 100%;
-  background: linear-gradient(145deg, #ffffff, #f9fafb);
-  color: #1f2937;
+  background: var(--form-input-bg);
+  color: var(--form-input-text);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.05),
@@ -171,7 +171,12 @@ textarea:focus {
     0 4px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
-  background: linear-gradient(145deg, #ffffff, #fafbff);
+  background: var(--form-input-focus);
+  color: var(--form-text);
+}
+
+input::placeholder{
+  color: var(--form-placeholder);
 }
 
 /* Fix for select dropdown hover */
@@ -180,22 +185,26 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1em;
   padding-right: 3rem;
+  color: var(--form-text);
 }
 
 select:hover {
   border-color: #3b82f6;
-  background: linear-gradient(145deg, #ffffff, #fafbff);
+  background: var(--form-input-focus);
+  color: var(--form-h3);
 }
+
 
 select option {
   background: #ffffff;
   color: #1f2937;
   padding: 0.5rem;
+  font-family:'gilroy-medium';
 }
 
 .radio-group,
@@ -203,7 +212,12 @@ select option {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  width: 100%;
   margin-top: 0.5rem;
+}
+
+.radio-group{
+  justify-content: center;
 }
 
 .radio-label,
@@ -213,9 +227,9 @@ select option {
   gap: 0.75rem;
   font-weight: 500;
   padding: 0.8rem 1.2rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--form-input-border);
   border-radius: 8px;
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  background: var(--from-input);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -227,7 +241,7 @@ select option {
 .radio-label:hover,
 .checkbox-label:hover {
   border-color: #3b82f6;
-  background: linear-gradient(145deg, #f0f7ff, #ffffff);
+  background: var(--form-input-focus);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
 }
@@ -394,8 +408,8 @@ textarea {
 }
 
 .submit-btn {
-  background: linear-gradient(145deg, #2563eb, #1d4ed8);
-  color: white;
+  background: var(--form-submit-btn);
+  color: var(--form-button-text);
   padding: 1.2rem 2rem;
   border: none;
   border-radius: 8px;
@@ -498,4 +512,6 @@ textarea {
     width: 40px;
     height: 40px;
   }
+
+  
 }
