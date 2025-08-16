@@ -131,6 +131,10 @@
   margin-bottom: 1.5rem;
   position: relative;
 }
+.user-genuine{
+  display: block;
+  /* justify-items: center; */
+}
 
 label {
   font-weight: 600;
@@ -328,8 +332,9 @@ select option {
   display: flex;
   justify-content: space-between;
   max-width: 350px;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0.5rem;
   gap: 0.5rem;
+  justify-items: auto;
 }
 
 .rating-label {
@@ -389,7 +394,7 @@ select option {
 .rating-labels {
   display: flex;
   justify-content: space-between;
-  max-width: 350px;
+  max-width: 370px;
   margin-top: 0.5rem;
   font-size: 0.85rem;
   color: #6b7280;
@@ -505,6 +510,7 @@ textarea {
   
   .rating-group {
     justify-content: flex-start;
+    margin-left: 10px;
     flex-wrap: wrap;
   }
   

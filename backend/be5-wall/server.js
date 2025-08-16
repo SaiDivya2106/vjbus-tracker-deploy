@@ -17,8 +17,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    roll TEXT,
+    mail TEXT,
     branch TEXT,
     year TEXT,
     contact TEXT
@@ -32,8 +31,7 @@ db.run(`
 db.run(`
   CREATE TABLE IF NOT EXISTS datacheck (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    roll TEXT,
+    mail TEXT,
     branch TEXT,
     year TEXT,
     dateReceived TEXT,
@@ -56,7 +54,7 @@ db.run(`
 // Insert complaint data
 app.post('/api/user-check-data', (req, res) => {
   const {
-    name, roll, branch, year, dateReceived,
+    mail, branch, year, dateReceived,
     platform, sender, contact, category,
     flags, responded, personalDetails,
     genuineRating, message
@@ -66,14 +64,14 @@ app.post('/api/user-check-data', (req, res) => {
 
   const sql = `
     INSERT INTO datacheck (
-      name, roll, branch, year, dateReceived,
+      mail, branch, year, dateReceived,
       platform, sender, contact, category,
       flags, responded, personalDetails, genuineRating, message, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
-    name, roll, branch, year, dateReceived,
+    mail, branch, year, dateReceived,
     platform, sender, contact, category,
     flagsString, responded, personalDetails, genuineRating, message, 'null'
   ];
@@ -106,14 +104,14 @@ app.get('/api/users', (req, res) => {
 
 // Add user
 app.post('/api/users', (req, res) => {
-  const { name, roll, branch, year, contact } = req.body;
+  const { mail, branch, year, contact } = req.body;
 
   const sql = `
-    INSERT INTO users (name, roll, branch, year, contact)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO users (mail, branch, year, contact)
+    VALUES (?, ?, ?, ?)
   `;
 
-  db.run(sql, [name, roll, branch, year, contact], function (err) {
+  db.run(sql, [mail, branch, year, contact], function (err) {
     if (err) return res.status(500).send(err.message);
     res.json({ success: true, id: this.lastID });
   });

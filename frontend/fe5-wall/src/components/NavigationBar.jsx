@@ -5,15 +5,21 @@ import logo from '../assets/logo2.jpeg';
 import '../styles/Navbar.css';
 import { FaHome, FaEnvelopeOpenText, FaListAlt, FaUser } from 'react-icons/fa';
 
+
 function NavigationBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const navRef = useRef(null);
 
-  useEffect(() => {
+  // Function to update login state (can be called from outside)
+  window.updateNavbarLoginState = function() {
     const user = localStorage.getItem('user');
     setIsLoggedIn(!!user);
+  };
+
+  useEffect(() => {
+    window.updateNavbarLoginState();
 
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -22,7 +28,17 @@ function NavigationBar() {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
 
-    return () => window.removeEventListener('resize', checkScreenSize);
+    // Listen for login/logout events
+    const handleLogin = () => setIsLoggedIn(true);
+    const handleLogout = () => setIsLoggedIn(false);
+    window.addEventListener('user-login', handleLogin);
+    window.addEventListener('user-logout', handleLogout);
+
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('user-login', handleLogin);
+      window.removeEventListener('user-logout', handleLogout);
+    };
   }, []);
 
   // Toggle Menu manually

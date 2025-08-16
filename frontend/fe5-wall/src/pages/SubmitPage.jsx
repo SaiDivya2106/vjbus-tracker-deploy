@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/SubmitPage.css';
 import axios from 'axios'
+
+// Helper to parse cookies
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
 import 'flatpickr/dist/flatpickr.min.css';
 
 const SubmitPage = () => {
   // Form state
   const [formData, setFormData] = useState({
+    mail: '',
     branch: '',
     year: '',
     dateReceived: '',
@@ -47,16 +56,26 @@ const SubmitPage = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
-    // Here you would typically send the data to your backend
-    //on submit u have to send to request to Backend using api
-    // using axios or fetch // best way using axios 
-     let res = await axios.post('https://dev-wall.vjstartup.com/wall-be/api/user-check-data',formData)
-     if(res.data.success===true){
-      alert("Data is saved successfully")
-     }
+    // Parse user cookie and get email
+    let userCookie = getCookie('user');
+    let email = '';
+    if (userCookie) {
+      try {
+        const userObj = JSON.parse(decodeURIComponent(userCookie));
+        email = userObj.email || '';
+      } catch (err) {
+        email = '';
+      }
+    }
+    const dataToSend = { ...formData, mail: email };
+    console.log('Form Data:', dataToSend);
+    let res = await axios.post('https://dev-wall.vjstartup.com/wall-be/api/user-check-data', dataToSend);
+    if (res.data.success === true) {
+      alert("Data is saved successfully");
+      window.location.href = "https://dev-wall.vjstartup.com/responses";
+    }
   };
 
   // Initialize flatpickr for date input
@@ -115,13 +134,14 @@ const SubmitPage = () => {
               <option>CE</option>
               <option>ME</option>
               <option>AE</option>
+              <option>Faculty</option>
             </select>
           </div>
 
           <div className="input-group">
             <label>Year of Study:</label>
             <div className="radio-group">
-              {['1st Year', '2nd Year', '3rd Year', '4th Year'].map(year => (
+              {['1st Year', '2nd Year', '3rd Year', '4th Year', 'Faculty'].map(year => (
                 <label key={year} className="radio-label">
                   <input 
                     type="radio" 
@@ -348,8 +368,9 @@ const SubmitPage = () => {
             </div>
           </div>
 
-          <div className="input-group">
+          <div className="input-group user-genuine">
             <label>How genuine do you think the message is?</label>
+            <br></br>
             <div className="rating-group">
               {[1, 2, 3, 4, 5].map(rating => (
                 <label key={rating} className="rating-label">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../styles/Login.css";
+import '../components/NavigationBar.jsx'; // Import NavigationBar for consistent styling
 
 // Declare google as a global variable. For production, consider using @types/google.accounts
 /* global google */
@@ -108,7 +109,8 @@ const Login = () => {
       if (data.user) { // Assuming `data.user` indicates success and contains user info
         console.log("Login.js: Backend auth successful. Updating user state.");
         updateUserStateFromCookie(); // This will now update localStorage and dispatch event
-        window.location.reload(); // Reload to ensure the UI reflects the new user state
+        window.dispatchEvent(new Event("user-login"));
+        // window.location.reload(); // Reload to ensure the UI reflects the new user state
       } else {
         alert("❌ Login failed! " + (data.message || "Please try again."));
         setUser(null);
@@ -183,7 +185,8 @@ const Login = () => {
         method: "POST",
         credentials: "include", // Important for sending cookies to clear session
       });
-      window.location.reload(); // Reload to ensure the UI reflects the new user state
+      // window.location.reload(); // Reload to ensure the UI reflects the new user state
+      window.dispatchEvent(new Event("user-logout"));
       // Do not clear user state or localStorage here directly,
       // let updateUserStateFromCookie handle it based on the cleared cookie
       console.log("Login.js: Backend logout successful. Updating user state.");
@@ -280,15 +283,6 @@ const Login = () => {
                     <span className="info-value">{new Date().toLocaleString()}</span>
                   </div>
                 </div>
-
-                {/* Status Badge */}
-                <div className="status-badge">
-                  {/* <svg className="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 12l2 2 4-4" />
-                    <circle cx="12" cy="12" r="10" />
-                  </svg> */}
-                  <span className="status-text">Verified Student Account</span>
-                </div>
               </div>
 
               {/* Action Buttons */}
@@ -308,9 +302,12 @@ const Login = () => {
                 {/* Responses Button */}
                 <button
                   className="action-btn responses-btn"
-                  onClick={() => window.location.href = "/responses"} // Example URL for home page
+                  onClick={() => window.location.href = "/"} // Example URL for home page
                 >
-                  
+                  <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9,22 9,12 15,12 15,22" />
+                  </svg>
                   Go to Responses Page
                 </button>
 
