@@ -18,6 +18,8 @@ app.use(cors({
             "http://localhost:3119",
             "https://dev-auth.vjstartup.com",
             "https://auth.vjstartup.com",
+            "https://dev-bus.vjstartup.com",
+            "https://dev-wall.vjstartup.com",
             /^https?:\/\/([a-zA-Z0-9-]+\.)?vjstartup\.com/
         ];
 
