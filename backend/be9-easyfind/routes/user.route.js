@@ -48,6 +48,7 @@ async function generateUniqueCode() {
 // Submit a found item
 // Create new item
 router.post('/found',auth, upload.single('image'), async (req, res) => {
+  console.log(" Reached into Found");
   try {
       // Check if an image file was uploaded
       if (!req.file) {

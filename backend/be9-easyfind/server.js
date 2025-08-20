@@ -25,7 +25,10 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:4000",
   "http://localhost:3117",
+  "https://dev-easyfind.vjstartup.com", // add as needed
+  "https://dev-easyfind-admin.vjstartup.com", // add as needed
   "https://easyfind.vjstartup.com", // add as needed
+  "https://easyfind-admin.vjstartup.com", // add as needed
 ];
 
 app.use(cors({

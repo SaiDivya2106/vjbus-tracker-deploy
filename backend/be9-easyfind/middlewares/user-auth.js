@@ -11,7 +11,7 @@ const auth = (req, res, next) => {
   const token = authHeader.split(" ")[1]; // Extract the token after "Bearer"
 
   try {
-    const decoded = jwt.verify(token, process.env.AUTH_JWT_SECRET); // Verify using shared secret
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify using shared secret
     req.user = decoded; // Attach user payload to the request
     next();
   } catch (err) {

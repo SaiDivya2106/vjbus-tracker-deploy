@@ -241,7 +241,7 @@ router.patch("/updatestatus", auth, async (req, res) => {
 
     // If the item is verified, compare with all lost items
     if (status === "verified" && item.description) {
-      dispatchEmailJob("matchLostItem",{itemId:newItem._id});
+      dispatchEmailJob("matchLostItem",{itemId:item._id});
     }
 
     res.json({ message: "Status updated successfully" });
