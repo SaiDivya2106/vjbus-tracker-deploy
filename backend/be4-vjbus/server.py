@@ -130,7 +130,7 @@ thread = threading.Thread(target=auto_start, daemon=True)
 def is_in_college(lon, lat):
     # COLLEGE=(17.539873, 78.386514)
     COLLEGE = (17.539885990830992, 78.38652028688297)
-    return geodesic(COLLEGE, (lat, lon)).meters <= 9400
+    return geodesic(COLLEGE, (lat, lon)).meters <= 400
 
 
 def log_data(route_id):
@@ -272,7 +272,9 @@ def handle_driver_connect(data):
 
 @socketio.on("location_update")
 def handle_location_update(data):
-    print("Received location update:  ",data)
+    from datetime import datetime
+    time_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"{time_now} Received location update:  ", data)
     route_id = data.get("route_id")
     latitude = data.get("latitude")
     longitude = data.get("longitude")
@@ -364,7 +366,9 @@ def handle_disconnect():
     role= request.args.get("role")
     if role=="Driver":
         route_id = get_key_by_value(all_drivers, session_id)
-    print(f"Session {session_id} disconnected for Route ID: {route_id}, Role: {role}")
+    from datetime import datetime
+    time_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"{time_now} Session {session_id} disconnected for Route ID: {route_id}, Role: {role}")
 
     all_drivers.pop(route_id, None)
     started_routes.pop(route_id, None)
