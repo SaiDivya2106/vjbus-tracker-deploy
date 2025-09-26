@@ -2,6 +2,7 @@ const exp = require('express');
 const asyncHandler = require('express-async-handler');
 const jwt = require("jsonwebtoken"); 
 const nodemailer=require("nodemailer");
+const verifyGoogleToken = require("../Middleware/verifyGoogleToken");
 
 const adminApp = exp.Router();
 adminApp.use(exp.json()); // Middleware to parse JSON
@@ -21,32 +22,59 @@ adminApp.use((req, res, next) => {
 
 
 
-adminApp.post("/check-admin", asyncHandler(async (req, res) => {
-    const { email } = req.body;
+// adminApp.post("/check-admin",verifyGoogleToken, asyncHandler(async (req, res) => {
+//     const { email } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+//     if (!email) {
+//         return res.status(400).json({ message: "Email is required" });
+//     }
+
+//     try {
+//         // Find admin by email
+//         const admin = await adminsCollectionObj.findOne({ email });
+
+//         if (admin) {
+//             res.json({ isAdmin: true, adminCategory: admin.category });
+//         } else {
+//             res.json({ isAdmin: false, adminCategory: null });
+//         }
+//     } catch (error) {
+//         console.error("Error checking admin:", error);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// }));
+
+
+
+
+adminApp.post("/check-admin", verifyGoogleToken, asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    // Find all admin records with this email
+    const adminRecords = await adminsCollectionObj.find({ email }).toArray();
+
+    if (adminRecords.length > 0) {
+      const categories = adminRecords.map(a => a.category);
+      res.json({ isAdmin: true, adminCategories: categories });
+    } else {
+      res.json({ isAdmin: false, adminCategories: [] });
     }
-
-    try {
-        // Find admin by email
-        const admin = await adminsCollectionObj.findOne({ email });
-
-        if (admin) {
-            res.json({ isAdmin: true, adminCategory: admin.category });
-        } else {
-            res.json({ isAdmin: false, adminCategory: null });
-        }
-    } catch (error) {
-        console.error("Error checking admin:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+  } catch (error) {
+    console.error("Error checking admin:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 }));
 
 
 
+
 // GET API to view all complaints (sorted by priority)
-adminApp.get('/view-complaints', asyncHandler(async (req, res) => {
+adminApp.get('/view-complaints',verifyGoogleToken, asyncHandler(async (req, res) => {
     const complaints = await complaintsCollectionObj
         .find()
         .sort({ priority_score: -1, timestamp: -1 })
@@ -60,7 +88,7 @@ adminApp.get('/view-complaints', asyncHandler(async (req, res) => {
 }));
 
 //GET Complaint Details by complaint ID
-adminApp.get('/view-complaint/:complaintId', asyncHandler(async (req, res) => {
+adminApp.get('/view-complaint/:complaintId',verifyGoogleToken, asyncHandler(async (req, res) => {
     const complaintId = req.params.complaintId; // Get complaint ID from request params
 
     try {
@@ -79,36 +107,73 @@ adminApp.get('/view-complaint/:complaintId', asyncHandler(async (req, res) => {
 
 
 //GET complaints Count
-adminApp.get(
-    "/complaints-count/:category",  // Category is passed as a URL parameter
-    asyncHandler(async (req, res) => {
-      try {
-        // Get category from the URL parameter
-        const { category } = req.params;
+// adminApp.get(
+//     "/complaints-count/:category",  // Category is passed as a URL parameter
+//     asyncHandler(async (req, res) => {
+//       try {
+//         // Get category from the URL parameter
+//         const { category } = req.params;
   
-        // Fetch counts for each status within the specified category
-        const [pendingCount, resolvedCount, ongoingCount] = await Promise.all([
-          complaintsCollectionObj.countDocuments({ status: "Pending", category }),
-          complaintsCollectionObj.countDocuments({ status: "Resolved", category }),
-          complaintsCollectionObj.countDocuments({ status: "Ongoing", category })
-        ]);
+//         // Fetch counts for each status within the specified category
+//         const [pendingCount, resolvedCount, ongoingCount] = await Promise.all([
+//           complaintsCollectionObj.countDocuments({ status: "Pending", category }),
+//           complaintsCollectionObj.countDocuments({ status: "Resolved", category }),
+//           complaintsCollectionObj.countDocuments({ status: "Ongoing", category })
+//         ]);
   
-        // Send response with the counts for the given category
-        res.status(200).json({
-          pending: pendingCount,
-          resolved: resolvedCount,
-          ongoing: ongoingCount,
-        });
+//         // Send response with the counts for the given category
+//         res.status(200).json({
+//           pending: pendingCount,
+//           resolved: resolvedCount,
+//           ongoing: ongoingCount,
+//         });
         
-      } catch (error) {
-        console.error("Error fetching complaint counts:", error);
-        res.status(500).json({ message: "Internal Server Error" });
-      }
-    })
-  );
+//       } catch (error) {
+//         console.error("Error fetching complaint counts:", error);
+//         res.status(500).json({ message: "Internal Server Error" });
+//       }
+//     })
+//   );
   
 
-  adminApp.put('/update-status/:complaint_id', asyncHandler(async (req, res) => {
+
+
+// GET complaints Count (single or multiple categories)
+adminApp.get(
+  "/complaints-count/:categories", // categories can be single or multiple separated by commas
+  asyncHandler(async (req, res) => {
+    try {
+      // Extract categories from params
+      let { categories } = req.params;
+      let categoryArray = categories.split(","); // Convert to array
+
+      // Build filter condition
+      const filter = categoryArray.length === 1
+        ? { category: categoryArray[0] } // Single category
+        : { category: { $in: categoryArray } }; // Multiple categories
+
+      // Fetch counts
+      const [pendingCount, resolvedCount, ongoingCount] = await Promise.all([
+        complaintsCollectionObj.countDocuments({ status: "Pending", ...filter }),
+        complaintsCollectionObj.countDocuments({ status: "Resolved", ...filter }),
+        complaintsCollectionObj.countDocuments({ status: "Ongoing", ...filter }),
+      ]);
+
+      // Send response
+      res.status(200).json({
+        pending: pendingCount,
+        resolved: resolvedCount,
+        ongoing: ongoingCount,
+      });
+    } catch (error) {
+      console.error("Error fetching complaint counts:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  })
+);
+
+
+  adminApp.put('/update-status/:complaint_id',verifyGoogleToken, asyncHandler(async (req, res) => {
     const complaintId = req.params.complaint_id;
     const { status } = req.body;
 
@@ -145,6 +210,7 @@ adminApp.get(
             pass: process.env.ADMIN_PASS
         }
     });
+    
 
     // Step 4: Prepare email content
     const mailOptions = {
@@ -168,7 +234,7 @@ adminApp.get(
 
 
 // DELETE API to remove a complaint
-adminApp.delete('/delete-complaint/:complaint_id', asyncHandler(async (req, res) => {
+adminApp.delete('/delete-complaint/:complaint_id',verifyGoogleToken, asyncHandler(async (req, res) => {
     const complaintId = req.params.complaint_id;
 
     // Step 1: Find the complaint by complaint_id
@@ -218,41 +284,76 @@ adminApp.delete('/delete-complaint/:complaint_id', asyncHandler(async (req, res)
     });
 }));
 
-// GET API to filter complaints (Latest first)
-adminApp.get('/filter-complaints', asyncHandler(async (req, res) => {
-    const { category, status, dateRange } = req.query;
+// // GET API to filter complaints (Latest first)
+// adminApp.get('/filter-complaints',verifyGoogleToken, asyncHandler(async (req, res) => {
+//     const { category, status, dateRange } = req.query;
 
-    let query = {};
+//     let query = {};
 
-    if (category) {
-        query.category = category;
+//     if (category) {
+//         query.category = category;
+//     }
+
+//     if (status) {
+//         query.status = status;
+//     }
+
+//     if (dateRange) {
+//         const { startDate, endDate } = getDateRange(dateRange);
+//         if (startDate && endDate) {
+//             query.timestamp = {
+//                 $gte: startDate,
+//                 $lte: endDate
+//             };
+//         }
+//     }
+
+//     const complaints = await complaintsCollectionObj
+//         .find(query)
+//         .sort({ timestamp: -1 })
+//         .toArray();
+
+//     // Always return an array, even if empty
+//     res.status(200).json({ complaints });
+// }));
+
+
+
+
+adminApp.get('/filter-complaints', verifyGoogleToken, asyncHandler(async (req, res) => {
+  const { status, category, dateRange } = req.query;
+
+  let query = {};
+
+  // Get logged-in admin categories
+  const adminRecords = await adminsCollectionObj.find({ email: req.user.email }).toArray();
+  const adminCategories = adminRecords.map(a => a.category);
+
+  // If category param exists AND is valid for this admin, use only that
+  if (category && adminCategories.includes(category)) {
+    query.category = category; // single category
+  } else {
+    // Otherwise, fetch all categories assigned to admin
+    query.category = { $in: adminCategories };
+  }
+
+  if (status) query.status = status;
+
+  if (dateRange) {
+    const { startDate, endDate } = getDateRange(dateRange);
+    if (startDate && endDate) {
+      query.timestamp = { $gte: startDate, $lte: endDate };
     }
+  }
 
-    if (status) {
-        query.status = status;
-    }
+  const complaints = await complaintsCollectionObj
+    .find(query)
+    .sort({ timestamp: -1 })
+    .toArray();
 
-    if (dateRange) {
-        const { startDate, endDate } = getDateRange(dateRange);
-        if (startDate && endDate) {
-            query.timestamp = {
-                $gte: startDate,
-                $lte: endDate
-            };
-        }
-    }
-
-    const complaints = await complaintsCollectionObj
-        .find(query)
-        .sort({ timestamp: -1 }) // Sort by latest first
-        .toArray();
-
-    if (complaints.length > 0) {
-        res.status(200).json({ complaints });
-    } else {
-        res.status(404).json({ message: "No complaints found for the given filters" });
-    }
+  res.status(200).json({ complaints });
 }));
+
 
 
 // Helper function to get the start and end of the week or month
@@ -275,25 +376,62 @@ function getDateRange(dateRange) {
 }
 
 // Route to add a comment to a complaint
-adminApp.post('/complaints/:id/comment', asyncHandler(async (req, res) => {
-    const { id } = req.params; // Get complaint ID from URL
-    const { comment } = req.body; // Get the full comment object from request body
+// adminApp.post('/complaints/:id/comment', asyncHandler(async (req, res) => {
+//     const { id } = req.params; // Get complaint ID from URL
+//     const { comment } = req.body; // Get the full comment object from request body
    
 
-    if (!comment || !comment.text) {
-        return res.status(400).json({ message: "Comment cannot be empty" });
-    }
+//     if (!comment || !comment.text) {
+//         return res.status(400).json({ message: "Comment cannot be empty" });
+//     }
 
-    const result = await complaintsCollectionObj.updateOne(
-        { complaint_id: id },
-        { $push: { comments: comment } } // Push new comment into the comments array
-    );
+//     const result = await complaintsCollectionObj.updateOne(
+//         { complaint_id: id },
+//         { $push: { comments: comment } } // Push new comment into the comments array
+//     );
 
-    if (result.modifiedCount > 0) {
-        res.json({ message: "Comment added successfully" });
-    } else {
-        res.status(404).json({ message: "Complaint not found or comment could not be added" });
-    }
+//     if (result.modifiedCount > 0) {
+//         res.json({ message: "Comment added successfully" });
+//     } else {
+//         res.status(404).json({ message: "Complaint not found or comment could not be added" });
+//     }
+// }));
+
+
+
+
+adminApp.post('/complaints/:id/comment',verifyGoogleToken, asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { text, adminEmail } = req.body;
+
+  if (!text || !adminEmail) {
+    return res.status(400).json({ message: "Comment text and admin email are required" });
+  }
+
+  // ✅ Verify that the email belongs to an admin
+  const admin = await adminsCollectionObj.findOne({ email: adminEmail });
+
+  if (!admin) {
+    return res.status(404).json({ message: "Admin not found" });
+  }
+
+  const comment = {
+    id: new Date().getTime(),
+    text,
+    date: new Date().toISOString(),
+    email: admin.email   // ✅ Only storing email
+  };
+
+  const result = await complaintsCollectionObj.updateOne(
+    { complaint_id: id },
+    { $push: { comments: comment } }
+  );
+
+  if (result.modifiedCount > 0) {
+    res.json({ message: "Comment added successfully" });
+  } else {
+    res.status(404).json({ message: "Complaint not found or comment could not be added" });
+  }
 }));
 
 

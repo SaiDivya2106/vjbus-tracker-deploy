@@ -17,7 +17,7 @@ const AppContent = () => {
 
   return (
     <>
-      {/* ✅ Conditionally render LoginModal */}
+      {/* ✅ Conditionally render LoginModal*/}
       {isLoginModalOpen && (
         <LoginModal
           onClose={() => setLoginModalOpen(false)}

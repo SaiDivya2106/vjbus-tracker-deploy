@@ -12,44 +12,74 @@
 <body>
 
 <div class="chat-container">
-    <div class="chat-header" id="initial-header">
-        <h5>BUS CHAT</h5>
+    <!-- WhatsApp-like header -->
+    <div class="whatsapp-header" id="initial-header">
+        <h5 id="bus-chat-header">BUS CHAT</h5>
+        <i class="fa-solid fa-house to-home" onclick="window.location.href='/'"> </i>
     </div>
 
-    <div class="chat-header" id="chat-header" style="display:none;">
-        <h5>BUS CHAT</h5>
-        <p>ROOM ID: <span id="room-name"></span></p>
+    <!-- WhatsApp-like chat header -->
+    <div class="whatsapp-chat-header" id="chat-header" style="display:none;">
+        <div class="chat-header-info">
+            <div class="chat-contact">
+                <div class="contact-avatar">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <div class="contact-details">
+                    <div class="contact-name">Chat <span id="room-name"></span></div>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <i class="fas fa-sign-out-alt" id="leave-chat-btn" onclick="leaveRoom()"></i>
+            </div>
+        </div>
     </div>
 
+    <!-- Chat area -->
     <div id="chat" style="display:none;">
-        <div class="chat-box" id="messages">
+        <div class="chat-messages" id="messages">
             <!-- Messages will be displayed here -->
-            
         </div>
-        <div class="input-group">
-            <input type="text" id="message" class="form-control" placeholder="Enter a message" onkeydown="sendOnEnter(event)">
-            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        
+        <!-- Message input area -->
+        <div class="message-input-area">
+            <div class="input-container">
+                <input type="text" id="message" class="message-input" placeholder="Type a message" onkeydown="sendOnEnter(event)">
+            </div>
+            <button class="send-button" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
-        <!-- <button class="leave-chat" onclick="leaveRoom()">LEAVE CHAT</button> -->
     </div>
 
+    <!-- Chat list section -->
+    <div id="chat-list-section" style="display:none;">
+        <div class="chat-list-header">
+            <h5>Select a Chat</h5>
+        </div>
+        <div class="chat-list-container">
+            <div id="chat-list">
+                <!-- Chat rooms will be displayed here -->
+            </div>
+        </div>
+        <button class="btn btn-primary new-chat-float" id="new-chat-btn">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Join section -->
     <div id="join-section">
         <input type="text" id="name" class="form-control mb-2" placeholder="Enter your name" onkeydown="focusNext(event, 'route')">
         <input type="text" id="route" class="form-control mb-2" placeholder="Enter Room ID" onkeydown="focusNext(event, 'join')">
         <button class="btn btn-success w-100" id="join" onclick="joinRoom()">Join Chat</button>
     </div>
-</div>
 
-<button class="leave-btn" id="leave-btn" onclick="leaveRoom()">Leave</button>
-
-
-<!-- Bottom Floating Menu -->
-<div class="bottom-menu">
-    <div class="menu-item" id="homeBtn">
-        <i class="fa-solid fa-house"></i>
-    </div>
-    <div class="menu-item active" id="chatBtn">
-        <i class="fa-solid fa-comments"></i>
+    <!-- New chat section -->
+    <div id="new-chat-section" style="display:none;">
+        <h5>Create New Chat</h5>
+        <input type="text" id="new-chat-name" class="form-control mb-2" placeholder="Enter chat name">
+        <button class="btn btn-success w-100" id="create-chat">Create Chat</button>
+        <button class="btn btn-secondary w-100 mt-2" id="cancel-new-chat">Cancel</button>
     </div>
 </div>
 

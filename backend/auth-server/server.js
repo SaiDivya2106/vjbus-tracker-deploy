@@ -142,22 +142,25 @@ app.post("/verify-token", (req, res) => {
 app.post("/logout", (req, res) => {
     console.log("🔍 Debug: Logout");
 
+    const isLocalhost = req.hostname === 'localhost' || req.hostname.startsWith('127.') || req.hostname === '::1';
+    const cookieDomain = isLocalhost ? undefined : '.vjstartup.com'; // no domain needed for localhost
+
     // Clear userToken cookie for all subdomains of vjstartup.com
     res.cookie("userToken", "", { 
-        domain: ".vjstartup.com", // Applies to all subdomains
+        domain: cookieDomain,    // ✅ dynamic domain
         path: "/",               // Applies to the entire domain
         expires: new Date(0),    // Set expiry date in the past to delete the cookie
         httpOnly: true,          // Secure the cookie from JavaScript access
-        secure: false,           // Set to true in production if using HTTPS
+        secure: !isLocalhost,    // ✅ true if HTTPS (production)
         sameSite: "Lax"          // Set appropriate SameSite policy
     });
 
     // Optionally, clear the 'user' cookie as well
     res.cookie("user", "", { 
-        domain: ".vjstartup.com", 
+        domain: cookieDomain,    // ✅ dynamic domain
         path: "/", 
         expires: new Date(0),
-        secure: false, 
+        secure: !isLocalhost,    // ✅ true if HTTPS (production)
         sameSite: "Lax"
     });
 
@@ -166,4 +169,3 @@ app.post("/logout", (req, res) => {
 
 
 app.listen(3115, () => console.log("Auth Server running on port 3115"));
-

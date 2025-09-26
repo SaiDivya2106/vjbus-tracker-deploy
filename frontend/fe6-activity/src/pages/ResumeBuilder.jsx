@@ -888,10 +888,125 @@ const ResumeBuilder = () => {
     };
   };
 
+  // Add a dummy resume generation function for development
+  const generateDummyResume = () => {
+    // Create a development version of the resume data
+    return {
+      basics: {
+        name: basics.name || "John Doe",
+        email: basics.email || "johndoe@example.com",
+        phone: basics.phone || "123-456-7890",
+        location: basics.location || "New York, NY",
+        profiles: {
+          linkedin: basics.profiles?.linkedin || "linkedin.com/in/johndoe",
+          github: basics.profiles?.github || "github.com/johndoe"
+        },
+      },
+      summary: summary || "Experienced software professional with a track record of delivering high-quality solutions. Skilled in multiple programming languages and frameworks with a focus on creating user-friendly applications.",
+      
+      education: education.length > 0 ? education.map(edu => ({
+        ...edu,
+        period: `${edu.start_year || '2016'} - ${edu.current ? 'Present' : (edu.end_year || '2020')}`
+      })) : [
+        {
+          school: "University of Technology",
+          degree: "Bachelor of Science",
+          field: "Computer Science",
+          period: "2016 - 2020",
+          description: "Graduated with honors. Relevant coursework included data structures, algorithms, software engineering, and database systems."
+        }
+      ],
+      
+      experience: experience.length > 0 ? experience.map(exp => ({
+        ...exp,
+        period: `${exp.start_date || 'Jan 2020'} - ${exp.current ? 'Present' : (exp.end_date || 'Dec 2022')}`
+      })) : [
+        {
+          company: "Tech Solutions Inc.",
+          position: "Software Engineer",
+          period: "Jan 2020 - Present",
+          description: "Developed and maintained web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time and within specifications."
+        },
+        {
+          company: "Startup Innovations",
+          position: "Junior Developer",
+          period: "Jun 2018 - Dec 2019",
+          description: "Assisted in the development of mobile applications. Implemented UI designs and fixed bugs in existing codebase."
+        }
+      ],
+      
+      skills: skills.length > 0 ? skills : [
+        "JavaScript", "React", "Node.js", "Python", "SQL", "Git", "HTML/CSS", 
+        "TypeScript", "Docker", "AWS", "Agile Methodologies"
+      ],
+      
+      projects: projects.length > 0 ? projects.map(proj => ({
+        ...proj,
+        period: proj.start_date || proj.end_date ? 
+          `${proj.start_date || 'Jan 2020'} - ${proj.current ? 'Present' : (proj.end_date || 'Dec 2022')}` : 
+          "2020 - 2022"
+      })) : [
+        {
+          title: "E-commerce Platform",
+          description: "Developed a full-stack e-commerce platform with React, Node.js, and MongoDB. Implemented features such as user authentication, product search, and payment processing.",
+          skills: ["React", "Node.js", "MongoDB", "Express", "Redux"],
+          period: "2021 - 2022"
+        },
+        {
+          title: "Task Management Application",
+          description: "Created a task management application with drag-and-drop functionality. Integrated with Google Calendar for syncing events.",
+          skills: ["React", "Firebase", "Material-UI", "Google Calendar API"],
+          period: "2020 - 2021"
+        }
+      ],
+      
+      co_curricular: co_curricular.length > 0 ? co_curricular : [
+        {
+          title: "Hackathon Winner",
+          description: "First place in University Hackathon. Developed an accessibility tool for visually impaired users.",
+          period: "2019"
+        }
+      ],
+      
+      extra_curricular: extra_curricular.length > 0 ? extra_curricular : [
+        {
+          title: "Volunteer Teacher",
+          description: "Taught programming basics to underprivileged children at local community center.",
+          period: "2018 - 2020"
+        }
+      ],
+      
+      certifications: certifications.length > 0 ? certifications : [
+        {
+          title: "AWS Certified Developer",
+          description: "Certification validating expertise in developing applications on AWS.",
+          period: "2021"
+        }
+      ],
+      
+      sections: sections.filter(section => 
+        !['personal', 'experience', 'education', 'skills', 'projects', 'co_curricular', 'extra_curricular', 'certifications'].includes(section.id)
+      ),
+      
+      sectionOrder: sectionOrder || [
+        "contact", "summary", "experience", "education", "skills", 
+        "projects", "co_curricular", "extra_curricular", "certifications", "custom"
+      ]
+    };
+  };
+
+  // Modify the generateResume function to use the dummy function for development
   const generateResume = async () => {
     setLoading(true);
     setError('');
     try {
+      // COMMENT OUT THE DUMMY DATA
+      // const dummyResumeData = generateDummyResume();
+      // setResumeData(dummyResumeData);
+      // setSummary(dummyResumeData.summary || '');
+      // ...other dummy state updates...
+
+      // UNCOMMENT THIS SECTION TO USE THE ACTUAL API CALL
       const token = localStorage.getItem('token');
       const data = generateResumeData();
       const response = await axios.post(
@@ -905,96 +1020,34 @@ const ResumeBuilder = () => {
       );
 
       if (response.data.generated_content) {
-        // Parse the generated content
         const generatedResumeData = JSON.parse(response.data.generated_content);
-        
-        // Create a default summary if none is provided
         if (generatedResumeData.summary === undefined) {
-          generatedResumeData.summary = "Professional with experience in " + (jobTitle || "the field") + ". Skilled in " + 
-            (generatedResumeData.skills && generatedResumeData.skills.length > 0 
-              ? generatedResumeData.skills.slice(0, 3).join(", ") 
-              : "various technical areas") + 
+          generatedResumeData.summary = "Professional with experience in " + (jobTitle || "the field") + ". Skilled in " +
+            (generatedResumeData.skills && generatedResumeData.skills.length > 0
+              ? generatedResumeData.skills.slice(0, 3).join(", ")
+              : "various technical areas") +
             ". Seeking to leverage my skills and experience to contribute to organizational success.";
         }
-        
-        // Set the resume data
-        setResumeData({
-          ...generatedResumeData
-        });
-        
-        // Update the summary state - always set it, even if it's an empty string
+        setResumeData({ ...generatedResumeData });
         setSummary(generatedResumeData.summary || '');
-        
-        // Update other state variables if needed
         if (generatedResumeData.basics) {
           setBasics({
             ...generatedResumeData.basics,
             profiles: generatedResumeData.basics.profiles || {}
           });
         }
-        
-        if (generatedResumeData.education) {
-          setEducation(generatedResumeData.education);
-        }
-        
-        if (generatedResumeData.experience) {
-          setExperience(generatedResumeData.experience);
-        }
-        
-        if (generatedResumeData.skills) {
-          setSkills(generatedResumeData.skills);
-        }
-        
-        if (generatedResumeData.projects) {
-          setProjects(generatedResumeData.projects);
-        }
-        
-        if (generatedResumeData.activities) {
-          setFormattedActivities(generatedResumeData.activities);
-        } else if (response.data.resume_data && response.data.resume_data.activities) {
-          // If activities are not in the generated content, use the raw activities from the API response
-          setFormattedActivities(response.data.resume_data.activities);
-        }
-        
-        if (generatedResumeData.sectionOrder) {
-          setSectionOrder(generatedResumeData.sectionOrder);
-        }
+        if (generatedResumeData.education) setEducation(generatedResumeData.education);
+        if (generatedResumeData.experience) setExperience(generatedResumeData.experience);
+        if (generatedResumeData.skills) setSkills(generatedResumeData.skills);
+        if (generatedResumeData.projects) setProjects(generatedResumeData.projects);
+        if (generatedResumeData.activities) setFormattedActivities(generatedResumeData.activities);
+        if (generatedResumeData.sectionOrder) setSectionOrder(generatedResumeData.sectionOrder);
       } else {
         setError('Failed to generate resume content');
       }
     } catch (error) {
-      // Detailed error logging
       console.error('Error generating resume:', error);
-      console.error('Error response:', error.response);
-      console.error('Error message:', error.message);
-      console.error('Error status:', error.response?.status);
-      console.error('Error data:', error.response?.data);
-      
-      // Check for quota exceeded error - expanded to catch more patterns
-      const errorMessage = error.response?.data?.error || error.message || '';
-      const errorString = JSON.stringify(error).toLowerCase();
-      
-      console.log('Error message for detection:', errorMessage);
-      console.log('Error string for detection:', errorString);
-      
-      if (error.response?.status === 429 || 
-          error.response?.status === 500 ||
-          errorMessage.toLowerCase().includes('quota') ||
-          errorMessage.toLowerCase().includes('limit') ||
-          errorMessage.toLowerCase().includes('exceed') ||
-          errorMessage.toLowerCase().includes('exhausted') ||
-          errorMessage.toLowerCase().includes('resource') ||
-          errorString.includes('quota') ||
-          errorString.includes('limit') ||
-          errorString.includes('exceed') ||
-          errorString.includes('exhausted') ||
-          errorString.includes('resource') ||
-          errorString.includes('429 resource has been exhausted')) {
-        console.log('Quota error detected!');
-        setError('API quota exceeded. Please try again later or contact support for a quota increase.');
-      } else {
-        setError('Failed to generate resume. Please try again.');
-      }
+      setError('Failed to generate resume: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -1144,6 +1197,10 @@ const ResumeBuilder = () => {
       setLoading(false);
     }
   };
+  
+
+  // Navigation handlers
+
   
   
   // Navigation handlers
@@ -1452,7 +1509,7 @@ const ResumeBuilder = () => {
           // Keep entries for backward compatibility
           entries: section.entries || []
         };
-      }
+      } 
       
       // For non-custom sections, use standard formatting
       if (section.entries) {
@@ -2287,4 +2344,4 @@ const ResumeBuilder = () => {
   );
 };
 
-export default ResumeBuilder; 
+export default ResumeBuilder;

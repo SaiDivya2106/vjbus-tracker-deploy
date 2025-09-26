@@ -20,7 +20,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://vnr-outpass-frontend.vercel.app',
+  'https://dev-outpass.vjstartup.com',
+  'https://outpass.vjstartup.com',
 ];
 
 app.use(cors({

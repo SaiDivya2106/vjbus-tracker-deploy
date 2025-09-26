@@ -27,6 +27,10 @@ from cryptography.fernet import Fernet
 import traceback
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+import certifi
+from career_analysis import CareerAnalyzer
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -47,15 +51,19 @@ bcrypt = Bcrypt(app)  # Initialize Flask-Bcrypt
 # MongoDB Configuration
 app.config['MONGODB_SETTINGS'] = {
     'host': os.getenv('MONGODB_URI'),
-    'db': 'activity_logger'
+    'db': 'activity_logger',
+    'tlsAllowInvalidCertificates': True
 }
 
 # Initialize MongoDB
 db = MongoEngine(app)
 
+# Gemini model name variable (use everywhere)
+GEMINI_MODEL_NAME = 'gemini-2.0-flash'
+
 # Initialize Gemini
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))  # Configure with .env key initially
-model = genai.GenerativeModel('gemini-1.5-pro')
+model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
 # Add this after app initialization but before route definitions
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-secret-key-here')
@@ -73,6 +81,11 @@ cipher_suite = Fernet(ENCRYPTION_KEY)
 # Verify encryption key consistency
 print(f"Current encryption key: {ENCRYPTION_KEY[:6]}...{ENCRYPTION_KEY[-6:]}")
 
+# Initialize career analyzer
+career_analyzer = CareerAnalyzer()
+
+
+
 class Activity(db.EmbeddedDocument):
     activity_id = db.StringField(required=True, default=lambda: str(uuid.uuid4()))
     title = db.StringField(required=True)
@@ -82,8 +95,10 @@ class Activity(db.EmbeddedDocument):
     date = db.DateTimeField(default=datetime.utcnow)
     status = db.StringField(default='ongoing')
     source = db.StringField(choices=['manual', 'github', 'leetcode'])
-   
+    embedding = db.ListField(db.FloatField())
     skills = db.ListField(db.StringField())
+    
+    # Add embedding field to store vector representations
     
     
     start_date = db.DateTimeField()
@@ -156,9 +171,9 @@ def encrypt_api_key(api_key: str) -> bytes:
     return cipher_suite.encrypt(api_key.encode())
 
 def decrypt_api_key(encrypted_key: bytes) -> str:
-    print(encrypted_key)
+    
     h=cipher_suite.decrypt(encrypted_key).decode()
-    print(h)
+    
     return h   
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -247,6 +262,11 @@ def add_activity():
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
+        # Generate embedding for the activity
+        skills_text = ' '.join(data.get('skills', []))
+        activity_text = f"{data['title']} {data['description']} {skills_text}"
+        
+
         # Create new Activity document using MongoEngine model
         new_activity = Activity(
             title=data['title'],
@@ -255,6 +275,7 @@ def add_activity():
             date=datetime.utcnow(),  # Default to current time, or get from request if needed
             status=data.get('status', 'ongoing'),
             skills=data.get('skills', []),  # Add skills with empty list as default
+             # Store the embedding
             start_date=datetime.fromisoformat(data['start_date']) if 'start_date' in data else None,
             end_date=datetime.fromisoformat(data['end_date']) if 'end_date' in data else None
         )
@@ -270,6 +291,7 @@ def add_activity():
         return jsonify({
             'message': 'Activity added successfully',
             'activity': {
+                'activity_id': str(new_activity.activity_id),
                 'title': new_activity.title,
                 'activity_type': new_activity.activity_type,
                 'description': new_activity.description,
@@ -295,6 +317,9 @@ def get_user_activities():
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
+
+        # Ensure all activities have embeddings
+       
 
         activities = []
         for activity in user.activities:
@@ -791,7 +816,7 @@ def generate_resume_content(resume_data, user_api_key=None):
                 raise Exception("No system API key configured")
             genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
         logger.info(f"Using {key_source} API key for generation")
         
         # Format education entries
@@ -1008,7 +1033,6 @@ The response must contain only the JSON object - no additional text or explanati
         logger.error(f"Generation Error: {str(e)}")
         logger.error(f"Stack Trace: {traceback.format_exc()}")
         raise
-
 @app.route('/api/resume/generate', methods=['POST'])
 @jwt_required()
 def generate_resume():
@@ -1308,6 +1332,14 @@ def update_activity(activity_id):
         for field in allowed_fields:
             if field in data:
                 setattr(user.activities[activity_index], field, data[field])
+                
+        # Re-generate embedding if title, description or skills changed
+        if any(field in data for field in ['title', 'description', 'skills']):
+            activity = user.activities[activity_index]
+            skills_text = ' '.join(activity.skills)
+            activity_text = f"{activity.title} {activity.description} {skills_text}"
+            embedding = career_analyzer.model.encode(activity_text).tolist()
+            user.activities[activity_index].embedding = embedding
 
         user.save()
         
@@ -1486,7 +1518,7 @@ def recommend_activities():
                 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
                 logger.info("Using system API key for recommendations")
                 
-            model = genai.GenerativeModel('gemini-1.5-pro')
+            model = genai.GenerativeModel(GEMINI_MODEL_NAME)
             
         except Exception as key_error:
             logger.error(f"API key error: {str(key_error)}")
@@ -1494,7 +1526,7 @@ def recommend_activities():
                 return jsonify({'error': 'No valid API key available'}), 500
             genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
             key_source = "System (fallback)"
-            model = genai.GenerativeModel('gemini-1.5-pro')
+            model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
         # Safety settings and generation config
         safety_settings = {
@@ -1519,33 +1551,34 @@ def recommend_activities():
         
         # Parse the response to get activity titles
         try:
-            response_text = response.text
-            # Try to parse as JSON
-            recommended_activities = json.loads(response_text)
+            response_text = response.text.strip()
+            # Remove markdown code block markers if present
+            if response_text.startswith("```"):
+                response_text = response_text.replace("```json", "").replace("```", "").strip()
+
+            try:
+                recommended_activities = json.loads(response_text)
+                # Ensure it's a list of strings
+                if not isinstance(recommended_activities, list):
+                    return jsonify({'error': 'Invalid response format from AI'}), 500
+
+                # Remove empty strings, duplicates, and items not in user's activities
+                valid_activity_titles = {activity.title for activity in activities}
+                cleaned_activities = []
+                for title in recommended_activities:
+                    if isinstance(title, str) and title.strip() and title in valid_activity_titles and title not in cleaned_activities:
+                        cleaned_activities.append(title)
+
+                logger.info(f"Recommended {len(cleaned_activities)} activities for {job_title}")
+                return jsonify({'recommended_activities': cleaned_activities}), 200
+
+            except json.JSONDecodeError:
+                return jsonify({'error': 'AI response could not be parsed as JSON'}), 500
             
-            # Verify the response is a list of strings
-            if not isinstance(recommended_activities, list):
-                return jsonify({'error': 'Invalid response format from AI'}), 500
-                
-            for activity_title in recommended_activities:
-                if not isinstance(activity_title, str):
-                    return jsonify({'error': 'Invalid activity title format from AI'}), 500
-                    
-            # Verify that all activity titles exist in the user's activities
-            valid_activity_titles = [activity.title for activity in activities]
-            recommended_activities = [title for title in recommended_activities if title in valid_activity_titles]
-            
-            # Log the recommended activities
-            logger.info(f"Recommended {len(recommended_activities)} activities for {job_title}")
-            
-            return jsonify({
-                'recommended_activities': recommended_activities
-            }), 200
-            
-        except json.JSONDecodeError:
-            # If response is not valid JSON, return error
-            return jsonify({'error': 'AI response could not be parsed as JSON'}), 500
-            
+        except Exception as e:
+            logger.error(f"Error parsing AI response: {str(e)}")
+            return jsonify({'error': 'Server error'}), 500
+
     except Exception as e:
         logger.error(f"Recommendation error: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
@@ -1578,5 +1611,316 @@ def set_gemini_api_key():
         logger.error(f"API key update error: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
 
+@app.route('/api/generate-cover-letter', methods=['POST'])
+@jwt_required()
+def generate_cover_letter():
+    try:
+        data = request.get_json()
+        user_id = get_jwt_identity()
+        
+        # Validate required fields
+        if 'job_description' not in data:
+            return jsonify({'error': 'Job description is required'}), 400
+            
+        job_description = data['job_description']
+        job_title = data.get('job_title', '')
+        company_name = data.get('company_name', '')
+            
+        # Find the user
+        user = User.objects(id=user_id).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Check for any available API key (user or .env)
+        if not user.gemini_api_key and not os.getenv('GEMINI_API_KEY'):
+            return jsonify({
+                'error': 'No Gemini API key configured. Please set your API key first or contact support.',
+                'needs_api_key': True
+            }), 400
+            
+        # Get user profile data
+        user_name = user.name
+        
+        # Prepare skills, experience, education summaries
+        skills_list = user.skills if hasattr(user, 'skills') else []
+        
+        experience_summary = ""
+        if hasattr(user, 'experience') and user.experience:
+            for exp in user.experience[:2]:  # Get the most recent experiences
+                experience_summary += f"- {exp.position} at {exp.company}\n"
+        
+        education_summary = ""
+        if hasattr(user, 'education') and user.education:
+            for edu in user.education[:1]:  # Get the most recent education
+                education_summary += f"- {edu.degree} in {edu.field} from {edu.school}\n"
+                
+        # Set up the Google Generative AI client with proper key handling
+        key_source = "System"
+        try:
+            if user.gemini_api_key:
+                try:
+                    decrypted_key = decrypt_api_key(user.gemini_api_key)
+                    genai.configure(api_key=decrypted_key)
+                    key_source = "User"
+                    logger.info(f"Using user API key for cover letter generation ({user.email})")
+                except Exception as decrypt_error:
+                    logger.error(f"Decryption failed: {str(decrypt_error)}")
+                    if os.getenv('GEMINI_API_KEY'):
+                        logger.warning("Falling back to system API key")
+                        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+                        key_source = "System (fallback)"
+                    else:
+                        raise Exception("Invalid user API key and no system key available")
+            else:
+                if not os.getenv('GEMINI_API_KEY'):
+                    raise Exception("No system API key configured")
+                genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+                logger.info("Using system API key for cover letter generation")
+        except Exception as key_error:
+            logger.error(f"API key error: {str(key_error)}")
+            return jsonify({'error': 'No valid API key available'}), 500
+        
+        # Prepare the prompt
+        prompt = f"""
+        Create a professional cover letter for {user_name} applying for a {job_title} position at {company_name}.
+        
+        Use the following job description:
+        {job_description}
+        
+        Candidate's profile:
+        - Skills: {', '.join(skills_list)}
+        {experience_summary}
+        {education_summary}
+        
+        The cover letter should:
+        1. Be personalized to match the job requirements
+        2. Highlight relevant skills and experiences
+        3. Show enthusiasm for the role and company
+        4. Have a professional, confident tone
+        5. Be concise (about 300-400 words)
+        6. Include a standard cover letter structure with greeting, introduction, body paragraphs, and closing
+        
+        Format the cover letter without including a physical address or date, just start with the greeting.
+        """
+        
+        # Generate the cover letter content
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.7,
+                "top_p": 0.8,
+                "top_k": 40,
+                "max_output_tokens": 2048,
+            }
+        )
+        
+        # Process and return the generated content
+        cover_letter_text = response.text
+        
+        return jsonify({
+            'cover_letter': cover_letter_text,
+            'job_title': job_title,
+            'company_name': company_name
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating cover letter: {str(e)}")
+        error_msg = 'Cover letter generation failed'
+        if "API_KEY_INVALID" in str(e):
+            error_msg += ' - Invalid API key'
+        elif "quota" in str(e).lower():
+            error_msg += ' - API quota exceeded'
+        return jsonify({'error': error_msg, 'details': str(e)}), 500
+
+@app.route('/api/career/analyze', methods=['POST'])
+@jwt_required()
+def analyze_career_progress():
+    try:
+        user_id = get_jwt_identity()
+        user = User.objects(id=user_id).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        data = request.get_json()
+        target_career = data.get('target_career')
+        
+        if not target_career:
+            return jsonify({'error': 'Target career is required'}), 400
+            
+        # Fetch user's Gemini API key if exists
+        user_api_key = None
+        if hasattr(user, 'gemini_api_key') and user.gemini_api_key:
+            user_api_key = user.gemini_api_key
+            
+        # Convert user activities to the format expected by the analyzer
+        user_activities = []
+        for activity in user.activities:
+            user_activities.append({
+                'title': activity.title,
+                'description': activity.description,
+                'skills': activity.skills
+            })
+            
+        # Get gap analysis - pass the user API key
+        gap_analysis = career_analyzer.analyze_career_gaps(user_activities, target_career, user_api_key)
+        
+        return jsonify(gap_analysis), 200
+        
+    except Exception as e:
+        logger.error(f"Error analyzing career progress: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/career/roadmap', methods=['POST'])
+@jwt_required()
+def generate_career_roadmap():
+    try:
+        user_id = get_jwt_identity()
+        user = User.objects(id=user_id).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        data = request.get_json()
+        target_career = data.get('target_career')
+        
+        if not target_career:
+            return jsonify({'error': 'Target career is required'}), 400
+            
+        # Fetch user's Gemini API key if exists
+        user_api_key = None
+        if hasattr(user, 'gemini_api_key') and user.gemini_api_key:
+            user_api_key = user.gemini_api_key
+            
+        # Convert user activities to the format expected by the analyzer
+        user_activities = []
+        for activity in user.activities:
+            user_activities.append({
+                'title': activity.title,
+                'description': activity.description,
+                'skills': activity.skills
+            })
+            
+        # Generate roadmap - pass the user API key
+        roadmap = career_analyzer.generate_roadmap(user_activities, target_career, user_api_key)
+        
+        return jsonify(roadmap), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating career roadmap: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/career/similar_activities', methods=['POST'])
+@jwt_required()
+def find_similar_activities():
+    try:
+        user_id = get_jwt_identity()
+        user = User.objects(id=user_id).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        skills = data.get('skills', [])
+        
+        if not title or not description:
+            return jsonify({'error': 'Title and description are required'}), 400
+            
+        # Fetch user's Gemini API key if exists
+        user_api_key = None
+        if hasattr(user, 'gemini_api_key') and user.gemini_api_key:
+            user_api_key = user.gemini_api_key
+            
+        # Create activity object
+        activity = {
+            'title': title,
+            'description': description,
+            'skills': skills
+        }
+        
+        # Find similar activities - pass the user API key
+        similar_activities = career_analyzer.find_similar_activities(activity, user_api_key)
+        
+        return jsonify({'similar_activities': similar_activities}), 200
+        
+    except Exception as e:
+        logger.error(f"Error finding similar activities: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/career/match', methods=['GET'])
+@jwt_required()
+def find_matching_careers():
+    try:
+        user_id = get_jwt_identity()
+        user = User.objects(id=user_id).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Fetch user's Gemini API key if exists
+        user_api_key = None
+        if hasattr(user, 'gemini_api_key') and user.gemini_api_key:
+            user_api_key = user.gemini_api_key
+            
+        # Convert user activities to the format expected by the analyzer
+        user_activities = []
+        for activity in user.activities:
+            user_activities.append({
+                'title': activity.title,
+                'description': activity.description,
+                'skills': activity.skills
+            })
+            
+        # Find matching careers - pass the user API key
+        matching_careers = career_analyzer.find_career_match(user_activities, user_api_key)
+        
+        return jsonify({'matching_careers': matching_careers}), 200
+        
+    except Exception as e:
+        logger.error(f"Error finding matching careers: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/career/personalized_roadmap', methods=['POST'])
+@jwt_required()
+def get_personalized_roadmap():
+    try:
+        user_id = get_jwt_identity()
+        user = User.objects(id=user_id).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        data = request.get_json()
+        target_career = data.get('career_path')
+        
+        if not target_career:
+            return jsonify({'error': 'Target career path is required'}), 400
+            
+        # Fetch user's Gemini API key if exists
+        user_api_key = None
+        if hasattr(user, 'gemini_api_key') and user.gemini_api_key:
+            user_api_key = user.gemini_api_key
+            
+        # Convert user activities to the format expected by the analyzer
+        user_activities = []
+        for activity in user.activities:
+            user_activities.append({
+                'title': activity.title,
+                'description': activity.description,
+                'skills': activity.skills
+            })
+            
+        # Generate roadmap - pass the user API key
+        roadmap = career_analyzer.generate_roadmap(user_activities, target_career, user_api_key)
+        
+        return jsonify(roadmap), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating personalized roadmap: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6106, debug=True) 
+    app.run(host='0.0.0.0', port=6106, debug=True)

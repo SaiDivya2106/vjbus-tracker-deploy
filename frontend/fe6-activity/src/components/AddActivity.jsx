@@ -125,10 +125,26 @@ const AddActivity = ({ open, onClose, onActivityAdded }) => {
         // Notify parent component
         onActivityAdded('regular', response.data.activity);
         
-        // Also dispatch a global event for other components that might need to know
-        window.dispatchEvent(new CustomEvent('activity-added', { 
-          detail: { type: 'regular', activity: response.data.activity } 
-        }));
+        // Clear any cached data to force a refresh
+        localStorage.removeItem('regular_activities_cache');
+        localStorage.removeItem('regular_activities_cache_timestamp');
+        localStorage.removeItem('activities_data_cache');
+        localStorage.removeItem('activities_data_cache_timestamp');
+        
+        // Dispatch a global event for other components that might need to know
+        // Use a more direct approach to ensure components are updated
+        try {
+          window.dispatchEvent(new CustomEvent('activity-added', { 
+            detail: { type: 'regular', activity: response.data.activity } 
+          }));
+          
+          // Also dispatch a separate event specifically for regular activities
+          window.dispatchEvent(new CustomEvent('regular-activity-added', { 
+            detail: { activity: response.data.activity } 
+          }));
+        } catch (err) {
+          console.error('Error dispatching events:', err);
+        }
         
         onClose();
         setFormData({ // Reset form
@@ -177,10 +193,24 @@ const AddActivity = ({ open, onClose, onActivityAdded }) => {
         // Notify parent component
         onActivityAdded('daily', response.data.activity);
         
-        // Also dispatch a global event for other components that might need to know
-        window.dispatchEvent(new CustomEvent('activity-added', { 
-          detail: { type: 'daily', activity: response.data.activity } 
-        }));
+        // Clear any cached data to force a refresh
+        localStorage.removeItem('daily_activities_cache');
+        localStorage.removeItem('daily_activities_cache_timestamp');
+        
+        // Dispatch a global event for other components that might need to know
+        // Use a more direct approach to ensure components are updated
+        try {
+          window.dispatchEvent(new CustomEvent('activity-added', { 
+            detail: { type: 'daily', activity: response.data.activity } 
+          }));
+          
+          // Also dispatch a separate event specifically for daily activities
+          window.dispatchEvent(new CustomEvent('daily-activity-added', { 
+            detail: { activity: response.data.activity } 
+          }));
+        } catch (err) {
+          console.error('Error dispatching events:', err);
+        }
         
         onClose();
         setFormDataDaily({ // Reset form

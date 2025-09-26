@@ -3,15 +3,16 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2563eb',
-      light: '#3b82f6',
-      dark: '#1d4ed8',
+      main: '#5161ce',
+      light: '#7280e3',
+      dark: '#3c4997',
     },
     secondary: {
       main: '#dc004e',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#ffffff',
+      paper: '#ffffff',
     },
   },
   typography: {
@@ -40,6 +41,20 @@ const theme = createTheme({
       },
     },
     MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiCard: {
       styleOverrides: {
         root: {
           boxShadow: 'none',

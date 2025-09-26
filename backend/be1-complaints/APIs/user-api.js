@@ -8,7 +8,11 @@ const natural = require("natural");
 const validWords = new Set(require("an-array-of-english-words"));
 const sentiment = new Sentiment(); // ✅ Initialize Sentiment instance
 const nodemailer=require("nodemailer");
-const authMiddleware = require("../Middleware/authMiddleware");
+const verifyGoogleToken = require("../Middleware/verifyGoogleToken");
+
+
+
+const { isComplaintRelevant } = require('../utils/aiUtils');
 
 
 
@@ -46,7 +50,7 @@ function isMeaninglessComplaint(text) {
 }
 
 userApp.post(
-  "/add-complaint",
+  "/add-complaint",verifyGoogleToken,
   asyncHandler(async (req, res) => {
     const { complaint_id, title, description, category, user_id, github_issue } = req.body;
 
@@ -56,6 +60,9 @@ userApp.post(
         message: "Complaint ID, title, description, category, and user ID are required",
       });
     }
+
+
+
 
     // Analyze sentiment
     const result = sentiment.analyze(description);
@@ -93,6 +100,7 @@ userApp.post(
 
     try {
       const result = await complaintsCollectionObj.insertOne(newComplaint);
+    
 
       if (result.acknowledged) {
         // Format timestamp for email
@@ -103,51 +111,104 @@ userApp.post(
         });
       
         // Fetch admins assigned to the complaint category
-        const admins = await adminsCollectionObj.find({ category }).toArray();
+        // const admins = await adminsCollectionObj.find({ category }).toArray();
       
-        if (admins.length > 0) {
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: process.env.ADMIN_EMAIL,
-              pass: process.env.ADMIN_PASS,
-            },
-          });
-      
-          const mailPromises = admins.map((admin) => {
-            const mailOptions = {
-              from: process.env.EMAIL,
-              to: admin.email,
-              subject: `New Complaint in ${category}`,
-              html: `
-                <p>Dear Admin,</p>
-                <p>A new complaint has been submitted in your assigned category: <strong>${category}</strong>.</p>
+        // if (admins.length > 0) {
+        //   const transporter = nodemailer.createTransport({
+        //     service: "gmail",
+        //     auth: {
+        //       user: process.env.ADMIN_EMAIL,
+        //       pass: process.env.ADMIN_PASS,
+        //     },
+        //   });
+        //   const mailPromises = admins.map((admin) => {
+        //     const mailOptions = {
+        //       from: process.env.EMAIL,
+        //       to: admin.email,
+        //       subject: `New Complaint in ${category}`,
+        //       html: `
+        //         <p>Dear Admin,</p>
+        //         <p>A new complaint has been submitted in your assigned category: <strong>${category}</strong>.</p>
             
-                <p><strong>Complaint Details:</strong></p>
-                <ul>
-                  <li><strong>Title:</strong> ${title}</li>
-                  <li><strong>Description:</strong> ${description}</li>
-                  <li><strong>Complaint ID:</strong> ${complaint_id}</li>
-                  <li><strong>Status:</strong> Pending</li>
-                  <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
-                </ul>
+        //         <p><strong>Complaint Details:</strong></p>
+        //         <ul>
+        //           <li><strong>Title:</strong> ${title}</li>
+        //           <li><strong>Description:</strong> ${description}</li>
+        //           <li><strong>Complaint ID:</strong> ${complaint_id}</li>
+        //           <li><strong>Status:</strong> Pending</li>
+        //           <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
+        //         </ul>
             
-                <p><a href="https://complaints.vnrzone.site">View and manage the complaint</a></p>
+        //         <p><a href="https://complaints.vjstartup.com">View and manage the complaint</a></p>
             
-                <p>Please take action as soon as possible.</p>
-                <p>Regards,<br>Complaint Management System</p>
-              `,
-            };
-            return transporter.sendMail(mailOptions);
-          });
+        //         <p>Please take action as soon as possible.</p>
+        //         <p>Regards,<br>Complaint Management System</p>
+        //       `,
+        //     };
+        //     return transporter.sendMail(mailOptions);
+        //   });
       
-          await Promise.all(mailPromises); // Wait for all emails to send
-        }
+        //   await Promise.all(mailPromises); // Wait for all emails to send
+        // }
       
-        res.status(201).json({
-          message: "Complaint added successfully and email sent to admin(s)",
-          complaint: newComplaint,
-        });
+        // res.status(201).json({
+        //   message: "Complaint added successfully and email sent to admin(s)",
+        //   complaint: newComplaint,
+        // });
+
+
+
+
+
+
+const admins = await adminsCollectionObj.find({ category }).toArray();
+
+if (admins.length > 0) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.ADMIN_EMAIL, // email from which mails will be sent
+      pass: process.env.ADMIN_PASS,  // app password (not normal password)
+    },
+  });
+
+  // Send email to each admin in that category
+  const mailPromises = admins.map((admin) => {
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL,  // must match transporter user
+      to: admin.email,                // each admin email
+      subject: `New Complaint in ${category}`,
+      html: `
+        <p>Dear Admin,</p>
+        <p>A new complaint has been submitted in your assigned category: <strong>${category}</strong>.</p>
+    
+        <p><strong>Complaint Details:</strong></p>
+        <ul>
+          <li><strong>Title:</strong> ${title}</li>
+          <li><strong>Description:</strong> ${description}</li>
+          <li><strong>Complaint ID:</strong> ${complaint_id}</li>
+          <li><strong>Status:</strong> Pending</li>
+          <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
+        </ul>
+    
+        <p><a href="https://complaints.vjstartup.com">View and manage the complaint</a></p>
+    
+        <p>Please take action as soon as possible.</p>
+        <p>Regards,<br>Complaint Management System</p>
+      `,
+    };
+
+    return transporter.sendMail(mailOptions);
+  });
+
+  await Promise.all(mailPromises); // ensures all admins get the email
+}
+
+res.status(201).json({
+  message: "Complaint added successfully and email sent to all admins in category",
+  complaint: newComplaint,
+});
+
       }
       else {
         res.status(500).json({ message: "Failed to add complaint" });
@@ -157,14 +218,80 @@ userApp.post(
       res.status(500).json({ message: "Database error or email error" });
     }
   })
+  
 );
 
+
+
+//GET Complaints Summary
+userApp.get("/complaints/summary",verifyGoogleToken, async (req, res) => {
+  try {
+    // ✅ Fix: Add .toArray() to get actual documents
+    const allComplaints = await complaintsCollectionObj.find().toArray();
+
+    const summary = {
+      total: allComplaints.length,
+      resolved: 0,
+      pending: 0,
+      ongoing: 0,
+      categories: {},
+      topCategory: null
+    };
+
+    allComplaints.forEach((comp) => {
+      const status = comp.status;
+      const category = comp.category;
+
+      // Increment status counters
+      if (status === "Resolved") summary.resolved++;
+      else if (status === "Pending") summary.pending++;
+      else if (status === "Ongoing") summary.ongoing++;
+
+      // Initialize category if not exists
+      if (!summary.categories[category]) {
+        summary.categories[category] = {
+          category,
+          total: 0,
+          resolved: 0,
+          pending: 0,
+          ongoing: 0,
+          resolvedPercentage: 0
+        };
+      }
+
+      // Update category counts
+      summary.categories[category].total++;
+      summary.categories[category][status.toLowerCase()]++;
+    });
+
+    // Calculate resolved percentage for each category
+    Object.values(summary.categories).forEach((cat) => {
+      if (cat.total > 0) {
+        cat.resolvedPercentage = Math.round((cat.resolved / cat.total) * 100);
+      }
+    });
+
+    // Find top performing category based on resolved percentage
+    let topPercentage = 0;
+    Object.values(summary.categories).forEach((cat) => {
+      if (cat.resolvedPercentage > topPercentage) {
+        topPercentage = cat.resolvedPercentage;
+        summary.topCategory = cat.category;
+      }
+    });
+
+    res.json(summary);
+  } catch (error) {
+    console.error("Error fetching complaint summary:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 
   
 
 // GET API to fetch complaints of a specific user and count of pending, resolved, and ongoing complaints
-userApp.get("/view-complaints/:userId", asyncHandler(async (req, res) => {
+userApp.get("/view-complaints/:userId",verifyGoogleToken, asyncHandler(async (req, res) => {
   const { userId } = req.params; // Get the userId from the URL parameter
 
   // Fetch the complaints of the specific user
@@ -189,7 +316,7 @@ userApp.get("/view-complaints/:userId", asyncHandler(async (req, res) => {
 
 //To fetch Users Complaints
 
-userApp.get("/my-complaints/:user_id", asyncHandler(async (req, res) => {
+userApp.get("/my-complaints/:user_id",verifyGoogleToken, asyncHandler(async (req, res) => {
   const userId = req.params.user_id; // Extract user_id from request parameters
 
   const userComplaints = await complaintsCollectionObj
@@ -203,7 +330,7 @@ userApp.get("/my-complaints/:user_id", asyncHandler(async (req, res) => {
 
 
 // POST API to like a complaint
-userApp.post("/like-complaint/:complaint_id",  asyncHandler(async (req, res) => {
+userApp.post("/like-complaint/:complaint_id", verifyGoogleToken, asyncHandler(async (req, res) => {
   const { complaint_id } = req.params;
   const { email } = req.body;
 
@@ -249,7 +376,7 @@ userApp.post("/like-complaint/:complaint_id",  asyncHandler(async (req, res) => 
   res.status(200).json({ message: "Like updated successfully" });
 }));
 
-userApp.post("/dislike-complaint/:complaint_id", asyncHandler(async (req, res) => {
+userApp.post("/dislike-complaint/:complaint_id",verifyGoogleToken, asyncHandler(async (req, res) => {
   const { complaint_id } = req.params;
   const { email } = req.body;
 
@@ -314,7 +441,7 @@ function getDateRange(dateRange) {
 }
 
 // GET API to filter complaints with text-based search
-userApp.get("/filter-complaints", asyncHandler(async (req, res) => {
+userApp.get("/filter-complaints",verifyGoogleToken, asyncHandler(async (req, res) => {
   const { category, status, dateRange, searchKeyword } = req.query;
   let query = {};
 

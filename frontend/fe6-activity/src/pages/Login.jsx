@@ -102,10 +102,22 @@ const Login = () => {
               </Alert>
             )}
 
-          
+            <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
+              <TextField label="Email" fullWidth margin="normal" name="email" type="email" value={formData.email} onChange={handleChange} required />
+              <TextField label="Password" fullWidth margin="normal" name="password" type="password" value={formData.password} onChange={handleChange} required />
+
+              <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={loading}>
+                {loading ? <CircularProgress size={24} /> : "Login"}
+              </Button>
 
               <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
 
+              <Box sx={{ textAlign: "center", mt: 2 }}>
+                <Link href="/signup" variant="body2">
+                  Don't have an account? Sign Up
+                </Link>
+              </Box>
+            </Box>
           </Paper>
         </Container>
       </Box>

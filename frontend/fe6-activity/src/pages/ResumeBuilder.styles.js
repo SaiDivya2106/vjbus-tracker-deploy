@@ -85,7 +85,7 @@ export const Title = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
   marginBottom: theme.spacing(3),
   fontWeight: 700,
-  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  background: 'linear-gradient(45deg, #5161ce 30%, #7280e3 90%)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   textAlign: 'center',
@@ -202,13 +202,13 @@ export const ActionButton = styled(Button)(({ theme }) => ({
   padding: '12px 24px',
   fontWeight: 600,
   textTransform: 'none',
-  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  background: 'linear-gradient(45deg, #5161ce 30%, #7280e3 90%)',
   color: 'white',
-  boxShadow: '0 3px 15px rgba(33, 150, 243, 0.3)',
+  boxShadow: '0 3px 15px rgba(81, 97, 206, 0.3)',
   '&:hover': {
     transform: 'translateY(-2px)',
-    boxShadow: '0 5px 20px rgba(33, 150, 243, 0.4)',
-    background: 'linear-gradient(45deg, #1976D2 30%, #00B4E5 90%)'
+    boxShadow: '0 5px 20px rgba(81, 97, 206, 0.4)',
+    background: 'linear-gradient(45deg, #3c4997 30%, #5161ce 90%)'
   },
   transition: 'all 0.3s ease'
 }));
@@ -233,18 +233,18 @@ export const ResumePreviewContainer = styled(Box)(({ theme }) => ({
     margin: '4px',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+    background: 'linear-gradient(45deg, #5161ce 30%, #7280e3 90%)',
     borderRadius: '6px',
     border: '3px solid rgba(255, 255, 255, 0.95)',
     '&:hover': {
-      background: 'linear-gradient(45deg, #1976D2 30%, #00B4E5 90%)',
+      background: 'linear-gradient(45deg, #3c4997 30%, #5161ce 90%)',
     },
   },
   '&::-webkit-scrollbar-corner': {
     background: 'transparent',
   },
   scrollbarWidth: 'thin',
-  scrollbarColor: '#2196F3 rgba(0, 0, 0, 0.05)',
+  scrollbarColor: '#5161ce rgba(0, 0, 0, 0.05)',
   '@media print': {
     overflow: 'visible !important',
     height: 'auto !important',
@@ -301,7 +301,7 @@ export const EditContainer = styled(Box)(({ theme }) => ({
     borderRadius: '6px',
   },
   '&::-webkit-scrollbar-thumb': {
-    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+    background: 'linear-gradient(45deg, #5161ce 30%, #7280e3 90%)',
     borderRadius: '6px',
     border: '3px solid rgba(255, 255, 255, 0.7)',
   },
@@ -443,10 +443,10 @@ export const ActivityMenuItem = styled(MenuItem)(({ theme }) => ({
   '&.MuiMenuItem-root': {
     padding: theme.spacing(1.5, 2),
     '&:hover': {
-      backgroundColor: 'rgba(33, 150, 243, 0.08)',
+      backgroundColor: 'rgba(81, 97, 206, 0.08)',
     },
     '&.Mui-selected': {
-      backgroundColor: 'rgba(33, 150, 243, 0.12)',
+      backgroundColor: 'rgba(81, 97, 206, 0.12)',
     },
   },
 }));
@@ -465,11 +465,11 @@ export const ActivityCard = styled(SectionPaper)(({ theme, selected }) => ({
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   border: `2px solid ${selected ? theme.palette.primary.main : 'transparent'}`,
   background: selected 
-    ? 'rgba(33, 150, 243, 0.05)' 
+    ? 'rgba(81, 97, 206, 0.05)' 
     : 'rgba(255, 255, 255, 0.9)',
   '&:hover': {
     transform: 'translateY(-5px)',
-    boxShadow: '0 8px 24px rgba(33, 150, 243, 0.15)',
+    boxShadow: '0 8px 24px rgba(81, 97, 206, 0.15)',
     borderColor: theme.palette.primary.light
   },
   '&:active': {

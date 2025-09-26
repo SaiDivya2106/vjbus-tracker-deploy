@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -28,12 +28,16 @@ import {
   AccountCircle, 
   ExitToApp as LogoutIcon,
   Assignment as ActivitiesIcon,
-  VpnKey as VpnKeyIcon
+  VpnKey as VpnKeyIcon,
+  Create as CoverLetterIcon,
+  Psychology as CopilotIcon
 } from '@mui/icons-material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Profile from './Profile';
 import SetAPIKey from './SetAPIKey';
 import ProfileValidationWrapper from './ProfileValidationWrapper';
+import './Navbar.css';
+import { initializeSelector, updateSelector, handleResponsiveSelector, addResizeListener } from './NavbarAnimation';
 
 const Navbar = ({ logout }) => {
   const theme = useTheme();
@@ -45,6 +49,10 @@ const Navbar = ({ logout }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAPIKeyDialogOpen, setAPIKeyDialogOpen] = useState(false);
+  
+  const navbarRef = useRef(null);
+  const activeRef = useRef(null);
+  const selectorRef = useRef(null);
   
   const user = JSON.parse(localStorage.getItem('user')) || { name: 'User' };
   
@@ -77,18 +85,42 @@ const Navbar = ({ logout }) => {
     setIsProfileOpen(true);
   };
   
+  // Initialize and update selector on page load and route changes
+  useEffect(() => {
+    // Wait for the DOM to be fully loaded and refs to be available
+    const timer = setTimeout(() => {
+      if (!isMobile) {
+        initializeSelector(selectorRef, activeRef, navbarRef);
+      }
+      handleResponsiveSelector(selectorRef, activeRef, navbarRef, isMobile);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [location.pathname, isMobile]);
+  
+  // Listen for window resize events
+  useEffect(() => {
+    const handleResize = () => {
+      handleResponsiveSelector(selectorRef, activeRef, navbarRef, isMobile);
+    };
+    
+    return addResizeListener(handleResize);
+  }, [isMobile]);
+  
   const menuItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Resume', icon: <ResumeIcon />, path: '/resume-builder', needsValidation: true },
+    { text: 'Cover Letter', icon: <CoverLetterIcon />, path: '/cover-letter', needsValidation: true },
+    { text: 'Career Copilot', icon: <CopilotIcon />, path: '/career-copilot', needsValidation: true },
   ];
   
   const drawer = (
     <Box sx={{ width: 250 }} role="presentation">
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-          <span style={{ color: theme.palette.primary.main }}>Acti</span>
-          <span style={{ color: theme.palette.secondary.main }}>gen</span>
+          <span style={{ color: '#5161ce' }}>Acti</span>
+          <span style={{ color: '#dc004e' }}>gen</span>
         </Typography>
       </Box>
       <Divider />
@@ -98,18 +130,19 @@ const Navbar = ({ logout }) => {
             <ListItem 
               button 
               key={item.text} 
-              onClick={() => !item.needsValidation && handleNavigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               selected={location.pathname === item.path}
               sx={{
                 '&.Mui-selected': {
-                  backgroundColor: theme.palette.primary.light,
+                  backgroundColor: '#5161ce',
+                  color: 'white',
                   '&:hover': {
-                    backgroundColor: theme.palette.primary.light,
+                    backgroundColor: '#5161ce',
                   },
                 },
               }}
             >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? theme.palette.primary.main : 'inherit' }}>
+              <ListItemIcon sx={{ color: location.pathname === item.path ? 'white' : 'inherit' }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText 
@@ -122,7 +155,9 @@ const Navbar = ({ logout }) => {
           );
           
           return item.needsValidation ? 
-            <ProfileValidationWrapper key={item.text}>{listItem}</ProfileValidationWrapper> : 
+            <ProfileValidationWrapper key={item.text}>
+              {React.cloneElement(listItem, { path: item.path })}
+            </ProfileValidationWrapper> : 
             listItem;
         })}
       </List>
@@ -134,92 +169,97 @@ const Navbar = ({ logout }) => {
       <AppBar 
         position="fixed" 
         elevation={0} 
+        className="navbar-custom"
         sx={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
-          color: 'text.primary', 
-          borderBottom: '1px solid #e0e0e0', 
-          backdropFilter: 'blur(10px)', // Optional: Adds a blur effect
+          backgroundColor: '#5161ce',
+          color: 'white', 
         }}
       >
         <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ minHeight: '64px' }}>
-            {isMobile && (
+          <Toolbar disableGutters sx={{ minHeight: '64px', p: 0 }}>
+            <Typography 
+              variant="h6" 
+              component="div" 
+              className="navbar-logo"
+              onClick={() => navigate('/')}
+            >
+              <span style={{ color: 'white', fontWeight: 'bold' }}>Acti</span>
+              <span style={{ color: '#ff6b6b', fontWeight: 'bold' }}>Gen</span>
+            </Typography>
+            
+            {isMobile ? (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ mr: 2 }}
+                sx={{ ml: 'auto' }}
+                className="navbar-toggler"
               >
                 <MenuIcon />
               </IconButton>
-            )}
-            
-            <Typography 
-              variant="h6" 
-              component="div" 
-              sx={{ 
-                flexGrow: isMobile ? 1 : 0, 
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                mr: 4
-              }}
-              onClick={() => navigate('/')}
-            >
-              <span style={{ color: theme.palette.primary.main }}>Acti</span>
-              <span style={{ color: theme.palette.secondary.main }}>gen</span>
-            </Typography>
-            
-            {!isMobile && (
-              <Box sx={{ display: 'flex', flexGrow: 1 }}>
-                {menuItems.map((item) => {
-                  const button = (
-                    <Button 
-                      key={item.text}
-                      color="inherit"
-                      onClick={() => !item.needsValidation && handleNavigate(item.path)}
-                      sx={{ 
-                        mx: 1,
-                        py: 2,
-                        fontWeight: location.pathname === item.path ? 'bold' : 'normal',
-                        borderBottom: location.pathname === item.path ? `2px solid ${theme.palette.primary.main}` : 'none',
-                        borderRadius: 0,
-                        color: location.pathname === item.path ? theme.palette.primary.main : 'inherit',
-                        '&:hover': {
-                          backgroundColor: 'transparent',
-                          borderBottom: `2px solid ${theme.palette.primary.light}`,
-                        }
-                      }}
-                    >
-                      {item.text}
-                    </Button>
-                  );
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }} ref={navbarRef}>
+                <ul className="navbar-nav">
+                  {/* Horizontal selector for active menu item */}
+                  <div className="hori-selector" ref={selectorRef}>
+                    <div className="left"></div>
+                    <div className="right"></div>
+                  </div>
                   
-                  return item.needsValidation ? 
-                    <ProfileValidationWrapper key={item.text}>{button}</ProfileValidationWrapper> : 
-                    button;
-                })}
+                  {menuItems.map((item, index) => {
+                    const isActive = location.pathname === item.path;
+                    const navItem = (
+                      <li 
+                        key={index} 
+                        className={`nav-item ${isActive ? 'active' : ''}`}
+                        ref={isActive ? activeRef : null}
+                      >
+                        <a 
+                          className="nav-link" 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleNavigate(item.path);
+                          }}
+                        >
+                          <span className="nav-icon">{item.icon}</span>
+                          {item.text}
+                        </a>
+                      </li>
+                    );
+                    
+                    return item.needsValidation ? (
+                      <ProfileValidationWrapper key={index}>
+                        {React.cloneElement(navItem, { path: item.path })}
+                      </ProfileValidationWrapper>
+                    ) : navItem;
+                  })}
+                </ul>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleProfileMenuOpen}
+                    color="inherit"
+                  >
+                    <Avatar sx={{ width: 35, height: 35 }} className="navbar-avatar">
+                      {user.name.charAt(0)}
+                    </Avatar>
+                  </IconButton>
+                </Box>
               </Box>
             )}
-            
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main }}>
-                  {user.name.charAt(0)}
-                </Avatar>
-              </IconButton>
-            </Box>
           </Toolbar>
         </Container>
       </AppBar>
+      
+      {/* Add space for the fixed navbar */}
+      <Toolbar />
       
       <Menu
         id="menu-appbar"

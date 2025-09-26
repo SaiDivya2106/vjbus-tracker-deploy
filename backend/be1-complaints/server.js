@@ -16,7 +16,7 @@ const mc = require('mongodb').MongoClient;
 
 mc.connect('mongodb://10.45.8.187:27017')
   .then(client => {
-    const dbObj = client.db('complaintsdb');
+    const dbObj = client.db(process.env.DB_NAME);
     const complaintsCollectionObj = dbObj.collection('complaintsCollection');
     const adminsCollectionObj = dbObj.collection('adminsCollection');
     const flaggedusersCollectionObj = dbObj.collection('flaggedusersCollection');

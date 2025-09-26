@@ -8,14 +8,15 @@ import ProfileValidationWrapper from '../components/ProfileValidationWrapper';
 const Home = () => {
   const [isAddActivityOpen, setIsAddActivityOpen] = useState(false);
   return (
-    <div className="home-page" style={{ textAlign: 'center' }}>
+    <Box className="home-page">
       <Container 
-        className="home-container" 
+        maxWidth="lg"
         sx={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          minHeight: '100vh'
+          height: 'auto',
+          py: 4
         }}
       >
         <Box className="home-content">
@@ -46,7 +47,7 @@ const Home = () => {
           </Box>
         </Box>
       </Container>
-    </div>
+    </Box>
   );
 };
 

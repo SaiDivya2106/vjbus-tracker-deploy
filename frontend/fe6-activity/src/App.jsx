@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { Dashboard, ResumeBuilder, Login, Signup, Home } from './pages';
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import theme from './theme.js';
+import { Dashboard, ResumeBuilder, Login, Signup, Home, CoverLetter, CareerCopilot } from './pages';
 import Layout from './components/Layout';
 
 const clientId = "522460567146-ubk3ojomopil8f68hl73jt1pj0jbbm68.apps.googleusercontent.com"; // 🔹 Replace with your actual Google OAuth Client ID
@@ -48,39 +46,47 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route
-              path="/login"
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} />}
-            />
-            
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} />}
+          />
+          <Route
+            path="/signup"
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />}
+          />
 
-            {/* Protected Routes */}
-            <Route
-              path="/"
-              element={<ProtectedRoute><Home /></ProtectedRoute>}
-            />
-            <Route
-              path="/dashboard"
-              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
-            />
-            <Route
-              path="/resume-builder"
-              element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>}
-            />
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={<ProtectedRoute><Home /></ProtectedRoute>}
+          />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/resume-builder"
+            element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>}
+          />
+          <Route
+            path="/cover-letter"
+            element={<ProtectedRoute><CoverLetter /></ProtectedRoute>}
+          />
+          <Route
+            path="/career-copilot"
+            element={<ProtectedRoute><CareerCopilot /></ProtectedRoute>}
+          />
 
-            {/* Catch-all Route */}
-            <Route
-              path="*"
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />}
-            />
-          </Routes>
-        </Router>
-      </ThemeProvider>
+          {/* Catch-all Route */}
+          <Route
+            path="*"
+            element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />}
+          />
+        </Routes>
+      </Router>
     </GoogleOAuthProvider>
   );
 }

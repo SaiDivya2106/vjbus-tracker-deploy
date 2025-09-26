@@ -49,6 +49,10 @@ const base_url = import.meta.env.VITE_API_BASE_URL;
 const LEETCODE_CACHE_KEY = 'leetcode_data_cache';
 const LEETCODE_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
+// Define cache keys and expiration times for activities
+const ACTIVITIES_CACHE_KEY = 'activities_data_cache';
+const ACTIVITIES_CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 // Custom tooltip for the line chart
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -102,11 +106,22 @@ const Dashboard = () => {
   const [newLeetcodeUsername, setNewLeetcodeUsername] = useState('');
   const [isSettingUsername, setIsSettingUsername] = useState(false);
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    totalProjects: 0,
-    totalCertifications: 0,
-    githubContributions: 0,
-    leetcodeSolved: 0
+  const [stats, setStats] = useState(() => {
+    // Initialize stats from localStorage if available
+    const cachedStats = localStorage.getItem('dashboard_stats');
+    if (cachedStats) {
+      try {
+        return JSON.parse(cachedStats);
+      } catch (error) {
+        console.error('Error parsing cached stats:', error);
+      }
+    }
+    return {
+      totalProjects: 0,
+      totalCertifications: 0,
+      githubContributions: 0,
+      leetcodeSolved: 0
+    };
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -134,7 +149,21 @@ const Dashboard = () => {
 
   const handleCloseProfile = async () => {
     setIsProfileOpen(false);
-    // Refresh profile data
+    
+    // Check for updated profile data in localStorage
+    const cachedProfileData = localStorage.getItem('profile_data');
+    if (cachedProfileData) {
+      try {
+        const parsedData = JSON.parse(cachedProfileData);
+        setProfileData(parsedData);
+        setIsProfileComplete(validateProfileData(parsedData));
+        return;
+      } catch (error) {
+        console.error('Error parsing cached profile data:', error);
+      }
+    }
+    
+    // Fallback to API if localStorage data is not available
     try {
       const token = localStorage.getItem('token');
       const profileResponse = await axios.get(`${base_url}/api/user/profile`, {
@@ -166,10 +195,32 @@ const Dashboard = () => {
       await fetchActivities();
       await checkLeetCodeStatus();
       
-      // Fetch user profile data
+      // Check if we have cached profile data in localStorage
+      const cachedProfileData = localStorage.getItem('profile_data');
+      const cachedTimestamp = localStorage.getItem('profile_data_timestamp');
+      const now = Date.now();
+      const PROFILE_CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // If we have valid, unexpired cached data, use it
+      if (cachedProfileData && cachedTimestamp && 
+          (now - parseInt(cachedTimestamp) < PROFILE_CACHE_EXPIRY)) {
+        console.log('Using cached profile data from localStorage');
+        const parsedData = JSON.parse(cachedProfileData);
+        setProfileData(parsedData);
+        setIsProfileComplete(validateProfileData(parsedData));
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise, fetch from API
       const profileResponse = await axios.get(`${base_url}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      // Store the fresh data in localStorage for future use
+      localStorage.setItem('profile_data', JSON.stringify(profileResponse.data));
+      localStorage.setItem('profile_data_timestamp', now.toString());
+      
       setProfileData(profileResponse.data);
       setIsProfileComplete(validateProfileData(profileResponse.data));
     } catch (error) {
@@ -180,17 +231,104 @@ const Dashboard = () => {
     }
   };
 
-  // Initial data fetch
+  // Initial data fetch - Modified to avoid unnecessary API calls
   useEffect(() => {
-    fetchUserData();
+    if (username) {
+      console.log('Dashboard mounted, initializing data');
+      
+      // Set initial loading state
+      const hasActivitiesCache = localStorage.getItem(ACTIVITIES_CACHE_KEY);
+      const hasProfileCache = localStorage.getItem('profile_data');
+      const hasLeetCodeCache = localStorage.getItem(LEETCODE_CACHE_KEY);
+      
+      // If we have all caches, we can hide loading immediately
+      if (hasActivitiesCache && hasProfileCache && hasLeetCodeCache) {
+        setLoading(false);
+      }
+      
+      // Fetch data from API or cache as appropriate
+      fetchUserData();
+    }
   }, [username]);
+
+  // Setup event listeners for data updates
+  useEffect(() => {
+    // Function to handle activity data updates
+    const handleActivityUpdate = () => {
+      // Clear activities cache when an activity is added/updated/deleted
+      localStorage.removeItem(ACTIVITIES_CACHE_KEY);
+      localStorage.removeItem(`${ACTIVITIES_CACHE_KEY}_timestamp`);
+      fetchActivities();
+    };
+    
+    // Function to handle profile data updates
+    const handleProfileUpdate = () => {
+      // When profile_data_timestamp changes in localStorage, we should reload our data
+      const cachedProfileData = localStorage.getItem('profile_data');
+      if (cachedProfileData) {
+        const parsedData = JSON.parse(cachedProfileData);
+        setProfileData(parsedData);
+        setIsProfileComplete(validateProfileData(parsedData));
+      }
+    };
+    
+    // Listen for activity updates
+    window.addEventListener('activity-added', handleActivityUpdate);
+    window.addEventListener('activity-updated', handleActivityUpdate);
+    window.addEventListener('activity-deleted', handleActivityUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener('activity-added', handleActivityUpdate);
+      window.removeEventListener('activity-updated', handleActivityUpdate);
+      window.removeEventListener('activity-deleted', handleActivityUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
+    };
+  }, []);
 
   const fetchActivities = async () => {
     try {
+      // Check if activities data is cached in localStorage
+      const cachedActivities = localStorage.getItem(ACTIVITIES_CACHE_KEY);
+      const cachedTimestamp = localStorage.getItem(`${ACTIVITIES_CACHE_KEY}_timestamp`);
+      const now = Date.now();
+      
+      // If we have unexpired cached data, use it
+      if (cachedActivities && cachedTimestamp && 
+          (now - parseInt(cachedTimestamp) < ACTIVITIES_CACHE_EXPIRY)) {
+        console.log('Using cached activities data');
+        const activitiesData = JSON.parse(cachedActivities);
+        
+        // Calculate stats from cached activities
+        const projectCount = activitiesData.filter(activity => 
+          activity.activity_type?.toLowerCase() === 'project'
+        ).length;
+        
+        const certificationCount = activitiesData.filter(activity => 
+          activity.activity_type?.toLowerCase() === 'certification'
+        ).length;
+        
+        const newStats = {
+          ...stats,
+          totalProjects: projectCount,
+          totalCertifications: certificationCount
+        };
+        
+        setStats(newStats);
+        // Store stats in localStorage
+        localStorage.setItem('dashboard_stats', JSON.stringify(newStats));
+        return;
+      }
+      
+      // Otherwise, fetch from API
       const token = localStorage.getItem('token');
       const response = await axios.get(`${base_url}/api/activities`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      // Cache the activities data
+      localStorage.setItem(ACTIVITIES_CACHE_KEY, JSON.stringify(response.data));
+      localStorage.setItem(`${ACTIVITIES_CACHE_KEY}_timestamp`, now.toString());
       
       // Calculate stats from activities
       const projectCount = response.data.filter(activity => 
@@ -201,11 +339,15 @@ const Dashboard = () => {
         activity.activity_type?.toLowerCase() === 'certification'
       ).length;
       
-      setStats(prevStats => ({
-        ...prevStats,
+      const newStats = {
+        ...stats,
         totalProjects: projectCount,
         totalCertifications: certificationCount
-      }));
+      };
+      
+      setStats(newStats);
+      // Store stats in localStorage
+      localStorage.setItem('dashboard_stats', JSON.stringify(newStats));
     } catch (error) {
       console.error("Error fetching activities for stats:", error);
       setError('Failed to fetch activities');
@@ -399,15 +541,6 @@ const Dashboard = () => {
   const navigateToLeetCodeStats = () => {
     navigate(`/user/${username}/leetcode`);
   };
-
-  useEffect(() => {
-    const initializeData = async () => {
-      await fetchUserData();
-      await fetchActivities();
-    };
-    
-    initializeData();
-  }, []);
 
   return (
     <div className="dashboard">
@@ -603,10 +736,20 @@ const Dashboard = () => {
           setSnackbarMessage('Activity added successfully!');
           setSnackbarOpen(true);
           
+          // Dispatch a force refresh event to ensure ActivityManager updates
+          window.dispatchEvent(new CustomEvent('force-activity-refresh'));
+          
           // Dispatch an event to notify ActivityManager to refresh its lists
           window.dispatchEvent(new CustomEvent('activity-added', { 
             detail: { type, activity: newActivity } 
           }));
+          
+          // Clear the activities cache to force a refresh on the next render
+          localStorage.removeItem(ACTIVITIES_CACHE_KEY);
+          localStorage.removeItem(`${ACTIVITIES_CACHE_KEY}_timestamp`);
+          
+          // Trigger a fetch of new activities to update the dashboard stats
+          fetchActivities();
         }}
       />
 

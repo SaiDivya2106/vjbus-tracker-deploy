@@ -6,7 +6,8 @@ import {
   DialogActions, 
   Typography, 
   Box, 
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -16,11 +17,23 @@ import Profile from './Profile';
 
 const base_url = import.meta.env.VITE_API_BASE_URL;
 
+// Cache for profile validation results
+const profileValidationCache = {
+  isValid: null,
+  timestamp: null,
+  expiresIn: 5 * 60 * 1000 // 5 minutes in milliseconds
+};
+
 const ProfileValidationWrapper = ({ children }) => {
   const navigate = useNavigate();
   const [showProfileAlert, setShowProfileAlert] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Get the path from the child's props
+  const childPath = React.Children.map(children, child => 
+    React.isValidElement(child) ? child.props.path : null
+  )[0];
   
   const validateProfileData = (userData) => {
     if (!userData) return false;
@@ -36,23 +49,71 @@ const ProfileValidationWrapper = ({ children }) => {
   const handleClick = async (e) => {
     e.preventDefault();
     
+    // Extract path from child's onClick handler or use the original path from menuItems
+    const path = childPath || (
+      React.Children.map(children, child => 
+        React.isValidElement(child) && child.props.onClick ? 
+        child.props.onClick.toString().match(/navigate\(['"](\/[^'"]*)['"]\)/)?.[1] : 
+        null
+      )[0]
+    );
+    
+    // Default to resume-builder if no path is found (fallback for compatibility)
+    const targetPath = path || '/resume-builder';
+    
     setLoading(true);
+    
+    // Check if we have a valid cached result
+    const now = Date.now();
+    const cacheIsValid = 
+      profileValidationCache.isValid !== null && 
+      profileValidationCache.timestamp && 
+      (now - profileValidationCache.timestamp) < profileValidationCache.expiresIn;
+    
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${base_url}/api/user/profile`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      let isProfileComplete;
       
-      const isProfileComplete = validateProfileData(response.data);
+      // Use cached result if available and valid
+      if (cacheIsValid) {
+        isProfileComplete = profileValidationCache.isValid;
+      } else {
+        // Before making an API call, check if we have profile data in localStorage
+        const cachedProfileData = localStorage.getItem('profile_data');
+        const cachedTimestamp = localStorage.getItem('profile_data_timestamp');
+        const PROFILE_CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+        
+        if (cachedProfileData && cachedTimestamp && 
+            (now - parseInt(cachedTimestamp) < PROFILE_CACHE_EXPIRY)) {
+          // Use the cached profile data for validation
+          const profileData = JSON.parse(cachedProfileData);
+          isProfileComplete = validateProfileData(profileData);
+        } else {
+          // Otherwise make API call
+          const token = localStorage.getItem('token');
+          const response = await axios.get(
+            `${base_url}/api/user/profile`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            }
+          );
+          
+          isProfileComplete = validateProfileData(response.data);
+          
+          // Store the fetched data in localStorage
+          localStorage.setItem('profile_data', JSON.stringify(response.data));
+          localStorage.setItem('profile_data_timestamp', now.toString());
+        }
+        
+        // Update cache
+        profileValidationCache.isValid = isProfileComplete;
+        profileValidationCache.timestamp = now;
+      }
       
       if (isProfileComplete) {
-        // Profile is complete, navigate to resume builder
-        navigate('/resume-builder');
+        // Profile is complete, navigate to the target path
+        navigate(targetPath);
       } else {
         // Profile is incomplete, show warning
         setShowProfileAlert(true);
@@ -60,10 +121,18 @@ const ProfileValidationWrapper = ({ children }) => {
     } catch (error) {
       console.error('Error validating profile before navigation:', error);
       // If there's an error, let them navigate anyway
-      navigate('/resume-builder');
+      navigate(targetPath);
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Clear cache when profile is updated
+  const handleProfileUpdated = () => {
+    // Invalidate cache when profile is updated
+    profileValidationCache.isValid = null;
+    profileValidationCache.timestamp = null;
+    handleCloseProfile();
   };
   
   const handleOpenProfile = () => {
@@ -78,7 +147,38 @@ const ProfileValidationWrapper = ({ children }) => {
   // Clone the child element with the new onClick handler
   const childrenWithProps = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child, { onClick: handleClick });
+      // Add loading indicator to the child element
+      let newProps = { onClick: handleClick };
+      
+      // If it's a Button from MUI
+      if (child.type && child.type.name === 'Button') {
+        newProps = {
+          ...newProps,
+          startIcon: loading ? <CircularProgress size={16} color="inherit" /> : child.props.startIcon,
+          disabled: loading
+        };
+      }
+      // If it's a ListItem (for the drawer menu)
+      else if (child.props && child.props.button) {
+        // For ListItem, we can't directly use startIcon, so we'll modify based on its structure
+        const updatedChildren = React.Children.map(child.props.children, innerChild => {
+          // If this is the ListItemIcon, add a loading indicator
+          if (innerChild.type && innerChild.type.displayName === 'ListItemIcon') {
+            return React.cloneElement(innerChild, {}, 
+              loading ? <CircularProgress size={20} color="inherit" /> : innerChild.props.children
+            );
+          }
+          return innerChild;
+        });
+        
+        newProps = {
+          ...newProps,
+          disabled: loading,
+          children: updatedChildren
+        };
+      }
+      
+      return React.cloneElement(child, newProps);
     }
     return child;
   });
@@ -158,7 +258,7 @@ const ProfileValidationWrapper = ({ children }) => {
       {/* Profile Component */}
       <Profile 
         open={isProfileOpen} 
-        onClose={handleCloseProfile} 
+        onClose={handleProfileUpdated} 
       />
     </>
   );

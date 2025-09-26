@@ -462,6 +462,31 @@ def get_started_routes():
     return started_routes
 
 
+@socketio.on("get_all_rooms")
+def get_all_rooms(data):
+    conn = sqlite3.connect("database.db", check_same_thread=False)
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT room FROM chat ORDER BY room")
+    rooms = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return rooms
+
+
+@socketio.on("create_room")
+def create_room(data):
+    room = data["room"]
+    sender = data["sender"]
+    
+    # Simply joining the room will create it if it doesn't exist
+    join_room(room)
+    
+    # Send a system message about room creation
+    send({"sender": "System", "message": f"Chat room '{room}' created by {sender}"}, room=room)
+    
+    # Return success
+    return {"status": "success", "message": f"Room {room} created successfully"}
+
+
 @socketio.on("join_room")
 def handle_join(data):
     room = data["room"]
@@ -476,6 +501,16 @@ def handle_join(data):
     messages = [{"sender": row[0], "message": row[1], "timestamp": row[2]} for row in cursor.fetchall()]
     conn.close()
     socketio.emit("chat_history", {"room": room, "messages": messages}, room=request.sid)
+
+# @socketio.on("all_chats")
+# def handle_all_chats():
+#     # Send chat history only to the joining client
+#     conn = sqlite3.connect("database.db", check_same_thread=False)
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT sender, message, timestamp FROM chat ORDER BY timestamp ASC")
+#     messages = [{"sender": row[0], "message": row[1], "timestamp": row[2]} for row in cursor.fetchall()]
+#     conn.close()
+#     socketio.emit("all_chat_reply", {"messages": messages}, room=request.sid)
 
 
 @socketio.on("leave_room")

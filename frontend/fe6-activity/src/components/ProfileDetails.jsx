@@ -321,44 +321,24 @@ const ProfileDetails = ({ onSubmit, onSkip, initialData = {} }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    // Validate form data
+    const validationErrors = validateForm();
     
-    // Format education data
-    const formattedEducation = formData.education.map(edu => ({
-      school: edu.school || '',
-      degree: edu.degree || '',
-      field: edu.field || '',
-      start_year: edu.start_year || '',
-      end_year: edu.end_year || '',
-      current: edu.current || false,
-      description: edu.description || ''
-    }));
-
-    // Format experience data
-    const formattedExperience = formData.experience.map(exp => ({
-      company: exp.company || '',
-      position: exp.position || '',
-      start_date: exp.start_date || '',
-      end_date: exp.end_date || '',
-      current: exp.current || false,
-      description: exp.description || ''
-    }));
-
-    // Create the final formatted data
-    const finalData = {
-      ...formData,
-      education: formattedEducation,
-      experience: formattedExperience,
-      skills: formData.skills || [],
-      bio: formData.bio || '',
-      location: formData.location || '',
-      github: formData.github || '',
-      linkedin: formData.linkedin || '',
-    };
-
-    onSubmit(finalData);
+    if (Object.keys(validationErrors).length === 0) {
+      onSubmit(formData);
+      
+      // Store profile data in local storage
+      try {
+        // Update the localStorage with the latest profile data 
+        localStorage.setItem('profile_data', JSON.stringify(formData));
+        // Add a timestamp to track when the data was last updated
+        localStorage.setItem('profile_data_timestamp', Date.now().toString());
+      } catch (error) {
+        console.error('Error saving profile data to local storage:', error);
+      }
+    } else {
+      setErrors(validationErrors);
+    }
   };
 
   // Handle education field change with validation

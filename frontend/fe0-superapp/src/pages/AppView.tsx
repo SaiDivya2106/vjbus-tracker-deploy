@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogIn, ExternalLink, Menu } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "./context/AuthContext.tsx"; // ✅ Import hook
+import { useAuth } from "./context/AuthContext.tsx";
 
 const apps = [
   {
@@ -53,17 +53,16 @@ const AppView = () => {
   const { appId } = useParams();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const { isAuthenticated, login, logout } = useAuth(); // ✅ Use hook inside the component
+  const { isAuthenticated, login, logout } = useAuth();
 
   const app = apps.find(a => a.id === appId);
 
   if (!app) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">App Not Found</h1>
-          <Button onClick={() => navigate('/')} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-blue-100 to-indigo-100">
+        <div className="text-center px-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">App Not Found</h1>
+          <Button onClick={() => navigate("/")} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -73,7 +72,7 @@ const AppView = () => {
   }
 
   const openInNewTab = () => {
-    window.open(app.url, '_blank');
+    window.open(app.url, "_blank");
   };
 
   return (
@@ -84,14 +83,14 @@ const AppView = () => {
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="text-gray-700 hover:bg-gray-100"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-800">{app.name}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800">{app.name}</h1>
               <p className="text-sm text-gray-600">{app.description}</p>
             </div>
           </div>
@@ -119,7 +118,7 @@ const AppView = () => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Button */}
           <div className="sm:hidden">
             <Button
               variant="ghost"
@@ -131,11 +130,11 @@ const AppView = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="mt-4 flex flex-col gap-2 sm:hidden">
-            <div className="text-base font-semibold text-gray-800">{app.name}</div>
-            <div className="text-sm text-gray-600 mb-2">{app.description}</div>
+          <div className="mt-4 px-2 flex flex-col gap-2 sm:hidden">
+            <h1 className="text-base font-semibold text-gray-800">{app.name}</h1>
+            <p className="text-sm text-gray-600">{app.description}</p>
             <Button
               onClick={openInNewTab}
               variant="outline"
@@ -164,7 +163,7 @@ const AppView = () => {
           <div className="h-full rounded-lg overflow-hidden border border-gray-200 bg-white shadow-lg">
             <iframe
               src={app.url}
-              className="w-full h-full"
+              className="w-full h-full sm:h-full h-[calc(100vh-200px)]"
               title={app.name}
               frameBorder="0"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"

@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Initialize socket listeners
     initializeSocketListeners();
+    
+    // Show chat list when page loads
+    showChatList();
 });
 
 /**
@@ -37,7 +40,7 @@ function initializeEventListeners() {
         routeInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                document.getElementById("join-btn").click();
+                document.getElementById("join").click();
             }
         });
     }
@@ -68,7 +71,7 @@ function initializeEventListeners() {
     }
     
     // Chat buttons
-    const joinBtn = document.getElementById("join-btn");
+    const joinBtn = document.getElementById("join");
     if (joinBtn) {
         joinBtn.addEventListener("click", joinRoom);
     }
@@ -78,10 +81,11 @@ function initializeEventListeners() {
         leaveBtn.addEventListener("click", leaveRoom);
     }
     
-    const sendBtn = document.getElementById("send-btn");
+    const sendBtn = document.querySelector(".send-button");
     if (sendBtn) {
         sendBtn.addEventListener("click", sendMessage);
     }
+    
 }
 
 /**
@@ -180,7 +184,6 @@ function joinRoom() {
     document.getElementById("chat-header").style.display = "block";
     document.getElementById("chat").style.display = "block";
     document.getElementById("join-section").style.display = "none";
-    document.getElementById("message").style.display = "block";
     document.getElementById("leave-btn").style.display = "block";
 }
 
@@ -215,6 +218,17 @@ function sendMessage() {
 }
 
 /**
+ * Send message on Enter key press
+ * @param {Event} event - Keydown event
+ */
+function sendOnEnter(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+/**
  * Add a message to the chat display
  * @param {string} sender - Message sender
  * @param {string} message - Message content
@@ -226,10 +240,33 @@ function addMessage(sender, message, isCurrentUser) {
     
     messageElement.classList.add("message");
     messageElement.classList.add(isCurrentUser ? "user-message" : "received-message");
-    messageElement.innerHTML = `<small class="username">${sender}</small><div>${message}</div>`;
+    
+    // Get current time for timestamp
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timestamp = `${hours}:${minutes}`;
+    
+    messageElement.innerHTML = `
+        <small class="username">${sender}</small>
+        <div>${message}</div>
+        <div class="timestamp">${timestamp}</div>
+    `;
     
     messagesDiv.appendChild(messageElement);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+/**
+ * Focus next input field
+ * @param {Event} event - Keydown event
+ * @param {string} nextId - ID of the next element to focus
+ */
+function focusNext(event, nextId) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById(nextId).focus();
+    }
 }
 
 /**
@@ -242,4 +279,173 @@ function setActive(element) {
     });
     
     element.classList.add("active");
+}
+
+/**
+ * Show the chat list section
+ */
+function showChatList() {
+    // Hide other sections
+    document.getElementById("initial-header").style.display = "block";
+    document.getElementById("chat-header").style.display = "none";
+    document.getElementById("chat").style.display = "none";
+    document.getElementById("join-section").style.display = "none";
+    document.getElementById("new-chat-section").style.display = "none";
+    
+    // Show chat list section
+    document.getElementById("chat-list-section").style.display = "block";
+    
+    // Load chat list
+    loadChatList();
+}
+
+/**
+ * Load and display the chat list
+ */
+function loadChatList() {
+    const chatList = document.getElementById("chat-list");
+    chatList.innerHTML = "<p>Loading Rooms...</p>";
+    
+    // Get chat rooms from server
+    socket.emit("get_all_rooms", {}, function(rooms) {
+        chatList.innerHTML = "";
+        
+        if (rooms && rooms.length > 0) {
+            rooms.forEach(roomId => {
+                const chatItem = document.createElement("div");
+                chatItem.className = "chat-list-item";
+                chatItem.innerHTML = `
+                    <div class="chat-list-item-avatar">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                    <div class="chat-list-item-details">
+                        <h4 class="chat-list-item-name">Chat ${roomId}</h4>
+                        <p class="chat-list-item-last-message" style="display:inline; ">Click to join this chat</p>
+                    </div>
+                `;
+                
+                chatItem.addEventListener("click", function() {
+                    selectChat(roomId);
+                });
+                
+                chatList.appendChild(chatItem);
+            });
+        } else {
+            chatList.innerHTML = "<p>No chat rooms available. Create a new chat to get started.</p>";
+        }
+        
+        // Add event listener for new chat button
+        document.getElementById("new-chat-btn").addEventListener("click", function() {
+            showNewChatForm();
+        });
+    });
+}
+
+/**
+ * Show the new chat form
+ */
+function showNewChatForm() {
+    // Hide other sections
+    document.getElementById("chat-list-section").style.display = "none";
+    
+    // Show new chat section
+    document.getElementById("new-chat-section").style.display = "block";
+    
+    // Add event listeners for new chat form
+    document.getElementById("create-chat").addEventListener("click", createNewChat);
+    document.getElementById("cancel-new-chat").addEventListener("click", showChatList);
+}
+
+/**
+ * Create a new chat
+ */
+function createNewChat() {
+    const chatName = document.getElementById("new-chat-name").value.trim();
+    if (chatName) {
+        // Get username from cookie or prompt
+        const storedName = getCookieValue("user") 
+            ? JSON.parse(getCookieValue("user")).family_name 
+            : "";
+        
+        let username = "";
+        if (storedName) {
+            username = storedName;
+        } else {
+            username = prompt("Enter your name:");
+            if (!username) {
+                alert("Name is required to create a chat room.");
+                return;
+            }
+        }
+        
+        // Create the new room on the server
+        socket.emit("create_room", { 
+            room: chatName, 
+            sender: username 
+        }, function(response) {
+            if (response && response.status === "success") {
+                // Set state and join the room
+                state.username = username;
+                state.room = chatName;
+                
+                // Join the room
+                socket.emit("join_room", { 
+                    room: state.room, 
+                    sender: state.username 
+                });
+                
+                // Update UI
+                document.getElementById("room-name").innerText = state.room;
+                document.getElementById("initial-header").style.display = "none";
+                document.getElementById("chat-header").style.display = "block";
+                document.getElementById("chat").style.display = "block";
+                document.getElementById("new-chat-section").style.display = "none";
+                document.getElementById("leave-btn").style.display = "block";
+            } else {
+                alert("Failed to create chat room. Please try again.");
+            }
+        });
+        
+        document.getElementById("new-chat-name").value = "";
+    } else {
+        alert("Please enter a chat name");
+    }
+}
+
+/**
+ * Select a chat and join directly
+ */
+function selectChat(chatId) {
+    // Get username from cookie or prompt
+    const storedName = getCookieValue("user") 
+        ? JSON.parse(getCookieValue("user")).family_name 
+        : "";
+    
+    if (storedName) {
+        state.username = storedName;
+        document.getElementById("name").value = storedName;
+    } else {
+        // Show join section to get username
+        document.getElementById("chat-list-section").style.display = "none";
+        document.getElementById("join-section").style.display = "flex";
+        document.getElementById("route").value = chatId;
+        document.getElementById("name").focus();
+        return;
+    }
+    
+    state.room = chatId;
+    
+    socket.emit("join_room", { 
+        room: state.room, 
+        sender: state.username 
+    });
+    
+    // Update UI
+    document.getElementById("room-name").innerText = state.room;
+    document.getElementById("initial-header").style.display = "none";
+    document.getElementById("chat-header").style.display = "block";
+    document.getElementById("chat").style.display = "block";
+    document.getElementById("chat-list-section").style.display = "none";
+    document.getElementById("join-section").style.display = "none";
+    document.getElementById("leave-btn").style.display = "block";
 }

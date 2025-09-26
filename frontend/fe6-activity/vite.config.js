@@ -10,13 +10,15 @@ export default defineConfig({
         open: true,
         cors: true, // ✅ Enable CORS
         hmr: {
-            protocol: 'ws',
-            host: 'activity.vnrzone.site',
+            protocol: 'wss',
+            host: 'dev-activity.vjstartup.com',
             port: 3106  // Changed from 3136 to match server port
         },
         allowedHosts: [
             'localhost:3106',
-            'activity.vnrzone.site' 
+            'activity.vjstartup.com',
+            'dev-activity.vjstartup.com'
+
         ],
     },
     preview: {

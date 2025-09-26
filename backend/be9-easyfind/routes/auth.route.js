@@ -4,7 +4,8 @@ const fetch = require("node-fetch");
 
 const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3115"; 
 
-const ADMIN_EMAILS = ["23071a0504@vnrvjiet.in", "admin2@vjstartup.com"]; // or load from env
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS;
+
 
 router.post("/user/login", async (req, res) => {
   const { token } = req.body;
@@ -59,6 +60,8 @@ router.post("/admin/login", async (req, res) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
     });
+    const setCookie = authRes.headers.raw && authRes.headers.raw()["set-cookie"];
+    if(setCookie) res.setHeader("Set-Cookie",setCookie);
 
     if (!authRes.ok) {
       const errorText = await authRes.text();
@@ -98,7 +101,7 @@ router.get("/admin/check-auth", async (req, res) => {
     
     console.log("allowed admins",allowedAdmins,data.email)
     // If user is not logged in or not an allowed admin
-    if (!authRes.ok || !allowedAdmins.includes(data.user.email)) {
+    if (!authRes.ok ||!data.logged_in|| !allowedAdmins.includes(data.user.email)) {
       return res.status(403).json({ logged_in: false, reason: "Not an admin" });
     }
 

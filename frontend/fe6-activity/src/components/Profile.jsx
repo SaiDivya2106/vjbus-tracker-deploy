@@ -58,15 +58,36 @@ const Profile = ({ open, onClose }) => {
 
   const fetchProfileData = async () => {
     try {
+      // Check if we have cached profile data in localStorage
+      const cachedProfileData = localStorage.getItem('profile_data');
+      const cachedTimestamp = localStorage.getItem('profile_data_timestamp');
+      const now = Date.now();
+      const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // If we have valid, unexpired cached data, use it
+      if (cachedProfileData && cachedTimestamp && (now - parseInt(cachedTimestamp) < CACHE_EXPIRY)) {
+        console.log('Using cached profile data from localStorage');
+        const parsedData = JSON.parse(cachedProfileData);
+        setProfileData(parsedData);
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise, fetch from API
       const token = localStorage.getItem('token');
       const response = await axios.get(`${base_url}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (response.data && response.data.profile_image) {
+      if (response.data) {
+        // Store the fresh data in localStorage for future use
+        localStorage.setItem('profile_data', JSON.stringify(response.data));
+        localStorage.setItem('profile_data_timestamp', now.toString());
+        
+        // Update state with the fetched data
         setProfileData(response.data);
       } else {
-        console.warn("Profile data missing profile_image:", response.data);
+        console.warn("Profile data is incomplete:", response.data);
         setProfileData({...response.data, profile_image: ''});
       }
     } catch (err) {

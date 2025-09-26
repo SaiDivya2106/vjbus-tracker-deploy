@@ -15,7 +15,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin }) => {
   // This function will be called once Google login is successful
   const handleCredentialResponse = async (response: any) => {
     const idToken = response.credential;
-    console.log("Google ID Token:", idToken); // Log the token to verify it's not undefined
+    // console.log("Google ID Token:", idToken); // Log the token to verify it's not undefined
 
     // Ensure the token is not undefined
     if (!idToken) {
@@ -39,7 +39,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin }) => {
       }
 
       const data = await backendResponse.json();
-      console.log('Server Response:', data);
+      // console.log('Server Response:', data);
 
       const { token, user } = data;
 
