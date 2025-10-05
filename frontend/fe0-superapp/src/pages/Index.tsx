@@ -348,13 +348,13 @@ const Index = () => {
               {apps.map((app, index) => {
                 const isSelected = animatingAppId === app.id && isAnimating;
                 const isOtherAnimating = isAnimating && animatingAppId !== app.id;
-                return (
-                <Card
-                  key={app.id}
-                  className={`group cursor-pointer border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden rounded-2xl hover:bg-white/95 ${isSelected ? 'scale-105 z-50' : ''} ${isOtherAnimating ? 'translate-x-8 opacity-40' : ''}`}
-                  onClick={() => openApp(app)}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
+                  return (
+                    <Card
+                      key={app.id}
+                      className={`group cursor-pointer border-0 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden rounded-2xl hover:bg-white/95 ${isSelected ? 'scale-105 z-50' : ''} ${isOtherAnimating ? 'translate-x-8 opacity-40' : ''}`}
+                      onClick={() => openApp(app)}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
                   <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${app.gradient} shadow-sm`}></div>
                   <CardContent className="p-6 relative">
                     <div className="flex items-start justify-between mb-4">
@@ -392,8 +392,9 @@ const Index = () => {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                  </Card>
+              );
+            })}
             </div>
           </div>
         </div>
