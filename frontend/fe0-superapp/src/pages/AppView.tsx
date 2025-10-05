@@ -193,13 +193,13 @@ const AppView = () => {
         )}
       </div>
 
-      {/* Main Content */}
-      <div className="p-4 h-[calc(100vh-80px)]">
-        <div className="max-w-7xl mx-auto h-full">
-          <div className="h-full rounded-lg overflow-hidden border border-gray-200 bg-white shadow-lg">
+      {/* Main Content - full-bleed iframe */}
+      <div className="h-[calc(100vh-80px)]">
+        <div className="h-full w-full">
+          <div className="h-full w-full overflow-hidden">
             <iframe
               src={app.url}
-              className="w-full h-full sm:h-full h-[calc(100vh-200px)]"
+              className="w-full h-full"
               title={app.name}
               frameBorder="0"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
