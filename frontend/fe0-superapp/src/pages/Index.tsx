@@ -302,20 +302,20 @@ const Index = () => {
       <div className="px-4 sm:px-6 py-12">
         <div className="max-w-6xl mx-auto">
           {/* Mobile: icons-only grid */}
-          <div className="sm:hidden grid grid-cols-4 gap-2 py-2">
+          <div className="sm:hidden grid grid-cols-3 gap-4 py-2">
             {apps.map((app, index) => (
               <div key={app.id} className="flex justify-center" style={{ animationDelay: `${index * 40}ms` }}>
                 <button
                   onClick={() => openApp(app)}
                   aria-label={app.name}
                   title={app.name}
-                  className="group flex flex-col items-center gap-1 bg-white/0 rounded-md p-0.5 w-18 h-20"
+                  className="group flex flex-col items-center gap-1 bg-white/0 rounded-md p-1 w-24 h-24"
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md bg-gradient-to-br ${app.gradient}`}>
-                    <app.icon className="h-6 w-6 text-white" />
+                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-md bg-gradient-to-br ${app.gradient}`}>
+                    <app.icon className="h-8 w-8 text-white" />
                   </div>
                   {/* small label helps recognition on mobile without taking much space */}
-                  <span className="text-[11px] text-gray-800 mt-1 text-center truncate w-full">{app.name}</span>
+                  <span className="text-[12px] text-gray-800 mt-1 text-center truncate w-full">{app.name}</span>
                 </button>
               </div>
             ))}
