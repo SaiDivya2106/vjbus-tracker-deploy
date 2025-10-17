@@ -155,7 +155,7 @@ userApp.post(
                   <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
                   ${image ? `<li><strong>Image:</strong> <a href="${image}">View Image</a></li>` : ""}
                 </ul>
-                <p><a href="https://complaints.vjstartup.com">View and manage the complaint</a></p>
+                <p><a href="https://thrive.vjstartup.com">View and manage the complaint</a></p>
                 <p>Please take action as soon as possible.</p>
                 <p>Regards,<br>Complaint Management System</p>
               `,

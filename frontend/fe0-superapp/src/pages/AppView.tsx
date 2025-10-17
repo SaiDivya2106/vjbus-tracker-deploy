@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, LogIn, ExternalLink, Menu } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "./context/AuthContext.tsx";
 
 const apps = [
@@ -15,7 +15,7 @@ const apps = [
     id: "complaints",
     name: "Complaints",
     description: "Register complaints and grievances",
-    url: "https://dev-complaints.vjstartup.com/"
+    url: "https://thrive.vjstartup.com/"
   },
   {
     id: "fake-news",
@@ -90,6 +90,9 @@ const AppView = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, login, logout } = useAuth();
+  const [iframeLoading, setIframeLoading] = useState(true);
+  const [iframeError, setIframeError] = useState<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   const app = apps.find(a => a.id === appId);
 
@@ -110,6 +113,23 @@ const AppView = () => {
   const openInNewTab = () => {
     window.open(app.url, "_blank");
   };
+
+  useEffect(() => {
+    // Reset loading state when app changes
+    setIframeLoading(true);
+    setIframeError(null);
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
+    // After 8s show a friendly message but keep spinner
+    timeoutRef.current = window.setTimeout(() => {
+      setIframeError("Still loading — opening in a moment. You can also open in a new tab.");
+    }, 8000);
+
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, [appId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -180,11 +200,11 @@ const AppView = () => {
               Open in New Tab
             </Button>
             {isAuthenticated ? (
-              <Button onClick={logout} className="text-gray-800 border border-gray-300 flex items-center gap-2 shadow-sm">
+              <Button onClick={logout} variant="outline" className="bg-white/90 text-gray-700 border border-gray-300 flex items-center gap-2 shadow-sm">
                 Logout
               </Button>
             ) : (
-              <Button onClick={login} className="text-gray-800 border border-gray-300 flex items-center gap-2 shadow-sm">
+              <Button onClick={login} variant="outline" className="bg-white/90 text-gray-700 border border-gray-300 flex items-center gap-2 shadow-sm">
                 <LogIn className="h-4 w-4" />
                 Login
               </Button>
@@ -193,17 +213,34 @@ const AppView = () => {
         )}
       </div>
 
-      {/* Main Content */}
-      <div className="p-4 h-[calc(100vh-80px)]">
-        <div className="max-w-7xl mx-auto h-full">
-          <div className="h-full rounded-lg overflow-hidden border border-gray-200 bg-white shadow-lg">
+      {/* Main Content - full-bleed iframe */}
+      <div className="h-[calc(100vh-80px)]">
+        <div className="h-full w-full">
+          <div className="h-full w-full overflow-hidden relative">
             <iframe
               src={app.url}
-              className="w-full h-full sm:h-full h-[calc(100vh-200px)]"
+              className="w-full h-full"
               title={app.name}
-              frameBorder="0"
+              style={{ border: 0 }}
+              onLoad={() => {
+                setIframeLoading(false);
+                setIframeError(null);
+                if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+              }}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
             />
+
+            {/* Loading overlay: show app name & description for better context */}
+            {iframeLoading && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/60 backdrop-blur-sm transition-opacity duration-300">
+                <div className="flex flex-col items-center gap-3 px-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-gray-200"></div>
+                  <h2 className="text-lg font-bold text-gray-800">{app.name}</h2>
+                  <p className="text-sm text-gray-600 max-w-xs text-center">{app.description}</p>
+                  {iframeError && <div className="text-xs text-gray-500 mt-1">{iframeError}</div>}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

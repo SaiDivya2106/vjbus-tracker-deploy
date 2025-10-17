@@ -41,7 +41,7 @@ const AppGrid: React.FC<AppGridProps> = ({ onAppClick }) => {
       name: "Complaints",
       description: "Register complaints and grievances",
       icon: <FileWarning size={40} />,
-      url: "https://complaints.vjstartup.com/",
+      url: "https://thrive.vjstartup.com/",
       color: "bg-orange-500",
       requiresOwnAuth: true
     },
