@@ -18,6 +18,8 @@ import { FaUserPen } from "react-icons/fa";
 import {  FaEdit  } from 'react-icons/fa'; // Correct icon
 import { Modal } from "react-bootstrap";
 import { CheckCircleFill } from "react-bootstrap-icons";
+import NoImageIcon from "../images/no-img-icon.png";
+
 
 
 const CATEGORIES = [
@@ -79,8 +81,9 @@ const showPopup = (message) => {
 const [editComplaint, setEditComplaint] = useState(null); // holds complaint to edit
 const [editForm, setEditForm] = useState({ title: "", description: "", category: "" });
 // Default image if complaint has no image
-const DEFAULT_IMAGE =
-  "https://static.vecteezy.com/system/resources/previews/007/719/637/non_2x/no-camera-or-no-photo-allowed-sign-the-flat-icon-crossed-out-good-for-icon-sticker-message-flat-design-with-grey-color-vector.jpg";
+// const DEFAULT_IMAGE =
+//   "https://static.vecteezy.com/system/resources/previews/007/719/637/non_2x/no-camera-or-no-photo-allowed-sign-the-flat-icon-crossed-out-good-for-icon-sticker-message-flat-design-with-grey-color-vector.jpg";
+const DEFAULT_IMAGE = NoImageIcon;
 
 
   useEffect(() => {
@@ -89,34 +92,75 @@ const DEFAULT_IMAGE =
 
   const fetchComplaints = async () => {
     setLoading(true);
-    try {
-      const url =  `${baseUrl}/user-api/filter-complaints?category=${categoryFilter}&status=${statusFilter}`;
-      const token = localStorage.getItem("authToken");
+  //   try {
+  //     const url =  `${baseUrl}/user-api/filter-complaints?category=${categoryFilter}&status=${statusFilter}`;
+  //     const token = localStorage.getItem("authToken");
 
-      const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //     const res = await axios.get(url, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
-      const data = res.data?.complaints || [];
-      setComplaints(data);
+  //     const data = res.data?.complaints || [];
+  //     setComplaints(data);
 
-      // Track votes
-      const votes = {};
-      data.forEach((complaint) => {
-        if (Array.isArray(complaint.votedUsers)) {
-          const userVote = complaint.votedUsers.find(
-            (v) => v.email === user?.email
-          );
-          if (userVote) votes[complaint.complaint_id] = userVote.vote;
-        }
-      });
-      setUserVotes(votes);
-    } catch (err) {
-      console.error("Error fetching complaints:", err);
-    } finally {
-      setLoading(false);
+  //     // Track votes
+  //     const votes = {};
+  //     data.forEach((complaint) => {
+  //       if (Array.isArray(complaint.votedUsers)) {
+  //         const userVote = complaint.votedUsers.find(
+  //           (v) => v.email === user?.email
+  //         );
+  //         if (userVote) votes[complaint.complaint_id] = userVote.vote;
+  //       }
+  //     });
+  //     setUserVotes(votes);
+  //   } catch (err) {
+  //     console.error("Error fetching complaints:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  try {
+  const url = `${baseUrl}/user-api/filter-complaints?category=${categoryFilter}&status=${statusFilter}`;
+  const token = localStorage.getItem("authToken");
+
+  const res = await axios.get(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = res.data?.complaints || [];
+  setComplaints(data);
+
+  // Track votes
+  const votes = {};
+  data.forEach((complaint) => {
+    if (Array.isArray(complaint.votedUsers)) {
+      const userVote = complaint.votedUsers.find(
+        (v) => v.email === user?.email
+      );
+      if (userVote) votes[complaint.complaint_id] = userVote.vote;
     }
-  };
+  });
+  setUserVotes(votes);
+
+} catch (err) {
+  console.error("Error fetching complaints:", err);
+
+  // 🔥 Check 403 response
+  if (err.response && err.response.status === 403) {
+
+    // Remove bad token
+    localStorage.removeItem("authToken");
+
+    // Redirect
+    navigate("/complaints-website");
+  }
+} finally {
+  setLoading(false);
+}
+};
+
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "Unknown Date";
@@ -539,7 +583,7 @@ const handleDeleteComplaint = async (id) => {
 
         {/* Image with status badge overlay */}
         <div className="position-relative complaint-image-wrapper mt-3 mb-2">
-          <Card.Img
+          {/* <Card.Img
             variant="top"
             src={complaint.image || DEFAULT_IMAGE}
             alt="complaint"
@@ -551,7 +595,93 @@ const handleDeleteComplaint = async (id) => {
                 setShowImageModal(true);
               }
             }}
-          />
+          /> */}
+
+
+
+          <div
+  className="d-flex flex-column align-items-center justify-content-center"
+  style={{
+    height: "180px",
+    // backgroundColor: "#f8f9fa",  light gray background like in your screenshot
+    borderRadius: "10px",
+  }}
+>
+  {complaint.image ? (
+    <Card.Img
+      variant="top"
+      src={complaint.image}
+      alt="Complaint"
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        borderRadius: "10px",
+        cursor: "pointer",
+      }}
+      onClick={() => {
+        setModalImageSrc(complaint.image);
+        setShowImageModal(true);
+      }}
+    />
+  ) : (
+    <>
+<div style={{ position: "relative", textAlign: "center" }}>
+  <Card.Img
+    variant="top"
+    src={complaint.image || DEFAULT_IMAGE}
+    alt="complaint"
+    className="complaint-image"
+    onClick={() => {
+      if (complaint.image) {
+        setModalImageSrc(complaint.image);
+        setShowImageModal(true);
+      }
+    }}
+    style={{
+      cursor: complaint.image ? "pointer" : "default",
+      width: complaint.image ? "100%" : "250px", // smaller for default image
+      height: complaint.image ? "auto" : "250px",
+      display: "block",
+      margin: complaint.image ? "0 auto" : "20px auto 0 auto", // moves default image up
+      opacity: complaint.image ? 1 : 0.95,
+    }}
+  />
+
+    <p
+    style={{
+      position: "absolute",
+      bottom: "35px", // locks text below icon regardless of icon size
+      width: "100%",
+      textAlign: "center",
+      fontSize: "1rem",
+      color: "#6c757d",
+      fontWeight: "bold",
+      margin: 0,
+    }}
+  >
+    No Image
+  </p>
+  {/* <p
+    style={{
+      position: "absolute",
+      bottom: "15px", // locks text below icon regardless of icon size
+      width: "100%",
+      textAlign: "center",
+      fontSize: "1rem",
+      color: "#6c757d",
+      fontWeight: "semi-bold",
+      margin: 0,
+    }}
+  >
+    No Image
+  </p> */}
+</div>
+
+    </>
+  )}
+</div>
+
           <div
             className="status-overlay position-absolute"
             style={{ top: "8px", left: "8px", zIndex: 3 }}
@@ -559,67 +689,63 @@ const handleDeleteComplaint = async (id) => {
             {getStatusBadge(complaint.status)}
           </div>
         </div>
+{/* Date + Edit row below image */}
+<div
+  className="d-flex align-items-center justify-content-between"
+  style={{ marginTop: "5px", marginBottom: "5px" }} // reduced gap
+>
+  {/* Date on the left */}
+  <div
+    className="d-flex align-items-center text-primary fw-semibold"
+    style={{ fontSize: "0.9rem", marginBottom: 0 }}
+  >
+    <span
+      style={{
+        backgroundColor: "#e0f0ff",
+        color: "#1e90ff",
+        padding: "6px",
+        borderRadius: "10px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "28px",
+        height: "28px",
+        marginRight: "8px",
+      }}
+    >
+      <FaCalendarAlt style={{ fontSize: "14px" }} />
+    </span>
+    {formatDate(complaint.timestamp)}
+  </div>
 
-        {/* Date + Edit row below image */}
-        <div className="d-flex align-items-center justify-content-between mt-2 mb-3">
-          {/* Date on the left */}
-          <div className="d-flex align-items-center text-primary fw-semibold" style={{ fontSize: "0.9rem" }}>
-            <span
-              style={{
-                backgroundColor: "#e0f0ff",
-                color: "#1e90ff",
-                padding: "6px",
-                borderRadius: "10px",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "28px",
-                height: "28px",
-                marginRight: "8px",
-              }}
-            >
-              <FaCalendarAlt style={{ fontSize: "14px" }} />
-            </span>
-            {formatDate(complaint.timestamp)}
-          </div>
+  {/* Edit icon (optional) */}
+</div>
 
-          {/* Edit icon on the right if user owns complaint and status is Pending */}
-          {complaint.user_id === user?.email && complaint.status === "Pending" && (
-            < FaEdit 
-              size={26}
-              className="edit-icon-purple"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleEditComplaint(complaint)}
-            />
-          )}
-        </div>
+<Card.Title
+  className="fw-bold text-dark fs-5"
+  style={{ marginTop: "5px", marginBottom: "5px" }} // reduced gap
+>
+  {complaint.title}
+</Card.Title>
+
+<Card.Text className="text-secondary mb-2" style={{ marginTop: 0 }}>
+  {expandedDescriptions[complaint.complaint_id]
+    ? complaint.description
+    : `${complaint.description.substring(0, 200)}${
+        complaint.description.length > 200 ? "..." : ""
+      }`}
+  {complaint.description.length > 200 && (
+    <span
+      className="view-more-link ms-2"
+      onClick={() => setExpandedCard(complaint)} // open popup
+      style={{ color: "#007bff", cursor: "pointer", fontWeight: 500 }}
+    >
+      View More
+    </span>
+  )}
+</Card.Text>
 
 
-                  <Card.Title className="fw-bold text-dark mt-3 fs-4">
-                    {complaint.title}
-                  </Card.Title>
-                  <Card.Text className="text-secondary mb-2">
-                    {expandedDescriptions[complaint.complaint_id]
-                      ? complaint.description
-                      : `${complaint.description.substring(0, 250)}${
-                          complaint.description.length > 250 ? "..." : ""
-                        }`}
-                    {complaint.description.length > 250 && (
-                      <span
-                        className="view-more-link ms-2"
-                        onClick={() => toggleDescription(complaint.complaint_id)}
-                        style={{
-                          color: "#007bff",
-                          cursor: "pointer",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {expandedDescriptions[complaint.complaint_id]
-                          ? "View Less"
-                          : "View More"}
-                      </span>
-                    )}
-                  </Card.Text>
 
                   {complaint.comments && complaint.comments.length > 0 && (
                     <button
@@ -798,236 +924,7 @@ const handleDeleteComplaint = async (id) => {
   </div>
 )}
 
-{editComplaint && (
-  <div className="overlay">
-    <Card
-      className="popup-card rounded-4 card-background-gradient p-3"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Close button – top-right corner */}
-      <button
-        className="close-btn"
-        onClick={() => setEditComplaint(null)}
-      >
-        ✕
-      </button>
 
-      {/* Header with delete button moved slightly left */}
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <h5 className="mb-0">Edit or delete your Complaint</h5>
-        <button
-          className="btn btn-danger btn-icon btn-sm delete-btn"
-          onClick={() => handleDeleteComplaint(editComplaint.complaint_id)}
-        >
-          <i className="bi bi-trash"></i>
-        </button>
-      </div>
-
-
-      {/* Complaint Title */}
-<div className="form-group mb-2">
-  <label className="form-label d-flex align-items-center">
-    <span className="label-icon purple me-2">
-      <i className="bi bi-info-lg"></i>
-    </span>
-    Title
-  </label>
-  <input
-    type="text"
-    name="title"
-    className="form-control"
-    value={editForm.title}
-    onChange={handleEditChange} // ✅ Removed onFocus select
-  />
-</div>
-
-{/* Description */}
-<div className="form-group mb-2">
-  <label className="form-label d-flex align-items-center">
-    <span className="label-icon dark-purple me-2">
-      <i className="bi bi-card-text text-light"></i>
-    </span>
-    Description
-  </label>
-  <textarea
-    name="description"
-    className="form-control"
-    rows={4} // ✅ increased for better visibility
-    value={editForm.description}
-    onChange={handleEditChange} // ✅ Removed onFocus select
-  />
-</div>
-
-
-      {/* Category */}
-      <div className="form-group mb-2">
-        <label className="form-label d-flex align-items-center">
-          <span className="label-icon orange me-2">
-            <i className="bi bi-tag text-light"></i>
-          </span>
-          Category
-        </label>
-        <select
-          name="category"
-          className="form-control"
-          value={editForm.category}
-          onChange={handleEditChange}
-        >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Image Upload */}
-      {/* Image Upload */}
-<div className="form-group mb-2">
-  <label className="form-label d-flex align-items-center">
-    <span className="label-icon blue me-2">
-      <i className="bi bi-image text-light"></i>
-    </span>
-    Update Image (Optional)
-  </label>
-  <div className="upload-box-wrapper">
-    <div className="upload-box">
-      {imagePreview || editComplaint.image ? (
-        <div className="image-preview">
-
-
-
-          <img
-  src={imagePreview || editComplaint.image}
-  alt="Preview"
-  onClick={() => {
-    setModalImageSrc(imagePreview || editComplaint.image);
-    setShowImageModal(true);
-  }}
-  style={{
-    width: "100%",
-    borderRadius: "8px",
-    maxHeight: "250px",
-    objectFit: "cover",
-    cursor: "pointer", // ✅ indicates click
-  }}
-/>
-
-          <button
-            type="button"
-            className="remove-btn"
-            onClick={removeEditImage}
-          >
-            ×
-          </button>
-        </div>
-      ) : (
-        <>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="file-input"
-            id="edit-file-upload"
-            style={{ display: "none" }}
-          />
-          <label htmlFor="edit-file-upload" className="upload-placeholder">
-            <div className="upload-icon">⬆</div>
-            <span className="upload-text">Upload Image</span>
-          </label>
-        </>
-      )}
-    </div>
-    <p className="file-size-note text-dark">≤ 1.5MB</p>
-  </div>
-</div>
-
-            {editWarning && (
-  <div
-    className="alert alert-warning text-center mb-3"
-    style={{ borderRadius: "10px", fontWeight: 500 }}
-  >
-    ⚠ {editWarning}
-  </div>
-)}
-      
-
-      {/* Save Button */}
-      <div className="modal-footer mt-2 text-center">
-        <button
-          className="btn btn-primary save-btn"
-          onClick={submitEditComplaint}
-        >
-          <i className="bi bi-save me-2"></i> Save Changes
-        </button>
-      </div>
-    </Card>
-  </div>
-)}
-  <Modal
-    show={showDeleteSuccess}
-    onHide={() => setShowDeleteSuccess(false)}
-    centered
-  >
-    <Modal.Body className="text-center p-5">
-      <CheckCircleFill size={50} color="green" className="mb-3" />
-      <h5 className="text-success">Complaint Deleted Successfully!</h5>
-    </Modal.Body>
-  </Modal>
-  <Modal
-  show={showSaveSuccess}
-  onHide={() => setShowSaveSuccess(false)}
-  centered
->
-  <Modal.Body className="text-center p-5">
-    <CheckCircleFill size={50} color="green" className="mb-3" />
-    <h5 className="text-success">Complaint Saved Successfully!</h5>
-  </Modal.Body>
-</Modal>
-<Modal
-  show={showImageModal}
-  onHide={() => setShowImageModal(false)}
-  centered
-  size="lg"
-  contentClassName="bg-dark border-0"
-  style={{ zIndex: 9999 }}  // ✅ ensures it's on top of everything
-  backdropClassName="custom-image-backdrop"
->
-  <Modal.Body
-    className="p-0 d-flex justify-content-center align-items-center"
-    style={{ backgroundColor: "rgba(0,0,0,0.95)" }}
-  >
-    <img
-      src={modalImageSrc}
-      alt="Full preview"
-      style={{
-        width: "100%",
-        height: "auto",
-        maxHeight: "70vh",
-        objectFit: "contain",
-      }}
-    />
-    <button
-      onClick={() => setShowImageModal(false)}
-      style={{
-        position: "absolute",
-        top: "15px",
-        right: "20px",
-        background: "rgba(255,255,255,0.2)",
-        color: "white",
-        border: "none",
-        borderRadius: "50%",
-        width: "35px",
-        height: "35px",
-        fontSize: "1.5rem",
-        cursor: "pointer",
-        zIndex: 10000, // ✅ even above the modal image
-      }}
-    >
-      ×
-    </button>
-  </Modal.Body>
-</Modal>
 
 {/* 🔍 Shared Image Preview Modal */}
 {/* Image Preview Modal */}
@@ -1051,7 +948,7 @@ const handleDeleteComplaint = async (id) => {
         width: "auto",
         maxWidth: "80%",
         height: "auto",
-        maxHeight: "70vh",
+        maxHeight: "65vh",
         borderRadius: "10px",
         objectFit: "contain",
         boxShadow: "0 0 15px rgba(0,0,0,0.5)",
@@ -1086,7 +983,7 @@ const handleDeleteComplaint = async (id) => {
         className="add-complaint-btn"
         onClick={() => navigate("/complaint-form")}
       >
-        <FaPlus className="plus-icon" /> Add Complaint
+        <FaPlus className="plus-icon" /> Add Support Request
       </button>
 
 

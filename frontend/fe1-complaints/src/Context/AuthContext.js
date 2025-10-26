@@ -106,6 +106,7 @@ export const AuthProvider = ({ children }) => {
 
   // --- Check admin ---
   const checkAdminStatus = async (email) => {
+    console.log("baseURl",baseUrl)
     try {
       const token = localStorage.getItem("authToken");
       const res = await fetch(`${baseUrl}/admin-api/check-admin`, {

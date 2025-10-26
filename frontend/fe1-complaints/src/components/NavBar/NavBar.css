@@ -1,5 +1,7 @@
 /* NavBar.css */
-
+body {
+  padding-top: 55px; /* adjust based on navbar height */
+}
 .navbar {
   display: flex;
   justify-content: space-between;

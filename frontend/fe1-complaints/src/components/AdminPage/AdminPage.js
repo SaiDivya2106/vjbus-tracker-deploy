@@ -394,40 +394,92 @@ const AdminPage = () => {
   setLoading(true);
   setError(false);
 
-  try {
-    let url = `${baseUrl}/admin-api/filter-complaints`;
-    const params = new URLSearchParams();
+//   try {
+//     let url = `${baseUrl}/admin-api/filter-complaints`;
+//     const params = new URLSearchParams();
 
-    // If specific category selected, send only that
-    if (category && category !== "All") {
-      params.append("category", category);
-    }
+//     // If specific category selected, send only that
+//     if (category && category !== "All") {
+//       params.append("category", category);
+//     }
 
-    // Status filter
-    if (status && status !== "All") {
-      params.append("status", status);
-    }
+//     // Status filter
+//     if (status && status !== "All") {
+//       params.append("status", status);
+//     }
 
-    const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${url}?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+//     const token = localStorage.getItem("authToken");
+//     const response = await axios.get(`${url}?${params.toString()}`, {
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
 
-    const complaintsData = response?.data?.complaints ?? [];
-    if (Array.isArray(complaintsData)) {
-      setComplaints(complaintsData);
-    } else {
-      throw new Error("Invalid complaints data");
-    }
-  } catch (err) {
-    console.error("❌ Error fetching complaints:", err);
-    setError(true);
-    setComplaints([]);
-  } finally {
-    setLoading(false);
+//     const complaintsData = response?.data?.complaints ?? [];
+//     if (Array.isArray(complaintsData)) {
+//       setComplaints(complaintsData);
+//     } else {
+//       throw new Error("Invalid complaints data");
+//     }
+//   } catch (err) {
+//     console.error("❌ Error fetching complaints:", err);
+//     setError(true);
+//     setComplaints([]);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+try {
+  let url = `${baseUrl}/admin-api/filter-complaints`;
+  const params = new URLSearchParams();
+
+  // Category filter
+  if (category && category !== "All") {
+    params.append("category", category);
   }
-};
 
+  // Status filter
+  if (status && status !== "All") {
+    params.append("status", status);
+  }
+
+  const token = localStorage.getItem("authToken");
+  const response = await axios.get(`${url}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  // ✅ Handle token expired or invalid
+  if (response?.status === 403 || response?.data?.message === "Invalid or expired token") {
+    localStorage.removeItem("authToken");
+    alert("Session expired. Please login again.");
+    navigate("/complaints-website");
+    return;
+  }
+
+  const complaintsData = response?.data?.complaints ?? [];
+  if (Array.isArray(complaintsData)) {
+    setComplaints(complaintsData);
+  } else {
+    throw new Error("Invalid complaints data");
+  }
+
+} catch (err) {
+
+  console.error("❌ Error fetching complaints:", err);
+
+  // ✅ Also catch backend thrown 403 errors
+  if (err?.response?.status === 403) {
+    alert("Session expired. Please login again.");
+    localStorage.removeItem("authToken");
+    navigate("/complaints-website");
+    return;
+  }
+
+  setError(true);
+  setComplaints([]);
+  
+} finally {
+  setLoading(false);
+}
+  };
 
   const handleSort = (option) => setSortOption(option);
 

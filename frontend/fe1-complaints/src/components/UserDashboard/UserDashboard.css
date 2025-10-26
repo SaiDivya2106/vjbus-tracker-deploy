@@ -5,7 +5,55 @@
   min-height: 100vh;
   font-family: 'Arial', sans-serif;
 }
+.upload-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.no-complaints-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
 
+.no-complaints-text {
+  font-size: 1rem;
+  color: #4e4f50; /* dark gray for readability */
+  font-weight: 500;
+  text-align: center;
+  max-width: 400px; /* limits width so text is 1–2 lines */
+  margin-bottom: 15px; /* space between text and button */
+}
+
+.raise-btn {
+  background-color: #6f42c1; /* same as admin updates button */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.raise-btn:hover {
+  background-color: #5936a2; /* slightly darker on hover */
+}
+
+
+.edit-icon-purple {
+  /* color: rgb(155, 108, 237); */
+   color: #8e44ad;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+  margin-right: 5px;
+}
+
+.edit-icon-purple:hover {
+  color: rgb(155, 108, 237);
+  transform: scale(1.2);
+}
 
 .no-complaints-message {
   text-align: center;

@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy":"http://localhost:6101",
   "dependencies": {
     "axios": "^0.27.2",
     "bootstrap": "^5.3.3",
