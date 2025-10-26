@@ -322,7 +322,7 @@
 import React, { useState, useEffect } from "react";
 import { FaSquarePollVertical, FaUserPen } from "react-icons/fa6";
 import { HiOutlineThumbUp, HiOutlineThumbDown } from "react-icons/hi";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt ,FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col, Form } from "react-bootstrap";
 import axios from "axios";
@@ -342,6 +342,8 @@ const AdminPage = () => {
   const [error, setError] = useState(false);
 
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
+  const DEFAULT_IMAGE = "https://static.vecteezy.com/system/resources/previews/007/719/637/non_2x/no-camera-or-no-photo-allowed-sign-the-flat-icon-crossed-out-good-for-icon-sticker-message-flat-design-with-grey-color-vector.jpg";
+
 
   // Normalize admin categories into array
   const categories = Array.isArray(adminCategory)
@@ -574,98 +576,124 @@ const AdminPage = () => {
           )}
         </div>
       ) : (
-        <Row className="g-4 pb-3">
-          {complaints.map((complaint) => (
-            <Col key={complaint.complaint_id} xs={12} sm={6} lg={4}>
-              <Card
-                className={`card-hover-effect p-3 glass-effect rounded-4 custom-card-container w-100 d-flex flex-column ${
-                  expandedCardId === complaint.complaint_id ? "expanded-card" : ""
-                }`}
+       <Row className="g-4 pb-3">
+  {complaints.map((complaint) => (
+    <Col key={complaint.complaint_id} xs={12} sm={6} lg={4}>
+      <Card
+        className={`card-hover-effect p-3 glass-effect rounded-4 custom-card-container w-100 d-flex flex-column ${
+          expandedCardId === complaint.complaint_id ? "expanded-card" : ""
+        }`}
+      >
+        {/* Image with status overlay */}
+        <div className="complaint-image-wrapper position-relative mb-3">
+          <Card.Img
+            variant="top"
+            src={complaint.image || DEFAULT_IMAGE}
+            alt="complaint"
+            className="complaint-image rounded-3"
+            style={{ height: "200px", objectFit: "cover", width: "100%" }}
+          />
+          <div
+            className="status-overlay"
+            style={{
+              position: "absolute",
+              top: "12px",
+              left: "12px",
+              zIndex: 3
+            }}
+          >
+            {getStatusBadge(complaint.status)}
+          </div>
+        </div>
+
+        {/* Date and Edit on the same line */}
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <Card.Text
+            className="mb-0"
+            style={{
+              fontSize: "0.9rem",
+              fontWeight: "600",
+              color: "#1e90ff",
+            }}
+          >
+            <span
+              style={{
+                backgroundColor: "#e0f0ff",
+                color: "#1e90ff",
+                padding: "6px",
+                borderRadius: "10px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                marginRight: "8px",
+              }}
+            >
+              <FaCalendarAlt style={{ fontSize: "14px" }} />
+            </span>
+            {new Date(complaint.timestamp).toDateString()}
+          </Card.Text>
+
+          <Button
+            className="custom-pencil-button"
+            onClick={() =>
+              navigate(`/complaints-details/${complaint.complaint_id}`)
+            }
+          >
+            <FaEdit size={28} className="pencil-icon" />
+          </Button>
+        </div>
+
+        {/* Title and Description */}
+        <Card.Title className="fw-bold text-dark mt-1">
+          {complaint.title}
+        </Card.Title>
+
+        <Card.Text className="text-secondary mb-2">
+          {complaint.description.split(" ").length > 38 ? (
+            <>
+              {expandedCardId === complaint.complaint_id
+                ? complaint.description
+                : complaint.description
+                    .split(" ")
+                    .slice(0, 38)
+                    .join(" ") + "..."}
+              <span
+                className="ms-2 text-secondary fw-semibold"
+                role="button"
+                onClick={() => toggleExpand(complaint.complaint_id)}
               >
-                <div className="d-flex justify-content-between align-items-start">
-                  {getStatusBadge(complaint.status)}
-                  <Button
-                    className="custom-pencil-button"
-                    onClick={() =>
-                      navigate(`/complaints-details/${complaint.complaint_id}`)
-                    }
-                  >
-                    <FaUserPen size={28} className="pencil-icon" />
-                  </Button>
-                </div>
+                {expandedCardId === complaint.complaint_id
+                  ? "View less"
+                  : "View more"}
+              </span>
+            </>
+          ) : (
+            complaint.description
+          )}
+        </Card.Text>
 
-                <Card.Text
-                  className="mt-3 mb-0"
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: "600",
-                    color: "#1e90ff",
-                  }}
-                >
-                  <span
-                    style={{
-                      backgroundColor: "#e0f0ff",
-                      color: "#1e90ff",
-                      padding: "6px",
-                      borderRadius: "10px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "28px",
-                      height: "28px",
-                      marginRight: "8px",
-                    }}
-                  >
-                    <FaCalendarAlt style={{ fontSize: "14px" }} />
-                  </span>
-                  {new Date(complaint.timestamp).toDateString()}
-                </Card.Text>
+        {/* Likes, Dislikes, Category */}
+        <div className="mt-auto d-flex justify-content-between align-items-center pt-3">
+          <div className="d-flex align-items-center gap-3">
+            <span className="text-success d-flex align-items-center">
+              <HiOutlineThumbUp className="me-1" size={20} />
+              {complaint.likes}
+            </span>
+            <span className="text-danger d-flex align-items-center">
+              <HiOutlineThumbDown className="me-1" size={20} />
+              {complaint.dislikes}
+            </span>
+          </div>
+          <span className="category-tag1">{complaint.category}</span>
+        </div>
+      </Card>
+    </Col>
+  ))}
+</Row>
 
-                <Card.Title className="fw-bold text-dark mt-3">
-                  {complaint.title}
-                </Card.Title>
 
-                <Card.Text className="text-secondary mb-2">
-                  {complaint.description.split(" ").length > 38 ? (
-                    <>
-                      {expandedCardId === complaint.complaint_id
-                        ? complaint.description
-                        : complaint.description
-                            .split(" ")
-                            .slice(0, 38)
-                            .join(" ") + "..."}
-                      <span
-                        className="ms-2 text-secondary fw-semibold"
-                        role="button"
-                        onClick={() => toggleExpand(complaint.complaint_id)}
-                      >
-                        {expandedCardId === complaint.complaint_id
-                          ? "View less"
-                          : "View more"}
-                      </span>
-                    </>
-                  ) : (
-                    complaint.description
-                  )}
-                </Card.Text>
-
-                <div className="mt-auto d-flex justify-content-between align-items-center pt-3">
-                  <div className="d-flex align-items-center gap-3">
-                    <span className="text-success d-flex align-items-center">
-                      <HiOutlineThumbUp className="me-1" size={20} />
-                      {complaint.likes}
-                    </span>
-                    <span className="text-danger d-flex align-items-center">
-                      <HiOutlineThumbDown className="me-1" size={20} />
-                      {complaint.dislikes}
-                    </span>
-                  </div>
-                  <span className="category-tag1">{complaint.category}</span>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
       )}
     </div>
   );

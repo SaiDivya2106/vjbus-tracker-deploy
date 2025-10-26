@@ -331,7 +331,7 @@ const ComplaintForm = () => {
                 </div>
               )}
             </div>
-            <p className="file-size-note">Preferred size: ≤ 200KB</p>
+            <p className="file-size-note">Preferred size: ≤ 1.5MB</p>
           </div>
         </div>
 

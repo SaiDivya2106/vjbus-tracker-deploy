@@ -151,6 +151,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease; /* Added transform */
+  margin-right: 20px;
 }
 
 .custom-pencil-button:active {
@@ -316,3 +317,21 @@
 
 
 
+.complaint-image-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.complaint-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.status-overlay {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
