@@ -132,14 +132,11 @@ const DEFAULT_IMAGE = NoImageIcon;
   const data = res.data?.complaints || [];
   setComplaints(data);
 
-  // Track votes
+  // ✅ Now directly store userVotes
   const votes = {};
   data.forEach((complaint) => {
-    if (Array.isArray(complaint.votedUsers)) {
-      const userVote = complaint.votedUsers.find(
-        (v) => v.email === user?.email
-      );
-      if (userVote) votes[complaint.complaint_id] = userVote.vote;
+    if (complaint.userVote) {
+      votes[complaint.complaint_id] = complaint.userVote;
     }
   });
   setUserVotes(votes);
@@ -147,18 +144,15 @@ const DEFAULT_IMAGE = NoImageIcon;
 } catch (err) {
   console.error("Error fetching complaints:", err);
 
-  // 🔥 Check 403 response
   if (err.response && err.response.status === 403) {
-
-    // Remove bad token
     localStorage.removeItem("authToken");
-
-    // Redirect
     navigate("/complaints-website");
   }
 } finally {
   setLoading(false);
 }
+
+
 };
 
 
@@ -860,28 +854,36 @@ const handleDeleteComplaint = async (id) => {
       <Card.Text className="text-dark mb-3">{expandedCard.description}</Card.Text>
 
       {/* Admin Comments */}
-      <div className="admin-updates mb-3">
-        <h5 className="mb-2">
-          <MdOutlineTextsms className="me-2" /> Admin Updates:
-        </h5>
-        {expandedCard.comments.map((comment) => (
-          <div
-            key={comment.id}
-            className="update-entry mb-2 p-3"
-            style={{
-              backgroundColor: "#f8f9fa",
-              borderLeft: "4px solid purple",
-              borderRadius: "10px",
-            }}
-          >
-            <div className="d-flex align-items-center mb-1">
-              <FaUser className="me-2 text-purple" size={18} />
-              <strong>{comment.email}</strong>
-            </div>
-            <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
-          </div>
-        ))}
+<div className="admin-updates mb-3">
+  <h5 className="mb-2">
+    <MdOutlineTextsms className="me-2" /> Admin Updates:
+  </h5>
+
+  {expandedCard.comments && expandedCard.comments.length > 0 ? (
+    expandedCard.comments.map((comment) => (
+      <div
+        key={comment.id}
+        className="update-entry mb-2 p-3"
+        style={{
+          backgroundColor: "#f8f9fa",
+          borderLeft: "4px solid purple",
+          borderRadius: "10px",
+        }}
+      >
+        <div className="d-flex align-items-center mb-1">
+          <FaUser className="me-2 text-purple" size={18} />
+          <strong>{comment.email}</strong>
+        </div>
+        <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
       </div>
+    ))
+  ) : (
+    <p className="text-muted" style={{ marginLeft: "1.8rem" }}>
+      No admin updates yet.
+    </p>
+  )}
+</div>
+
 
       {/* Footer: category + votes */}
       <div className="mt-auto d-flex w-100 align-items-center pt-2 px-0">

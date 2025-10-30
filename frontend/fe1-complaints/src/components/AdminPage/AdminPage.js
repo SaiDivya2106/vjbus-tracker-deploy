@@ -693,7 +693,7 @@ try {
               navigate(`/complaints-details/${complaint.complaint_id}`)
             }
           >
-            <FaEdit size={28} className="pencil-icon" />
+            <FaEdit  size={28} className="edit-icon-purple" style={{ cursor: "pointer" }} />
           </Button>
         </div>
 

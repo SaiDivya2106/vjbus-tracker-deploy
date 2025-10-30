@@ -364,6 +364,7 @@ import axios from "axios";
 import { CheckCircleFill } from "react-bootstrap-icons";
 import "./UserDashboard.css";
 import NoImageIcon from "../images/no-img-icon.png";
+import {useRef } from "react"; // 👈 add useRef here
 
 const CATEGORIES = [
   "Infrastructure",
@@ -385,6 +386,8 @@ const CATEGORIES = [
   "Others",
 ];
 
+
+
 const STATUSES = ["Pending", "Ongoing", "Resolved"];
 
 const UserDashboard = () => {
@@ -403,10 +406,16 @@ const UserDashboard = () => {
   const [editWarning, setEditWarning] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState(null);
-
+  const warningRef = useRef(null);
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
 
   const DEFAULT_IMAGE = NoImageIcon;
+
+  useEffect(() => {
+  if (editWarning && warningRef.current) {
+    warningRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}, [editWarning]);
 
   // Fetch user complaints
   useEffect(() => {
@@ -529,6 +538,9 @@ const UserDashboard = () => {
       const description = editForm.description.trim();
       if (!title || !description) {
         setEditWarning("⚠ Title and description cannot be empty.");
+        if (warningRef.current) {
+        warningRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
         return;
       }
 
@@ -694,7 +706,7 @@ const UserDashboard = () => {
                       <button className="admin-update-btn" onClick={() => setExpandedCard(complaint)}>Show Admin Updates <ChevronDown size={18} /></button>
                     )}
 
-                    <div className="mt-auto d-flex w-100 align-items-center pt-2 px-0">
+                    {/* <div className="mt-auto d-flex w-100 align-items-center pt-2 px-0">
                       <span className="category-tag px-2 py-1 rounded-pill me-auto" style={{ fontSize: "0.8rem" }}>{complaint.category}</span>
                       <div className="d-flex align-items-center gap-3 ms-auto">
                         <button className={`btnscolor d-flex align-items-center gap-1 px-2 py-1 rounded-pill shadow-sm border-0 ${userVotes[complaint.complaint_id] === "upvote" ? "bg-success text-white" : "text-success"}`} onClick={() => handleVote(complaint.complaint_id, "upvote")} style={{ fontSize: "1rem" }}>
@@ -704,7 +716,21 @@ const UserDashboard = () => {
                           <ThumbsDown size={20} />{complaint.dislikes}
                         </button>
                       </div>
-                    </div>
+                    </div> */}
+                    <div className="mt-auto d-flex w-100 align-items-center pt-2 px-0">
+  <span className="category-tag px-2 py-1 rounded-pill me-auto" style={{ fontSize: "0.8rem" }}>
+    {complaint.category}
+  </span>
+  <div className="d-flex align-items-center gap-3 ms-auto">
+    <div className="d-flex align-items-center gap-1 text-success">
+      <ThumbsUp size={20} /> <span>{complaint.likes}</span>
+    </div>
+    <div className="d-flex align-items-center gap-1 text-danger">
+      <ThumbsDown size={20} /> <span>{complaint.dislikes}</span>
+    </div>
+  </div>
+</div>
+
                   </Card>
                 </Col>
               ))
@@ -874,6 +900,7 @@ const UserDashboard = () => {
           className="form-control"
           value={editForm.category}
           onChange={handleEditChange}
+          disabled
         >
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
@@ -938,14 +965,24 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {editWarning && (
+      {/* {editWarning && (
         <div
           className="alert alert-warning text-center mb-3"
           style={{ borderRadius: "10px", fontWeight: 500 }}
         >
           ⚠ {editWarning}
         </div>
-      )}
+      )} */}
+
+{editWarning && (
+  <div
+    ref={warningRef} // 👈 add this line
+    className="alert alert-warning text-center mb-3"
+    style={{ borderRadius: "10px", fontWeight: 500 }}
+  >
+    ⚠ {editWarning}
+  </div>
+)}
 
       {/* Save Button */}
       <div className="modal-footer mt-2 text-center">

@@ -71,13 +71,17 @@ const token = localStorage.getItem("authToken");
 
 await axios.put(
   `${baseUrl}/admin-api/update-status/${complaint_id}`,
-  { status: updatedStatus },
+  { 
+    status: updatedStatus,
+    adminEmail: user.email   // ✅ send admin's email
+  },
   {
     headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
+      Authorization: `Bearer ${token}`, // ✅ keep the token for verification
     },
   }
 );
+
 
       setComplaint((prev) => ({ ...prev, status: updatedStatus }));
       toast.success(`Status updated to: ${updatedStatus}`, {
@@ -152,10 +156,14 @@ await axios.delete(
   `${baseUrl}/admin-api/delete-complaint/${complaint_id}`,
   {
     headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
+      Authorization: `Bearer ${token}`, // ✅ keep token
+    },
+    data: {
+      adminEmail: user.email, // ✅ send admin email to backend
     },
   }
 );
+
 
       alert("Complaint has been deleted successfully.");
       navigate("/adminpage");

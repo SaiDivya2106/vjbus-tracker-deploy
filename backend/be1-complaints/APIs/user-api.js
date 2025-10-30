@@ -121,59 +121,86 @@ userApp.post(
     try {
       const resultInsert = await complaintsCollectionObj.insertOne(newComplaint);
 
-     if (resultInsert.acknowledged) {
-  const formattedTimestamp = new Date(newComplaint.timestamp).toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    dateStyle: "long",
-    timeStyle: "short",
-  });
+      if (resultInsert.acknowledged) {
+        // 👇 Format timestamp
+        const formattedTimestamp = new Date(newComplaint.timestamp).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          dateStyle: "long",
+          timeStyle: "short",
+        });
 
-  const admins = await adminsCollectionObj.find({ category }).toArray();
-  if (admins.length > 0) {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.ADMIN_EMAIL,
-        pass: process.env.ADMIN_PASS,
-      },
-    });
+        // 👇 Immediately send response to frontend
+        const { user_id, ...complaintWithoutUserId } = newComplaint;
+        res.status(201).json({
+          message: "Complaint added successfully. Admins will be notified shortly.",
+          complaint: complaintWithoutUserId,
+        });
 
-    const mailPromises = admins.map((admin) => {
-      const mailOptions = {
-        from: process.env.ADMIN_EMAIL,
-        to: admin.email,
-        subject: `New Complaint in ${category}`,
-        html: `
-          <p>Dear Admin,</p>
-          <p>A new complaint has been submitted in your assigned category: <strong>${category}</strong>.</p>
-          <p><strong>Complaint Details:</strong></p>
-          <ul>
-            <li><strong>Title:</strong> ${title}</li>
-            <li><strong>Description:</strong> ${description}</li>
-            <li><strong>Complaint ID:</strong> ${complaint_id}</li>
-            <li><strong>Status:</strong> Pending</li>
-            <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
-            ${image ? `<li><strong>Image:</strong> <a href="${image}">View Image</a></li>` : ""}
-          </ul>
-          <p><a href="https://thrive.vjstartup.com">View and manage the complaint</a></p>
-          <p>Please take action as soon as possible.</p>
-          <p>Regards,<br>Complaint Management System</p>
-        `,
-      };
-      return transporter.sendMail(mailOptions);
-    });
+        // 👇 Run email sending asynchronously (non-blocking)
+        setImmediate(async () => {
+          try {
+            const admins = await adminsCollectionObj.find({ category }).toArray();
+            if (admins.length > 0) {
+              const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                  user: process.env.ADMIN_EMAIL,
+                  pass: process.env.ADMIN_PASS,
+                },
+              });
 
-    await Promise.all(mailPromises);
-  }
+              const mailPromises = admins.map((admin) => {
+                const mailOptions = {
+                  from: process.env.ADMIN_EMAIL,
+                  to: admin.email,
+                  subject: `New Complaint: ${title} in ${category}`,
+                  html: `
+                    <p>Dear Admin,</p>
+                    <p>A new complaint has been submitted in your assigned category: <strong>${category}</strong>.</p>
+                    <p><strong>Complaint Details:</strong></p>
+                    <ul>
+                      <li><strong>Title:</strong> ${title}</li>
+                      <li><strong>Description:</strong> ${description}</li>
+                      <li><strong>Complaint ID:</strong> ${complaint_id}</li>
+                      <li><strong>Status:</strong> Pending</li>
+                      <li><strong>Submitted on:</strong> ${formattedTimestamp}</li>
+                      ${
+                        image
+                          ? `<li><strong>Image:</strong><br>
+                              <a href="${image}" 
+                                 target="_blank" 
+                                 style="
+                                   display: inline-block;
+                                   padding: 8px 16px;
+                                   background-color: #3b7abeff;
+                                   color: white;
+                                   text-decoration: none;
+                                   border-radius: 16px;
+                                   font-weight: 500;
+                                   margin-top: 6px;
+                                 ">
+                                📷 Click to View Image
+                              </a>
+                             </li>`
+                          : ""
+                      }
+                    </ul>
+                    <p><a href="https://thrive.vjstartup.com">View and manage the complaint</a></p>
+                    <p>Please take action as soon as possible.</p>
+                    <p>Regards,<br>Complaint Management System</p>
+                  `,
+                };
+                return transporter.sendMail(mailOptions);
+              });
 
-  // 👇 remove user_id before sending back the response
-  const { user_id, ...complaintWithoutUserId } = newComplaint;
-
-  res.status(201).json({
-    message: "Complaint added successfully and email sent to all admins in category",
-    complaint: complaintWithoutUserId, // 👈 user_id excluded here
-  });
-} else {
+              await Promise.all(mailPromises);
+              console.log(`✅ Emails sent to ${admins.length} admins for category: ${category}`);
+            }
+          } catch (err) {
+            console.error("⚠️ Error sending admin emails:", err);
+          }
+        });
+      } else {
         res.status(500).json({ message: "Failed to add complaint" });
       }
     } catch (error) {
@@ -414,6 +441,7 @@ userApp.get(
   verifyGoogleToken,
   asyncHandler(async (req, res) => {
     const { category, status, dateRange, searchKeyword } = req.query;
+    const userEmail = req.user.email; // ✅ Extract from token (verifyGoogleToken adds this)
     let query = {};
 
     if (searchKeyword) query.$text = { $search: searchKeyword };
@@ -424,14 +452,33 @@ userApp.get(
       if (startDate && endDate) query.timestamp = { $gte: startDate, $lte: endDate };
     }
 
+    // Fetch all complaints but exclude large votedUsers data
     const complaints = await complaintsCollectionObj
-      .find(query, { projection: { user_id: 0 ,votedUsers: 0 } }) // 👈 exclude user_id field
+      .find(query)
       .sort({ timestamp: -1 })
       .toArray();
 
-    res.status(200).json({ complaints });
+    // ✅ Add `userVote` field for the logged-in user
+    const complaintsWithUserVote = complaints.map((complaint) => {
+      let userVote = null;
+      if (Array.isArray(complaint.votedUsers)) {
+        const voteObj = complaint.votedUsers.find(v => v.email === userEmail);
+        if (voteObj) userVote = voteObj.vote;
+      }
+
+      // Remove the votedUsers field before sending to frontend
+      const { votedUsers, user_id, ...rest } = complaint;
+
+      return {
+        ...rest,
+        userVote, // 👈 Add this field so frontend can know if the user upvoted or downvoted
+      };
+    });
+
+    res.status(200).json({ complaints: complaintsWithUserVote });
   })
 );
+
 
 
 // -------------------- EXPORT --------------------
