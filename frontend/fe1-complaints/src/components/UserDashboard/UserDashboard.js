@@ -417,28 +417,40 @@ const UserDashboard = () => {
   }
 }, [editWarning]);
 
-  // Fetch user complaints
   useEffect(() => {
-    if (!user?.email) return;
-    const token = localStorage.getItem("authToken");
-    axios
-      .get(`${baseUrl}/user-api/view-complaints/${user.email}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setComplaints(res.data.complaints || []);
+  if (!user?.email) return;
 
-        const votes = {};
-        (res.data.complaints || []).forEach((complaint) => {
-          if (Array.isArray(complaint.votedUsers)) {
-            const userVote = complaint.votedUsers.find((v) => v.email === user.email);
-            if (userVote) votes[complaint.complaint_id] = userVote.vote;
-          }
-        });
-        setUserVotes(votes);
-      })
-      .catch((err) => console.error(err));
-  }, [user]);
+  const token = localStorage.getItem("authToken");
+
+  axios
+    .get(`${baseUrl}/user-api/view-complaints/${user.email}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      setComplaints(res.data.complaints || []);
+
+      const votes = {};
+      (res.data.complaints || []).forEach((complaint) => {
+        if (Array.isArray(complaint.votedUsers)) {
+          const userVote = complaint.votedUsers.find(
+            (v) => v.email === user.email
+          );
+          if (userVote) votes[complaint.complaint_id] = userVote.vote;
+        }
+      });
+
+      setUserVotes(votes);
+    })
+    .catch((err) => {
+      console.error(err);
+
+      // ⭐ Handle token expiry
+      if (err.response && err.response.status === 401) {
+        localStorage.removeItem("authToken"); // Remove invalid token
+        navigate("/complaints-website");      // Redirect to login
+      }
+    });
+}, [user]);
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "Unknown Date";

@@ -34,32 +34,39 @@ const ComplaintsDetails = () => {
   };
   
   useEffect(() => {
-    const fetchComplaint = async () => {
-      try {
-// Get token from localStorage
-const token = localStorage.getItem("authToken");
+  const fetchComplaint = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
 
-const response = await axios.get(
-  `${baseUrl}/admin-api/view-complaint/${complaint_id}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
-    },
-  }
-);
+      const response = await axios.get(
+        `${baseUrl}/admin-api/view-complaint/${complaint_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-        const complaintData = response.data.complaint;
-        setComplaint({
-          ...complaintData,
-          comments: complaintData.comments || [],
-        });
-        setStatus(complaintData.status);
-      } catch (error) {
-        console.error("Error fetching complaint details:", error);
+      const complaintData = response.data.complaint;
+      setComplaint({
+        ...complaintData,
+        comments: complaintData.comments || [],
+      });
+      setStatus(complaintData.status);
+
+    } catch (error) {
+      console.error("Error fetching complaint details:", error);
+
+      // ⭐ If unauthorized (token expired/invalid)
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        navigate("/complaints-website");
       }
-    };
-    fetchComplaint();
-  }, [complaint_id]);
+    }
+  };
+
+  fetchComplaint();
+}, [complaint_id]);
 
   const handleStatusChange = async (e) => {
     const updatedStatus = e.target.value;
@@ -189,7 +196,7 @@ await axios.delete(
         </button>
 
 <div className="complaint-header-wrapper d-flex justify-content-between align-items-center mt-4 mb-3 px-2">
-  <h1 className="page-title fs-2 fw-bold mb-0">Complaint Details</h1>
+  <h1 className="page-title fs-2 fw-bold mb-0">Request Details</h1>
   <button
     className="btn btn-danger delete-icon-btn"
     onClick={handleDeleteComplaint}

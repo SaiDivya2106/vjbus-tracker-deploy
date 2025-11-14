@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './UserAnalysis.css';
 import { CheckCircle2, Timer, AlertTriangle, Trophy, FileX2 } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 
 const UserAnalysis = () => {
   const [data, setData] = useState(null);
@@ -11,23 +11,31 @@ const UserAnalysis = () => {
   const [loading, setLoading] = useState(true);
 
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
+const navigate = useNavigate();
 
 useEffect(() => {
-  const token = localStorage.getItem("authToken"); // Get token from localStorage
-  setLoading(true); // start loading
+  const token = localStorage.getItem("authToken");
+  setLoading(true);
 
   axios
     .get(`${baseUrl}/user-api/complaints/summary`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Add Authorization header
+        Authorization: `Bearer ${token}`,
       },
     })
     .then((res) => setData(res.data))
     .catch((err) => {
       console.error("Error fetching data:", err);
+
+      // ⭐ Check if unauthorized
+      if (err.response && err.response.status === 401) {
+        localStorage.removeItem("authToken"); // Remove token
+        navigate("/complaints-website");      // Redirect
+      }
+
       setData(null);
     })
-    .finally(() => setLoading(false)); // stop loading
+    .finally(() => setLoading(false));
 }, []);
 
 
@@ -91,7 +99,7 @@ useEffect(() => {
   if (loading) {
     return (
       <div className="loading-state">
-        <p>Loading complaints...</p>
+        <p>Loading requests...</p>
       </div>
     );
   }
@@ -102,7 +110,7 @@ useEffect(() => {
       <div className="empty-state">
         <FileX2 size={48} className="empty-icon" />
         <h3>No Complaints Found</h3>
-        <p>There are no complaints yet.</p>
+        <p>There are no requests yet.</p>
       </div>
     );
   }
@@ -116,10 +124,10 @@ useEffect(() => {
         <div className="tracker-header">
            <div className="header-inline">
     <div className="icon">📊</div>
-    <h2>Complaints Resolution Tracker</h2>
+    <h2>Requests Resolution Tracker</h2>
   </div>
           <p>
-            Track the progress and effectiveness of complaint resolution across all categories.
+            Track the progress and effectiveness of request resolution across all categories.
             <br />
             Transparency in action.
           </p>

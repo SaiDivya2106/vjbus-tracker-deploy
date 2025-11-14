@@ -204,7 +204,7 @@ const ComplaintForm = () => {
             <span className="icon-circle">
               <PersonFill size={18} color={lightBlue} />
             </span>{" "}
-            Complaint Title *
+            Request Title *
           </label>
           <input
             type="text"
@@ -339,14 +339,14 @@ const ComplaintForm = () => {
         <p className="complaint-note mt-3 d-flex align-items-center">
           <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
           <span>
-            False or invalid complaints are strictly prohibited. Only genuine issues will be considered.
+            False or invalid requests are strictly prohibited. Only genuine issues will be considered.
           </span>
         </p>
 
         {/* Submit */}
         <button type="submit" className="submit-btn" disabled={loading}>
           <Send style={{ marginRight: "8px", verticalAlign: "middle" }} size={18} color="#fff" />
-          {loading ? "Submitting..." : "Register Complaint"}
+          {loading ? "Submitting..." : "Register Request"}
         </button>
 
         {warning && (
@@ -362,7 +362,7 @@ const ComplaintForm = () => {
       <Modal show={showSuccess} onHide={() => setShowSuccess(false)} centered>
         <Modal.Body className="text-center p-5">
           <CheckCircleFill className="success-icon" />
-          <h5 className="text-success">Complaint Registered Successfully!</h5>
+          <h5 className="text-success">Request Registered Successfully!</h5>
         </Modal.Body>
       </Modal>
 

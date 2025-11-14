@@ -55,7 +55,7 @@ const LandingPage = () => {
           <Col md={6} className="content-col">
             <div className="brand-section">
               <h1 className="app-name">THRIVE</h1>
-              <p className="fs-3 fw-semibold">VNRVJIET Complaints System</p>
+              <p className="fs-3 fw-semibold">VNRVJIET Reporting & Resolution Portal</p>
             </div>
 
             {user ? (
@@ -64,7 +64,7 @@ const LandingPage = () => {
                   Welcome back, <span>{user.name || user.email}</span>
                 </h2>
                 <p className="instruction-text">
-                  Help us maintain campus standards by reporting issues or tracking existing complaints
+                  Help us maintain campus standards by reporting issues or tracking existing requests
                 </p>
 
                 <div className="action-btns">
@@ -73,14 +73,14 @@ const LandingPage = () => {
                     className="action-btn"
                     onClick={() => navigate("/all-complaints")}
                   >
-                    <i className="bi bi-list-check me-2"></i> View Complaints
+                    <i className="bi bi-list-check me-2"></i> View Requests
                   </Button>
                   <Button
                     variant="success"
                     className="action-btn"
                     onClick={() => navigate("/complaint-form")}
                   >
-                    <i className="bi bi-plus-circle me-2"></i> Report New Issue
+                    <i className="bi bi-plus-circle me-2"></i> Report New Request
                   </Button>
                 </div>
               </div>
@@ -94,11 +94,11 @@ const LandingPage = () => {
                 <ul className="features">
                   <li className="fw-medium">
                     <FaShieldAlt className="feature-icon text-primary me-2" />
-                    Secure & confidential complaint submission
+                    Secure & confidential request submission
                   </li>
                   <li className="fw-medium">
                     <FaClock className="feature-icon text-primary me-2" />
-                    Real-time tracking of complaint status
+                    Real-time tracking of request status
                   </li>
                   <li className="fw-medium">
                     <FaHeadset className="feature-icon text-primary me-2" />

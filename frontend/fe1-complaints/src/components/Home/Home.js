@@ -144,7 +144,7 @@ const DEFAULT_IMAGE = NoImageIcon;
 } catch (err) {
   console.error("Error fetching complaints:", err);
 
-  if (err.response && err.response.status === 403) {
+  if (err.response && err.response.status === 401) {
     localStorage.removeItem("authToken");
     navigate("/complaints-website");
   }
@@ -566,7 +566,7 @@ const handleDeleteComplaint = async (id) => {
       ) : filteredComplaints.length === 0 ? (
         <div className="text-center text-muted mt-5 mb-5 fs-5 d-flex flex-column align-items-center">
           <FileX size={64} className="iconn mb-3 text-secondary" />
-          <h5 className="text-dark fw-semibold">No complaints available</h5>
+          <h5 className="text-dark fw-semibold">No requests available</h5>
         </div>
       ) : (
         <div className={expandedCard ? "blurred-background" : ""}>

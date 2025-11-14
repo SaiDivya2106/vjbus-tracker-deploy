@@ -331,6 +331,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./AdminAnalysis.css";
 import { useAuth } from "../../Context/AuthContext";
 import { FaCheckCircle, FaClock, FaExclamationCircle, FaChartLine } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 // Register ChartJS components
 ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale);
@@ -345,6 +346,8 @@ const AdminAnalysis = () => {
   });
 
   const { adminCategory } = useAuth();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchComplaintCounts = async () => {
@@ -362,6 +365,11 @@ const AdminAnalysis = () => {
           setComplaintsData(response.data);
         } catch (error) {
           console.error("Error fetching complaint counts:", error);
+                  // ⭐ If unauthorized (token expired / invalid)
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("authToken");     // Remove token
+          navigate("/complaints-website");          // Redirect user
+        }
         }
       }
     };
@@ -447,7 +455,7 @@ const barData = (canvas) => {
 
   return (
     <div className="statistics-page text-center">
-      <h2 className="text-center mb-4 fw-bold">Admin Complaint Statistics 📊</h2>
+      <h2 className="text-center mb-4 fw-bold">Admin Request Statistics 📊</h2>
 
       {/* Chart */}
       <div className="d-flex justify-content-center">
@@ -457,7 +465,7 @@ const barData = (canvas) => {
             Performance Overview
           </h5>
           <p className="chart-subtitle">
-            Interactive visualization of complaint resolution metrics
+            Interactive visualization of request resolution metrics
           </p>
           <div className="chart-container">
             {/* <Bar data={(canvas) => barData(canvas)} options={chartOptions} /> */}
@@ -471,7 +479,7 @@ const barData = (canvas) => {
       <div className="summary-cards mt-5 d-flex justify-content-center gap-4 flex-wrap">
         <div className="card-box total">
           <FaChartLine size={55} className="card-icon" />
-          <h6 className="card-title1">TOTAL COMPLAINTS</h6>
+          <h6 className="card-title1">TOTAL REQUESTS</h6>
           <div className="card-number">
             {complaintsData.resolved +
               complaintsData.pending +

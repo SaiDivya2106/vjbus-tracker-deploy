@@ -447,7 +447,7 @@ try {
   });
 
   // ✅ Handle token expired or invalid
-  if (response?.status === 403 || response?.data?.message === "Invalid or expired token") {
+  if (response?.status === 401 || response?.data?.message === "Invalid or expired token") {
     localStorage.removeItem("authToken");
     alert("Session expired. Please login again.");
     navigate("/complaints-website");
@@ -524,7 +524,7 @@ try {
     <div className="container adminpage">
       <div className="text-center mt-3 mb-4">
         <p className="adminheading">
-          Admin Complaints Dashboard{" "}
+          Admin Requests Dashboard{" "}
           <sup className="text-muted">
             {categories.length > 1
               ? "Multiple Categories"
@@ -608,21 +608,21 @@ try {
       {loading ? (
         <div className="loading-wrapper">
           <div className="spinner" />
-          <p className="text-muted mt-3">Loading complaints...</p>
+          <p className="text-muted mt-3">Loading requests...</p>
         </div>
       ) : complaints.length === 0 ? (
         <div className="text-center text-muted mt-5 mb-5 fs-5 d-flex flex-column align-items-center">
           <FileX size={64} className="iconn mb-3 text-secondary" />
-          <h5 className="text-dark fw-semibold">No complaints available</h5>
+          <h5 className="text-dark fw-semibold">No requests available</h5>
           {selectedCategory && statusFilter === "All" && (
             <p>
-              No complaints have been submitted in{" "}
+              No requests have been submitted in{" "}
               <strong>{selectedCategory}</strong> category yet.
             </p>
           )}
           {selectedCategory && statusFilter !== "All" && (
             <p>
-              No complaints in <strong>{selectedCategory}</strong> with{" "}
+              No requests in <strong>{selectedCategory}</strong> with{" "}
               <strong>{statusFilter}</strong> status.
             </p>
           )}

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-
+import axios from "axios";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -12,6 +12,28 @@ export const AuthProvider = ({ children }) => {
   const [refreshTimeout, setRefreshTimeout] = useState(null);
 
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
+
+  useEffect(() => {
+  const interceptor = axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error?.response?.status === 401) {
+        console.log("⛔ Token expired — logging out automatically");
+
+        logout(); // Use your existing logout function
+
+        // Redirect user to login page
+        window.location.href = "/complaints-website";
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  // Cleanup
+  return () => axios.interceptors.response.eject(interceptor);
+}, []);
+
+
 
   // --- Decode JWT ---
   const decodeJwt = (token) => JSON.parse(atob(token.split(".")[1]));
