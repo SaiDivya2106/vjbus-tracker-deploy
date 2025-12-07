@@ -437,12 +437,13 @@ adminApp.post(
       return res.status(400).json({ message: "Comment text and admin email are required" });
     }
 
-    // ✅ Create comment object directly (no DB lookup)
+    // ✅ Create comment object with role and timestamp (compatible with new structure)
     const comment = {
       id: new Date().getTime(),
       text,
-      date: new Date().toISOString(),
-      email: adminEmail, // directly use from frontend
+      role: "admin", // Admin comment
+      timestamp: new Date().toISOString(),
+      email: adminEmail, // Keep for backward compatibility
     };
 
     // ✅ Add comment to complaint
@@ -765,5 +766,176 @@ adminApp.post('/superadmin/complaints/:id/action', asyncHandler(async (req, res)
 
 
 
+
+// ✅ CHANGE CATEGORY ENDPOINT (escalate/reassign complaint to another category)
+adminApp.put(
+  '/change-category/:complaint_id',
+  verifyGoogleToken,
+  asyncHandler(async (req, res) => {
+    const { complaint_id } = req.params;
+    const { newCategory, adminEmail } = req.body;
+
+    if (!complaint_id || !newCategory || !adminEmail) {
+      return res.status(400).json({ message: "Complaint ID, new category, and admin email are required" });
+    }
+
+    // Find complaint
+    const complaint = await complaintsCollectionObj.findOne({ complaint_id });
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    const oldCategory = complaint.category;
+    const studentEmail = complaint.user_id;
+    const complaintTitle = complaint.title;
+
+    // Verify admin is authorized for old category
+    const admin = await adminsCollectionObj.findOne({ email: adminEmail, category: oldCategory });
+    if (!admin) {
+      return res.status(403).json({ message: "You are not authorized to change this complaint's category" });
+    }
+
+    // Update complaint category
+    const updateResult = await complaintsCollectionObj.updateOne(
+      { complaint_id },
+      { $set: { category: newCategory } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(500).json({ message: "Failed to update category" });
+    }
+
+    // Setup email transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.ADMIN_EMAIL,
+        pass: process.env.ADMIN_PASS
+      }
+    });
+
+    // Email 1: Send to student (Anonymous format with IT details if applicable)
+    const isITCategory = newCategory.toLowerCase().includes('it') && newCategory.toLowerCase().includes('network');
+    const itDetailsHTML = isITCategory && complaint.it_details ? `
+      <p><strong>IT Details:</strong></p>
+      <ul>
+        ${complaint.it_details.room_number ? `<li><strong>Room Number:</strong> ${complaint.it_details.room_number}</li>` : ''}
+        ${complaint.it_details.internet_speed ? `<li><strong>Internet Speed:</strong> ${complaint.it_details.internet_speed}</li>` : ''}
+        ${complaint.it_details.issue_duration ? `<li><strong>Issue Duration:</strong> ${complaint.it_details.issue_duration}</li>` : ''}
+        ${complaint.it_details.mobile_number ? `<li><strong>Mobile Number:</strong> ${complaint.it_details.mobile_number}</li>` : ''}
+      </ul>
+    ` : '';
+    
+    const studentMailOptions = {
+      from: process.env.ADMIN_EMAIL,
+      to: studentEmail,
+      subject: `Complaint Reassigned to ${newCategory}`,
+      html: `
+        <p>Dear Student,</p>
+        <p>Your complaint has been moved to <strong>${newCategory}</strong> by the administration.</p>
+        <p><strong>Complaint Title:</strong> ${complaintTitle}</p>
+        <p><strong>Complaint ID:</strong> ${complaint_id}</p>
+        <p><strong>Previous Department:</strong> ${oldCategory}</p>
+        <p><strong>New Department:</strong> ${newCategory}</p>
+        ${itDetailsHTML}
+        <p>The appropriate team will now review and assist with your request.</p>
+        <p>Thank you for your patience.</p>
+        <p>Best regards,<br>Complaint Management Team</p>
+      `
+    };
+
+    // Email 2: Send to new category admin(s) with IT details
+    const newCategoryAdmins = await adminsCollectionObj.find({ category: newCategory }).toArray();
+    const adminEmails = newCategoryAdmins.map(a => a.email).join(", ");
+
+    const adminITDetailsHTML = isITCategory && complaint.it_details ? `
+      <p><strong>IT Details:</strong></p>
+      <ul>
+        ${complaint.it_details.room_number ? `<li><strong>Room Number:</strong> ${complaint.it_details.room_number}</li>` : ''}
+        ${complaint.it_details.internet_speed ? `<li><strong>Internet Speed:</strong> ${complaint.it_details.internet_speed}</li>` : ''}
+        ${complaint.it_details.issue_duration ? `<li><strong>Issue Duration:</strong> ${complaint.it_details.issue_duration}</li>` : ''}
+        ${complaint.it_details.mobile_number ? `<li><strong>Mobile Number:</strong> ${complaint.it_details.mobile_number}</li>` : ''}
+      </ul>
+    ` : '';
+
+    const adminMailOptions = {
+      from: process.env.ADMIN_EMAIL,
+      to: adminEmails,
+      subject: `New Complaint Assigned to Your Department: ${complaintTitle}`,
+      html: `
+        <p>Dear Admin Team,</p>
+        <p>A new complaint has been assigned to your department after category change.</p>
+        <p><strong>Complaint Details:</strong></p>
+        <ul>
+          <li><strong>Title:</strong> ${complaintTitle}</li>
+          <li><strong>Complaint ID:</strong> ${complaint_id}</li>
+          <li><strong>Category:</strong> ${newCategory}</li>
+          <li><strong>Previous Category:</strong> ${oldCategory}</li>
+          <li><strong>Status:</strong> ${complaint.status}</li>
+          <li><strong>Description:</strong> ${complaint.description}</li>
+          <li><strong>Submitted on:</strong> ${new Date(complaint.timestamp).toLocaleString()}</li>
+          ${complaint.image ? `<li><strong>Image:</strong> <a href="${complaint.image}" target="_blank">View Image</a></li>` : ''}
+        </ul>
+        ${adminITDetailsHTML}
+        <p>Please review and take necessary action.</p>
+        <p>Best regards,<br>Complaint Management System</p>
+      `
+    };
+
+    // Send both emails asynchronously
+    transporter.sendMail(studentMailOptions)
+      .then(() => console.log("✅ Category change email sent to student"))
+      .catch(err => console.error("❌ Error sending student email:", err));
+
+    transporter.sendMail(adminMailOptions)
+      .then(() => console.log("✅ New assignment email sent to admin(s)"))
+      .catch(err => console.error("❌ Error sending admin email:", err));
+
+    res.status(200).json({
+      message: `Complaint category changed from ${oldCategory} to ${newCategory}. Emails sent to student and new category admins.`,
+      oldCategory,
+      newCategory
+    });
+  })
+);
+
+// ✅ GET REOPENED COMPLAINTS FOR NOTIFICATION
+adminApp.get(
+  '/get-reopened-complaints',
+  verifyGoogleToken,
+  asyncHandler(async (req, res) => {
+    const { categories } = req.query;
+
+    if (!categories) {
+      return res.status(400).json({
+        message: "Categories parameter is required",
+      });
+    }
+
+    const categoriesArray = Array.isArray(categories)
+      ? categories
+      : categories.split(",");
+
+    try {
+      // Find all Reopened complaints in the admin's categories that have recent comments
+      const reopenedComplaints = await complaintsCollectionObj
+        .find({
+          status: "Reopened",
+          category: { $in: categoriesArray },
+        })
+        .sort({ lastCommentAt: -1 })
+        .limit(10)
+        .toArray();
+
+      res.status(200).json({
+        message: "Reopened complaints retrieved",
+        complaints: reopenedComplaints,
+      });
+    } catch (error) {
+      console.error("Error fetching reopened complaints:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  })
+);
 
 module.exports = adminApp;

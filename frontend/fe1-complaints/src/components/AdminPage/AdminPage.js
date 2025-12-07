@@ -329,10 +329,11 @@ import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { FileX } from "lucide-react";
 import "./AdminPage.css";
+import NotificationBell from "../NotificationBell/NotificationBell";
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { isAdmin, adminCategory } = useAuth();
+  const { isAdmin, adminCategory, user } = useAuth();
 
   const [complaints, setComplaints] = useState([]);
   const [sortOption, setSortOption] = useState("default");
@@ -514,7 +515,9 @@ try {
       case "Ongoing":
         return <span className="status-pill status-ongoing">Ongoing</span>;
       case "Resolved":
-        return <span className="status-pill status-resolved">Resolved</span>;
+        return <span className="status-pill status-resolved">✅ Resolved</span>;
+      case "Reopened":
+        return <span className="status-pill status-reopened">🔄 Reopened</span>;
       default:
         return null;
     }
@@ -523,14 +526,21 @@ try {
   return (
     <div className="container adminpage">
       <div className="text-center mt-3 mb-4">
-        <p className="adminheading">
-          Admin Requests Dashboard{" "}
-          <sup className="text-muted">
-            {categories.length > 1
-              ? "Multiple Categories"
-              : categories[0] || ""}
-          </sup>
-        </p>
+        <div className="d-flex align-items-center justify-content-center gap-3 mb-3">
+          <p className="adminheading mb-0">
+            Admin Requests Dashboard{" "}
+            <sup className="text-muted">
+              {categories.length > 1
+                ? "Multiple Categories"
+                : categories[0] || ""}
+            </sup>
+          </p>
+          <NotificationBell
+            baseUrl={baseUrl}
+            adminCategory={adminCategory}
+            user={user}
+          />
+        </div>
 
         <div className="filter-controls-wrapper mt-4 d-flex align-items-center gap-3">
           {/* Category dropdown if multiple categories */}

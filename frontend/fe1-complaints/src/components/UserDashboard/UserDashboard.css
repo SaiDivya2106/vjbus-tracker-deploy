@@ -802,4 +802,12 @@
   background-color: #f0f8ff;
 }
 
+.status-pill.status-reopened {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background-color: #ffe0e0;
+}
+
+
+
 

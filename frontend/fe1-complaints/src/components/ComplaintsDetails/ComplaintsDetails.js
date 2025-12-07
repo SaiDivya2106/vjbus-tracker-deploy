@@ -21,8 +21,11 @@ const ComplaintsDetails = () => {
   const [complaint, setComplaint] = useState(null);
   const [status, setStatus] = useState("");
   const [newComment, setNewComment] = useState("");
-  const {user}=useAuth()
+  const { user } = useAuth();
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
+
+  // determine if complaint is flagged (used to disable updates)
+  const isFlagged = complaint?.flagged === true || complaint?.flagged?.isFlagged === true;
 
   const formatDate = (isoString) => {
     const date = new Date(isoString);
@@ -36,21 +39,20 @@ const ComplaintsDetails = () => {
       hour12: true,
     });
   };
-  
+
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-// Get token from localStorage
-const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("authToken");
 
-const response = await axios.get(
-  `${baseUrl}/admin-api/view-complaint/${complaint_id}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
-    },
-  }
-);
+        const response = await axios.get(
+          `${baseUrl}/admin-api/view-complaint/${complaint_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const complaintData = response.data.complaint;
         setComplaint({
@@ -69,259 +71,295 @@ const response = await axios.get(
     const updatedStatus = e.target.value;
     setStatus(updatedStatus);
 
-    try {
-// Get token from localStorage
-const token = localStorage.getItem("authToken");
+    if (!user || !user.email) {
+      toast.error("Admin email missing. Please login again.");
+      return;
+    }
 
-await axios.put(
-  `${baseUrl}/admin-api/update-status/${complaint_id}`,
-  { status: updatedStatus },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
-    },
-  }
-);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      await axios.put(
+        `${baseUrl}/admin-api/update-status/${complaint_id}`,
+        { status: updatedStatus, adminEmail: user.email },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setComplaint((prev) => ({ ...prev, status: updatedStatus }));
-      toast.success(`Status updated to: ${updatedStatus}`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success(`Status updated to: ${updatedStatus}`);
     } catch (error) {
       console.error("Error updating status:", error);
-      toast.error("Failed to update status. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Failed to update status.");
     }
   };
 
- const handleCommentSubmit = async () => {
-  if (!newComment.trim()) return;
+  const handleCategoryChange = async (e) => {
+    const newCategory = e.target.value;
 
-  const newCommentObj = {
-    id: (complaint.comments.length || 0) + 1,
-    date: new Date().toISOString(),
-    text: newComment,
-  };
+    if (newCategory === complaint.category) {
+      toast.info("Please select a different category");
+      return;
+    }
 
-  try {
-   // Get token from localStorage
-const token = localStorage.getItem("authToken");
-
-await axios.post(
-  `${baseUrl}/admin-api/complaints/${complaint_id}/comment`,
-  {
-    text: newComment,
-    adminEmail: user.email,
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
-    },
-  }
-);
-
-
-    // Add comment to UI manually
-    setComplaint((prev) => ({
-      ...prev,
-      comments: [
-        ...(prev.comments || []),
-        {
-          id: new Date().getTime(),
-          text: newComment,
-          date: new Date().toISOString(),
-          email: user.email,
-        },
-      ],
-    }));
-
-    setNewComment(""); // clear the input
-  } catch (error) {
-    console.error("Error adding comment:", error);
-  }
-};
-
-
-  const handleDeleteComplaint = async () => {
-    if (!window.confirm("Are you sure you want to delete this complaint?")) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to move this complaint to ${newCategory}?`
+      )
+    ) {
+      return;
+    }
 
     try {
-      // Get token from localStorage
-const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("authToken");
 
-await axios.delete(
-  `${baseUrl}/admin-api/delete-complaint/${complaint_id}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`, // Add Bearer token
-    },
-  }
-);
+      await axios.put(
+        `${baseUrl}/admin-api/change-category/${complaint_id}`,
+        {
+          newCategory,
+          adminEmail: user.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      alert("Complaint has been deleted successfully.");
+      setComplaint((prev) => ({ ...prev, category: newCategory }));
+      toast.success(`Complaint moved to ${newCategory}.`);
+    } catch (error) {
+      console.error("Error changing category:", error);
+      toast.error("Failed to change category.");
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      await axios.post(
+        `${baseUrl}/admin-api/complaints/${complaint_id}/comment`,
+        {
+          text: newComment,
+          adminEmail: user.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setComplaint((prev) => ({
+        ...prev,
+        comments: [
+          ...(prev.comments || []),
+          {
+            id: new Date().getTime(),
+            text: newComment,
+            date: new Date().toISOString(),
+            email: user.email,
+          },
+        ],
+      }));
+
+      setNewComment("");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  const handleDeleteComplaint = async () => {
+    if (!window.confirm("Are you sure you want to delete this complaint?"))
+      return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!user || !user.email) {
+        toast.error("Admin email missing. Please login again.");
+        return;
+      }
+
+      await axios.delete(`${baseUrl}/admin-api/delete-complaint/${complaint_id}`, {
+        data: { adminEmail: user.email },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Complaint deleted successfully.");
       navigate("/adminpage");
     } catch (error) {
       console.error("Error deleting complaint:", error);
     }
   };
 
-  const handleBackClick = () => {
-    navigate("/adminpage");
-  };
+  const handleBackClick = () => navigate("/adminpage");
 
-  if (!complaint) {
-    return <div className="container">Loading complaint details...</div>;
-  }
+  if (!complaint) return <div className="container">Loading complaint...</div>;
 
   return (
     <div className="complaint-page">
       <ToastContainer />
       <div className="container">
+
         <button className="btn btn-outline-primary mb-3 mt-3" onClick={handleBackClick}>
           <i className="bi bi-arrow-left"></i> Back
         </button>
 
-<div className="complaint-header-wrapper d-flex justify-content-between align-items-center mt-4 mb-3 px-2">
-  <h1 className="page-title fs-2 fw-bold mb-0">Complaint Details</h1>
-  <button
-    className="btn btn-danger delete-icon-btn"
-    onClick={handleDeleteComplaint}
-    title="Delete Complaint"
-  >
-    <i className="bi bi-trash3-fill"></i>
-  </button>
-</div>
+        <div className="complaint-header-wrapper d-flex justify-content-between align-items-center mt-4 mb-3 px-2">
+          <h1 className="page-title fs-2 fw-bold mb-0">Complaint Details</h1>
+          <button className="btn btn-danger delete-icon-btn" onClick={handleDeleteComplaint}>
+            <i className="bi bi-trash3-fill"></i>
+          </button>
+        </div>
 
-
-        {/* MAIN SECTION (No Card) */}
+        {/* MAIN SECTION */}
         <div className="content-section">
-<div className="top-row d-flex justify-content-between align-items-center position-relative">
-  {/* Category badge */}
-  <span className="categoryb">
-    <BiCategoryAlt size={18} /> {complaint.category}
-  </span>
 
-  {/* Likes/Dislikes */}
-  <div className="engagement-box d-flex gap-3">
-    <div className="likes d-flex align-items-center gap-1">
-      <HiOutlineThumbUp size={24} /> {complaint.likes}
-    </div>
-    <div className="dislikes d-flex align-items-center gap-1">
-      <HiOutlineThumbDown size={24} /> {complaint.dislikes}
-    </div>
-  </div>
+          <div className="top-row d-flex justify-content-between align-items-center position-relative">
+            <span className="categoryb">
+              <BiCategoryAlt size={18} /> {complaint.category}
+            </span>
 
-  {/* Flag button - top-right corner with z-index */}
-  <div
-    className="position-absolute"
-    style={{ top: "10px", right: "10px", zIndex: 10 }}
-  >
-    <ComplaintCategoryWithFlag
-      complaintId={complaint.complaint_id}
-      baseUrl={baseUrl}
-      complaint={complaint}
-      user={user}
-      onFlagged={() => toast.success("Complaint flagged successfully!")}
-    />
-  </div>
-</div>
+            <div className="engagement-box d-flex gap-3">
+              <div className="likes d-flex align-items-center gap-1">
+                <HiOutlineThumbUp size={24} /> {complaint.likes}
+              </div>
+              <div className="dislikes d-flex align-items-center gap-1">
+                <HiOutlineThumbDown size={24} /> {complaint.dislikes}
+              </div>
+            </div>
 
-
-
+            <div
+              className="position-absolute"
+              style={{ top: "10px", right: "10px", zIndex: 10 }}
+            >
+              <ComplaintCategoryWithFlag
+                complaintId={complaint.complaint_id}
+                baseUrl={baseUrl}
+                complaint={complaint}
+                user={user}
+                onFlagged={() => toast.success("Complaint flagged!")}
+                disabled={isFlagged}
+              />
+            </div>
+          </div>
 
           <h1 className="h4 fw-bold">{complaint.title}</h1>
 
           <div className="complaint-meta mt-2">
             <span className="me-3">
-              <i className="bi bi-calendar3 me-1"></i> {formatDate(complaint.timestamp)}
+              <i className="bi bi-calendar3 me-1"></i>
+              {formatDate(complaint.timestamp)}
             </span>
-           
           </div>
-
-          {/* IT & Networking details (if present) */}
-          {(() => {
-            const cat = (complaint.category || "").toString().toLowerCase();
-            const isIt = cat.includes("it") && cat.includes("network");
-            const itRoom = complaint.it_details?.room_number || complaint.room_number;
-            const itSpeed = complaint.it_details?.internet_speed || complaint.internet_speed;
-            const itDuration = complaint.it_details?.issue_duration || complaint.issue_duration;
-            const itMobile = complaint.it_details?.mobile_number || complaint.mobile_number;
-
-            if (isIt && (itRoom || itSpeed || itDuration || itMobile)) {
-              return (
-                <div className="it-details-inline mb-3" style={{ color: "#333" }}>
-                  {itRoom && (
-                    <div className="d-flex align-items-center mb-1">
-                      <FaDoorOpen style={{ marginRight: 8, color: "#6c757d" }} />
-                      <small style={{ color: "#555" }}><strong>Room:</strong> {itRoom}</small>
-                    </div>
-                  )}
-                  {itSpeed && (
-                    <div className="d-flex align-items-center mb-1">
-                      <FiWifi style={{ marginRight: 8, color: "#6c757d" }} />
-                      <small style={{ color: "#555" }}><strong>Internet Speed:</strong> {itSpeed}</small>
-                    </div>
-                  )}
-                  {itDuration && (
-                    <div className="d-flex align-items-center mb-1">
-                      <FiClock style={{ marginRight: 8, color: "#6c757d" }} />
-                      <small style={{ color: "#555" }}><strong>Duration:</strong> {itDuration}</small>
-                    </div>
-                  )}
-                  {itMobile && (
-                    <div className="d-flex align-items-center mb-1">
-                      <IoMdCall style={{ marginRight: 8, color: "#6c757d" }} />
-                      <small style={{ color: "#555" }}><strong>Mobile:</strong> {itMobile}</small>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-            return null;
-          })()}
 
           <p className="mt-2 description-text">{complaint.description}</p>
 
-          {/* STATUS */}
-          <div className="update-status-box mt-3">
-            <span>Update Status:</span>
-            <select
-              className={`form-select ${status.toLowerCase()}-status`}
-              value={status}
-              onChange={handleStatusChange}
-            >
-              <option value="Pending">⏳ Pending</option>
-              <option value="Ongoing">🔄 Ongoing</option>
-              <option value="Resolved">✅ Resolved</option>
-            </select>
-          </div>
+{/* ⭐ FIXED - STATUS LEFT, CATEGORY RIGHT WITH LABELS */}
+<div className="d-flex justify-content-between align-items-start mt-4 flex-wrap">
 
-          <hr style={{ borderTop: "2px solid #666", marginTop: "1rem", marginBottom: "2rem" }} />
+  {/* LEFT SIDE - STATUS */}
+  <div className="status-box" style={{ minWidth: "240px" }}>
+    <label className="form-label fw-bold mb-1">Update Status</label>
+    <select
+      className={`form-select ${status.toLowerCase()}-status`}
+      value={status}
+      onChange={handleStatusChange}
+      disabled={isFlagged}
+    >
+      <option value="Pending">⏳ Pending</option>
+      <option value="Ongoing">🔄 Ongoing</option>
+      <option value="Resolved">✅ Resolved</option>
+    </select>
+  </div>
 
-          {/* COMMENTS */}
-          <div className="section-header">
-            <h3 className="comment-heading">
-              <i className="bi bi-chat-left-dots-fill"></i>Comments ({complaint.comments.length})
-            </h3>
-          </div>
+  {/* RIGHT SIDE - CATEGORY */}
+  <div className="category-box" style={{ minWidth: "280px" }}>
+    <label className="form-label fw-bold mb-1">Change Category(reassign/escalate)</label>
+    <select
+      className="form-select"
+      value={complaint.category}
+      onChange={handleCategoryChange}
+      disabled={isFlagged}
+    >
+      <option value={complaint.category}>{complaint.category} (current)</option>
+      <option value="Infrastructure">Infrastructure</option>
+      <option value="Canteen">Canteen</option>
+      <option value="Examination">Examination</option>
+      <option value="Fee Payments and Accounts">Fee Payments and Accounts</option>
+      <option value="Boys Hostel">Boys Hostel</option>
+      <option value="Girls Hostel">Girls Hostel</option>
+      <option value="Hostel Food">Hostel Food</option>
+      <option value="Extracurricular and Events">Extracurricular and Events</option>
+      <option value="Security">Security</option>
+      <option value="Sports">Sports</option>
+      <option value="Housekeeping">Housekeeping</option>
+      <option value="Audio-Visual Equipment">Audio-Visual Equipment</option>
+      <option value="Parking">Parking</option>
+      <option value="Transport">Transport</option>
+      <option value="Library">Library</option>
+      <option value="IT and Networking">IT and Networking</option>
+      <option value="Others">Others</option>
+    </select>
+  </div>
+
+</div>
+
+
+          <hr className="mt-4" />
+
+          {/* COMMENTS TIMELINE */}
+          <h3 className="comment-heading">
+            <i className="bi bi-chat-left-dots-fill"></i> Timeline (
+            {complaint.comments.length})
+          </h3>
 
           <div className="comments-container">
             {complaint.comments.length > 0 ? (
-              complaint.comments.map((comment) => (
-                <div key={comment.id} className="comment-card">
-                  <div className="comment-header">
-  <div className="author-wrapper">
-    <span className="comment-avatar">👤</span>
-    <span className="comment-author">{user.name || "Admin Team"}</span>
-  </div>
-  <div className="comment-date">{formatDate(comment.date)}</div>
-</div>
-                  <div className="comment-body">{comment.text}</div>
-                </div>
-              ))
+              <div className="timeline">
+                {complaint.comments.map((c, index) => {
+                  // Determine display name and styling based on role
+                  const isStudent = c.role === "student";
+                  const displayName = isStudent ? "Student" : (c.email || "Admin");
+                  const roleIcon = isStudent ? "🎓" : "👨‍💼";
+                  const roleColor = isStudent ? "#ff6b6b" : "#4c63d2";
+                  const roleBgColor = isStudent ? "#ffe0e0" : "#e8f0ff";
+
+                  return (
+                    <div key={c.id || index} className="timeline-item">
+                      {/* Timeline dot and connector */}
+                      <div className="timeline-marker" style={{ borderColor: roleColor, backgroundColor: roleColor }}>
+                        {roleIcon}
+                      </div>
+                      {index < complaint.comments.length - 1 && <div className="timeline-line" style={{ borderLeftColor: roleColor }}></div>}
+
+                      {/* Comment card */}
+                      <div className="timeline-content">
+                        <div className="comment-card" style={{ borderLeftColor: roleColor, backgroundColor: roleBgColor }}>
+                          <div className="comment-header">
+                            <span className="comment-role" style={{ color: roleColor, fontWeight: "700" }}>
+                              {displayName}
+                            </span>
+                            <span className="comment-date">
+                              {formatDate(c.timestamp || c.date)}
+                            </span>
+                          </div>
+                          <div className="comment-body">{c.text}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <p className="text-muted">No comments yet.</p>
             )}
@@ -329,10 +367,10 @@ await axios.delete(
             <div className="d-flex align-items-center mt-3">
               <textarea
                 className="form-control flex-grow-1"
-                placeholder="Add your comment here..."
-                rows="2"
+                placeholder="Add your comment..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                rows="2"
               ></textarea>
 
               <button
@@ -341,10 +379,11 @@ await axios.delete(
                 disabled={!newComment.trim()}
                 style={{ width: "60px", height: "60px" }}
               >
-                <IoMdSend className="text-white" size={30} />
+                <IoMdSend size={28} className="text-white" />
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

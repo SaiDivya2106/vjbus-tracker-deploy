@@ -3,7 +3,7 @@ import { Button, Form, Modal } from "react-bootstrap";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 
-const ComplaintCategoryWithFlag = ({ complaintId, complaint, onFlagged }) => {
+const ComplaintCategoryWithFlag = ({ complaintId, complaint, onFlagged, disabled = false }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState("");
   const [optionalNote, setOptionalNote] = useState("");
@@ -19,9 +19,10 @@ const ComplaintCategoryWithFlag = ({ complaintId, complaint, onFlagged }) => {
     "Other",
   ];
 
-  // Check if the complaint is already flagged
+  // Check if the complaint is already flagged or parent requested disabled
   const isAlreadyFlagged =
     complaint?.flagged === true || complaint?.flagged?.isFlagged === true;
+  const cannotFlag = disabled || isAlreadyFlagged;
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
 
   const handleFlagSubmit = async () => {
@@ -68,7 +69,7 @@ const ComplaintCategoryWithFlag = ({ complaintId, complaint, onFlagged }) => {
     <div className="d-flex justify-content-between align-items-start position-relative">
       {/* Flag Button */}
       <Button
-        variant={isAlreadyFlagged ? "secondary" : "danger"}
+        variant={cannotFlag ? "secondary" : "danger"}
         size="sm"
         className="px-2 py-1 fw-semibold shadow-sm"
         style={{
@@ -78,12 +79,12 @@ const ComplaintCategoryWithFlag = ({ complaintId, complaint, onFlagged }) => {
           right: "-8px",
           fontSize: "0.8rem",
         }}
-        onClick={() => !isAlreadyFlagged && setShowModal(true)}
-        title={isAlreadyFlagged ? "Already flagged" : "Flag Complaint"}
-        disabled={isAlreadyFlagged}
+        onClick={() => !cannotFlag && setShowModal(true)}
+        title={cannotFlag ? "Flagging disabled" : "Flag Complaint"}
+        disabled={cannotFlag}
       >
         <i className="bi bi-flag-fill me-1"></i>
-        {isAlreadyFlagged ? "Flagged" : "Flag"}
+        {cannotFlag ? "Flagged" : "Flag"}
       </Button>
 
       {/* Flag Modal */}

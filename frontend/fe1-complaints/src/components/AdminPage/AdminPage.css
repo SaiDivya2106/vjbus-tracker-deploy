@@ -70,6 +70,12 @@
   /* border-color:#7adee9; */
   border-color: #47b2c5;
 }
+
+.status-reopened {
+  background-color: #fff;
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
  .category-tag1 {
   background-color: #e9ecef;
   color: #495057;

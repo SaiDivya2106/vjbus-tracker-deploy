@@ -362,9 +362,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 import axios from "axios";
 import { CheckCircleFill } from "react-bootstrap-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./UserDashboard.css";
 import NoImageIcon from "../images/no-img-icon.png";
-import {useRef } from "react"; // 👈 add useRef here
+import { useRef } from "react";
+import ReopenComplaintModal from "../ReopenComplaintModal/ReopenComplaintModal";
 
 const CATEGORIES = [
   "Infrastructure",
@@ -406,6 +409,8 @@ const UserDashboard = () => {
   const [editWarning, setEditWarning] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState(null);
+  const [showReopenModal, setShowReopenModal] = useState(false);
+  const [selectedComplaintForReopen, setSelectedComplaintForReopen] = useState(null);
   const warningRef = useRef(null);
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
 
@@ -642,6 +647,8 @@ const UserDashboard = () => {
         return <span className="status-pill status-ongoing">Ongoing</span>;
       case "Resolved":
         return <span className="status-pill status-resolved">Resolved</span>;
+      case "Reopened":
+        return <span className="status-pill status-reopened">🔄 Reopened</span>;
       default:
         return null;
     }
@@ -650,6 +657,7 @@ const UserDashboard = () => {
   return (
     <div className="user-dashboard-container">
       <div className="dashboard-container">
+        <ToastContainer />
         <div className="page-heading text-center mb-4">
           <h1>VNRVJIET Support-Request Portal</h1>
           <p>Welcome to the platform where your voice matters!</p>
@@ -793,6 +801,19 @@ const UserDashboard = () => {
 
                     {complaint.comments && complaint.comments.length > 0 && (
                       <button className="admin-update-btn" onClick={() => setExpandedCard(complaint)}>Show Admin Updates <ChevronDown size={18} /></button>
+                    )}
+
+                    {/* "Issue Not Fixed?" button for Resolved complaints */}
+                    {complaint.status === "Resolved" && (
+                      <button 
+                        className="btn btn-sm btn-outline-primary mt-2 w-100" 
+                        onClick={() => {
+                          setSelectedComplaintForReopen(complaint);
+                          setShowReopenModal(true);
+                        }}
+                      >
+                        ❓ Issue Not Fixed?
+                      </button>
                     )}
 
                     {/* <div className="mt-auto d-flex w-100 align-items-center pt-2 px-0">
@@ -944,19 +965,24 @@ const UserDashboard = () => {
           <MdOutlineTextsms className="me-2" /> Admin Updates:
         </h5>
         {expandedCard.comments && expandedCard.comments.length > 0 ? (
-          expandedCard.comments.map((comment) => (
-            <div
-              key={comment.id}
-              className="update-entry mb-2 p-3"
-              style={{ backgroundColor: "#f8f9fa", borderLeft: "4px solid purple", borderRadius: "10px" }}
-            >
-              <div className="d-flex align-items-center mb-1">
-                <FaUser className="me-2 text-purple" size={18} />
-                <strong>{comment.email}</strong>
+          expandedCard.comments.map((comment) => {
+            const isStudent = comment.role === "student";
+            const displayName = isStudent ? "Student" : (comment.email || "Admin");
+            const borderColor = isStudent ? "#ff6b6b" : "purple";
+            return (
+              <div
+                key={comment.id}
+                className="update-entry mb-2 p-3"
+                style={{ backgroundColor: "#f8f9fa", borderLeft: `4px solid ${borderColor}`, borderRadius: "10px" }}
+              >
+                <div className="d-flex align-items-center mb-1">
+                  <FaUser className="me-2" size={18} style={{ color: borderColor }} />
+                  <strong style={{ color: borderColor }}>{displayName}</strong>
+                </div>
+                <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
               </div>
-              <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p>No admin updates available.</p>
         )}
@@ -1270,6 +1296,31 @@ const UserDashboard = () => {
     <h5 className="text-success">Complaint Saved Successfully!</h5>
   </Modal.Body>
 </Modal>
+
+{/* Reopen Complaint Modal */}
+<ReopenComplaintModal
+  show={showReopenModal}
+  onHide={() => setShowReopenModal(false)}
+  complaintId={selectedComplaintForReopen?.complaint_id}
+  userEmail={user?.email}
+  baseUrl={baseUrl}
+    onSuccess={() => {
+      // Show success toast in the dashboard (so user sees it where they reopened)
+      toast.success("Complaint reopened! Admins have been notified.", { position: "top-right", autoClose: 4000 });
+
+      // Refresh complaints after reopening
+      const token = localStorage.getItem("authToken");
+      axios
+        .get(`${baseUrl}/user-api/view-complaints/${user.email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setComplaints(res.data.complaints || []);
+        })
+        .catch((err) => console.error(err));
+    }}
+/>
+
       </div>
     </div>
   );

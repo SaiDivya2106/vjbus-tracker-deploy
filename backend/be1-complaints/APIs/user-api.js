@@ -325,17 +325,22 @@ userApp.get("/view-complaints/:userId", verifyGoogleToken, asyncHandler(async (r
 }));
 
 // -------------------- EDIT COMPLAINT --------------------
-userApp.put(
-  "/edit-complaint/:complaint_id",
-  verifyGoogleToken,
-  asyncHandler(async (req, res) => {
-    const { complaint_id } = req.params;
-    const { title, description, category, image } = req.body;
+  userApp.put(
+    "/edit-complaint/:complaint_id",
+    verifyGoogleToken,
+    asyncHandler(async (req, res) => {
+      const { complaint_id } = req.params;
+      const { title, description, category, image, room_number, internet_speed, mobile_number, issue_duration } = req.body;
 
-    if (!complaint_id) return res.status(400).json({ message: "Complaint ID is required." });
-    if (!title || !description) return res.status(400).json({ message: "Title and description are required." });
-
-    const existingComplaint = await complaintsCollectionObj.findOne({ complaint_id });
+      if (!complaint_id) return res.status(400).json({ message: "Complaint ID is required." });
+      
+      // Validate required fields are not empty
+      const trimmedTitle = title ? title.trim() : "";
+      const trimmedDescription = description ? description.trim() : "";
+      
+      if (!trimmedTitle || !trimmedDescription) {
+        return res.status(400).json({ message: "Title and description are required fields and cannot be empty. Please fill them before saving." });
+      }    const existingComplaint = await complaintsCollectionObj.findOne({ complaint_id });
     if (!existingComplaint) return res.status(404).json({ message: "Complaint not found." });
 
     const result = sentiment.analyze(description);
@@ -351,9 +356,40 @@ userApp.put(
       });
     }
 
+    // Build update document
+    const updateFields = { title, description, category, image };
+
+    // Determine if category is IT (same normalization as add-complaint)
+    const normalizedCategory = typeof category === "string" ? category.trim().toLowerCase() : "";
+    const isITCategory = [
+      "it and networking",
+      "it & networking",
+      "it networking",
+      "it/networking",
+    ].includes(normalizedCategory);
+
+    const updateDoc = { $set: updateFields };
+
+    if (isITCategory) {
+      updateDoc.$set = {
+        ...updateDoc.$set,
+        it_details: {
+          room_number: room_number || existingComplaint.it_details?.room_number || null,
+          internet_speed: internet_speed || existingComplaint.it_details?.internet_speed || null,
+          mobile_number: mobile_number || existingComplaint.it_details?.mobile_number || null,
+          issue_duration: issue_duration || existingComplaint.it_details?.issue_duration || null,
+        },
+      };
+    } else {
+      // If category changed away from IT, remove any existing it_details
+      if (existingComplaint.it_details) {
+        updateDoc.$unset = { it_details: "" };
+      }
+    }
+
     const updateResult = await complaintsCollectionObj.updateOne(
       { complaint_id },
-      { $set: { title, description, category, image } }
+      updateDoc
     );
 
     if (updateResult.modifiedCount === 0) return res.status(400).json({ message: "No changes made." });
@@ -526,7 +562,132 @@ userApp.get(
   })
 );
 
+// -------------------- REOPEN COMPLAINT --------------------
+userApp.post(
+  "/reopen-complaint/:complaint_id",
+  verifyGoogleToken,
+  asyncHandler(async (req, res) => {
+    const { complaint_id } = req.params;
+    const { text, userEmail } = req.body;
 
+    if (!complaint_id || !text || !userEmail) {
+      return res.status(400).json({
+        message: "Complaint ID, comment text, and user email are required",
+      });
+    }
+
+    const trimmedText = text.trim();
+    if (!trimmedText || trimmedText.length < 5) {
+      return res.status(400).json({
+        message: "Comment must be at least 5 characters long",
+      });
+    }
+
+    // Sentiment and meaningfulness checks
+    const result = sentiment.analyze(trimmedText);
+    if (result.score < -3 || containsOffensiveLanguage(trimmedText)) {
+      return res.status(400).json({
+        message: "Your comment contains offensive language. Please revise it.",
+      });
+    }
+
+    if (isMeaninglessComplaint(trimmedText)) {
+      return res.status(400).json({
+        message: "Your comment seems meaningless. Please provide valid text.",
+      });
+    }
+
+    try {
+      // Create comment object with role and timestamp
+      const newComment = {
+        id: new Date().getTime(),
+        text: trimmedText,
+        role: "student", // Student comment
+        timestamp: new Date().toISOString(),
+      };
+
+      // Update complaint: add comment, change status to Reopened, update lastCommentAt
+      const updateResult = await complaintsCollectionObj.updateOne(
+        { complaint_id },
+        {
+          $push: { comments: newComment },
+          $set: {
+            status: "Reopened",
+            lastCommentAt: new Date().toISOString(),
+          },
+        }
+      );
+
+      if (updateResult.modifiedCount === 0) {
+        return res.status(404).json({
+          message: "Complaint not found or could not be reopened",
+        });
+      }
+
+      // Fetch updated complaint for notification
+      const complaint = await complaintsCollectionObj.findOne({ complaint_id });
+
+      res.status(200).json({
+        message: "Complaint reopened successfully",
+        complaint,
+      });
+
+      // Send notification email to admins of this category asynchronously
+      setImmediate(async () => {
+        try {
+          const admins = await adminsCollectionObj
+            .find({ category: complaint.category })
+            .toArray();
+
+          if (admins.length > 0) {
+            const transporter = nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                user: process.env.ADMIN_EMAIL,
+                pass: process.env.ADMIN_PASS,
+              },
+            });
+
+            const adminEmails = admins.map((a) => a.email).join(", ");
+            const mailOptions = {
+              from: process.env.ADMIN_EMAIL,
+              to: adminEmails,
+              subject: `Complaint #${complaint_id} Reopened - Action Required`,
+              html: `
+                <p>Dear Admin Team,</p>
+                <p>A resolved complaint has been reopened by the student.</p>
+                <p><strong>Complaint Details:</strong></p>
+                <ul>
+                  <li><strong>Title:</strong> ${complaint.title}</li>
+                  <li><strong>Complaint ID:</strong> ${complaint_id}</li>
+                  <li><strong>Category:</strong> ${complaint.category}</li>
+                  <li><strong>Status:</strong> Reopened</li>
+                  <li><strong>Student Comment:</strong> ${trimmedText}</li>
+                  <li><strong>Reopened on:</strong> ${new Date().toLocaleString()}</li>
+                </ul>
+                <p>Please review the updated complaint and take necessary action.</p>
+                <p>Best regards,<br>Complaint Management System</p>
+              `,
+            };
+
+            transporter.sendMail(mailOptions, (err) => {
+              if (err) {
+                console.error("❌ Error sending reopen email:", err);
+              } else {
+                console.log("✅ Reopen notification sent to admins");
+              }
+            });
+          }
+        } catch (err) {
+          console.error("⚠️ Error in reopen notification:", err);
+        }
+      });
+    } catch (error) {
+      console.error("Error reopening complaint:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  })
+);
 
 // -------------------- EXPORT --------------------
 module.exports = userApp;

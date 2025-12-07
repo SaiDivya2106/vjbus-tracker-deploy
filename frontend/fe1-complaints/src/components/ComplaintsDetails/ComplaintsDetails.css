@@ -3,7 +3,7 @@
   background: white;
   border-radius: 24px;
   padding: 1.2rem 1.4rem;      /* Decreased padding */
-  color: #ffffff;
+  color: inherit;
   position: relative;
   overflow: hidden;
   margin: 2rem auto 1rem auto;
@@ -318,6 +318,44 @@ button.btn-danger {
   }
 }
 
+.status-box, .category-box {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure form labels are readable on the white card */
+.status-box label.form-label,
+.category-box label.form-label,
+.form-label {
+  color: #222 !important;
+  font-weight: 700;
+}
+
+/* Disabled selects style */
+select.form-select:disabled,
+.form-select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.form-select {
+  border-radius: 8px !important;
+}
+
+.pending-status {
+  border-left: 4px solid #f0ad4e;
+}
+
+.ongoing-status {
+  border-left: 4px solid #0275d8;
+}
+
+.resolved-status {
+  border-left: 4px solid #5cb85c;
+}
+
+
 
 /* === Responsive Design === */
 @media (max-width: 768px) {
@@ -396,6 +434,95 @@ button.btn-danger {
   .comment-avatar {
     margin: 0;
     font-size: 1rem;
+  }
+}
+
+/* === TIMELINE STYLING === */
+.timeline {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.timeline-item {
+  display: flex;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.timeline-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-right: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-line {
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: -2rem;
+  width: 2px;
+  border-left: 3px solid;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+.timeline-content {
+  flex-grow: 1;
+  padding-top: 0.5rem;
+}
+
+/* Updated comment card for timeline */
+.timeline-content .comment-card {
+  border-left: 4px solid;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.timeline-content .comment-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.comment-role {
+  font-size: 0.95rem;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.6);
+  margin-right: 0.5rem;
+}
+
+.timeline-content .comment-date {
+  font-size: 0.85rem;
+  color: #78909c;
+}
+
+@media (max-width: 768px) {
+  .timeline-marker {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+    margin-right: 1rem;
+  }
+
+  .timeline-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .timeline-line {
+    left: 16px;
   }
 }
 @media (max-width: 768px) {

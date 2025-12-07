@@ -12,12 +12,22 @@ export const AuthProvider = ({ children }) => {
   const [refreshTimeout, setRefreshTimeout] = useState(null);
 
   const baseUrl = process.env.REACT_APP_COMPLAINTS_APP_BE_URL;
+  const authServerUrl = process.env.REACT_APP_AUTH_SERVER_URL || "https://authv2.vjstartup.com";
 
  useEffect(() => {
-  // Attach token globally
-  axios.interceptors.request.use((config) => {
+  // Attach token globally and keep interceptor ids so we can eject them on cleanup
+  const reqInterceptorId = axios.interceptors.request.use((config) => {
     const token = localStorage.getItem("authToken");
+    // allow callers to explicitly skip auth (e.g., public uploads)
+    if (config && config._skipAuth) return config;
+
+    // don't attach Authorization header to third-party upload endpoints (Cloudinary)
+    const url = config && config.url ? config.url.toString() : "";
+    const skipHosts = ["api.cloudinary.com", "res.cloudinary.com"];
+    if (skipHosts.some((h) => url.includes(h))) return config;
+
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
       // mark this request as authenticated so response interceptor can make decisions
       config._hasAuth = true;
@@ -26,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   });
 
   // Handle token expiry globally
-  const interceptor = axios.interceptors.response.use(
+  const resInterceptorId = axios.interceptors.response.use(
     // Success handler: catch cases where authenticated requests unexpectedly return no body
     (response) => {
       try {
@@ -34,8 +44,10 @@ export const AuthProvider = ({ children }) => {
         // If an authenticated request returned no data or 204, consider token/session failure
         if (wasAuth && (response.status === 204 || response.data == null)) {
           console.warn("⛔ Authenticated request returned empty — forcing logout");
+          // Force logout and redirect, but reject so component-level catch handlers execute
           logout();
           window.location.href = "/complaints-website";
+          return Promise.reject({ message: "Empty authenticated response", response });
         }
       } catch (e) {
         // ignore
@@ -66,7 +78,10 @@ export const AuthProvider = ({ children }) => {
     }
   );
 
-  return () => axios.interceptors.response.eject(interceptor);
+  return () => {
+    axios.interceptors.request.eject(reqInterceptorId);
+    axios.interceptors.response.eject(resInterceptorId);
+  };
 }, []);
 
 
@@ -102,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     scheduleTokenRefresh(idToken);
 
     try {
-      const res = await fetch("https://auth.vjstartup.com/auth/google", {
+      const res = await fetch(`${authServerUrl}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -217,7 +232,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     if (refreshTimeout) clearTimeout(refreshTimeout);
 
-    await fetch("https://auth.vjstartup.com/logout", {
+    await fetch(`${authServerUrl}/logout`, {
       method: "POST",
       credentials: "include",
     });
@@ -268,7 +283,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
 
-        const res = await fetch("https://auth.vjstartup.com/check-auth", {
+        const res = await fetch(`${authServerUrl}/check-auth`, {
           credentials: "include",
         });
         const data = await res.json();

@@ -477,6 +477,8 @@ const handleDeleteComplaint = async (id) => {
         return <span className="status-pill status-ongoing">Ongoing</span>;
       case "Resolved":
         return <span className="status-pill status-resolved">Resolved</span>;
+      case "Reopened":
+        return <span className="status-pill status-reopened">🔄 Reopened</span>;
       default:
         return null;
     }
@@ -938,23 +940,28 @@ const handleDeleteComplaint = async (id) => {
   </h5>
 
   {expandedCard.comments && expandedCard.comments.length > 0 ? (
-    expandedCard.comments.map((comment) => (
-      <div
-        key={comment.id}
-        className="update-entry mb-2 p-3"
-        style={{
-          backgroundColor: "#f8f9fa",
-          borderLeft: "4px solid purple",
-          borderRadius: "10px",
-        }}
-      >
-        <div className="d-flex align-items-center mb-1">
-          <FaUser className="me-2 text-purple" size={18} />
-          <strong>{comment.email}</strong>
+    expandedCard.comments.map((comment) => {
+      const isStudent = comment.role === "student";
+      const displayName = isStudent ? "Student" : (comment.email || "Admin");
+      const borderColor = isStudent ? "#ff6b6b" : "purple";
+      return (
+        <div
+          key={comment.id}
+          className="update-entry mb-2 p-3"
+          style={{
+            backgroundColor: "#f8f9fa",
+            borderLeft: `4px solid ${borderColor}`,
+            borderRadius: "10px",
+          }}
+        >
+          <div className="d-flex align-items-center mb-1">
+            <FaUser className="me-2" size={18} style={{ color: borderColor }} />
+            <strong style={{ color: borderColor }}>{displayName}</strong>
+          </div>
+          <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
         </div>
-        <div style={{ marginLeft: "1.8rem" }}>{comment.text}</div>
-      </div>
-    ))
+      );
+    })
   ) : (
     <p className="text-muted" style={{ marginLeft: "1.8rem" }}>
       No admin updates yet.
