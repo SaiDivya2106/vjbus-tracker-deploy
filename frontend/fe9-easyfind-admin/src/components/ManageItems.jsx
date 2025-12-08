@@ -14,6 +14,8 @@ function ManageItems() {
   const [backendError, setBackendError] = useState("");
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedItemForVerification, setSelectedItemForVerification] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -83,6 +85,45 @@ function ManageItems() {
     setShowImageModal(true);
   };
 
+  const handleDeleteClick = (item) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setUpdatingStatus(true);
+    setErrorMessage("");
+    setBackendError("");
+    
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_EASYFIND_BACKEND_URL}/api/items/admin/edit-item/${itemToDelete._id}`,
+        { withCredentials: true }
+      );
+      
+      setItems(items.filter(item => item._id !== itemToDelete._id));
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 5000);
+    } catch (error) {
+      let errorMsg = "Failed to delete item. Please try again.";
+      
+      if (error.response) {
+        errorMsg = error.response.data.message || "Server error occurred";
+      } else if (error.request) {
+        errorMsg = "No response from server. Please check your connection.";
+      }
+      
+      setBackendError(errorMsg);
+      setTimeout(() => setBackendError(""), 5000);
+    } finally {
+      setUpdatingStatus(false);
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    }
+  };
+
   const filteredItems = items.filter(item =>
     (searchCode ? item.code.includes(searchCode) : true) &&
     (searchCategory ? item.category.toLowerCase().includes(searchCategory.toLowerCase()) : true) &&
@@ -105,7 +146,7 @@ function ManageItems() {
         </div>
       )}
 
-      <div className="flex space-x-4 mb-4">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 mb-4">
         <button 
           className={`px-4 py-2 rounded-md ${
             view === "pending" 
@@ -157,7 +198,7 @@ function ManageItems() {
                 key={item._id} 
                 className="p-4 border rounded-md shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                   <div className="flex-1">
                     <p className="font-semibold text-lg">
                       {item.itemName} <span className="text-sm text-gray-600">(Code: {item.code})</span>
@@ -170,10 +211,10 @@ function ManageItems() {
                     </p>
                   </div>
 
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     {item.status === "pending" && (
                       <button 
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm sm:text-base"
                         onClick={(e) => { 
                           e.stopPropagation(); 
                           handleVerifyClick(item);
@@ -185,7 +226,7 @@ function ManageItems() {
                     )}
                     {item.status === "verified" && (
                       <button 
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm sm:text-base"
                         onClick={(e) => { 
                           e.stopPropagation(); 
                           handleStatusChange(item._id, "pending"); 
@@ -195,6 +236,16 @@ function ManageItems() {
                         {updatingStatus ? "Updating..." : "Undo (Pending)"}
                       </button>
                     )}
+                    <button 
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm sm:text-base"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        handleDeleteClick(item);
+                      }}
+                      disabled={updatingStatus}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
 
@@ -237,19 +288,53 @@ function ManageItems() {
               alt={selectedItemForVerification.itemName}
               className="w-full h-auto rounded-md mb-4"
             />
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
               <button
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md order-2 sm:order-1"
                 onClick={() => setShowImageModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md order-1 sm:order-2"
                 onClick={() => handleStatusChange(selectedItemForVerification._id, "verified")}
                 disabled={updatingStatus}
               >
                 {updatingStatus ? "Verifying..." : "Confirm Verification"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && itemToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4 text-red-600">Delete Item</h3>
+            <p className="text-gray-700 mb-2">Are you sure you want to delete this item?</p>
+            <div className="bg-gray-50 p-3 rounded-md mb-4">
+              <p className="font-semibold">{itemToDelete.itemName}</p>
+              <p className="text-sm text-gray-600">Code: {itemToDelete.code}</p>
+              <p className="text-sm text-gray-600">Category: {itemToDelete.category}</p>
+            </div>
+            <p className="text-red-600 text-sm mb-4">⚠️ This action cannot be undone.</p>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
+              <button
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md order-2 sm:order-1"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setItemToDelete(null);
+                }}
+                disabled={updatingStatus}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md order-1 sm:order-2"
+                onClick={handleDeleteConfirm}
+                disabled={updatingStatus}
+              >
+                {updatingStatus ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

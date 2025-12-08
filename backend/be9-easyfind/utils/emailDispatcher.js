@@ -1,59 +1,134 @@
 const LostItem = require("../models/LostItem");
 const Item = require("../models/FoundItem");
+const EmailNotification = require("../models/EmailNotification");
 const sendEmail = require("./notifications");
 const stringSimilarity = require("string-similarity");
+const { getLostItemMatchEmail, getLostItemMatchText } = require('./emailTemplates');
 
 /**
- * Dispatches background email jobs
+ * Dispatches email jobs by creating notification records
  * @param {string} type - Type of job, e.g. 'matchLostItem'
  * @param {Object} payload - Depends on job type
  */
-function dispatchEmailJob(type, payload) {
-  setImmediate(async () => {
-    try {
-      switch (type) {
-        case "matchLostItem":
-          await matchAndNotify(payload.itemId); // Only needs itemId now
-          break;
+async function dispatchEmailJob(type, payload) {
+  try {
+    switch (type) {
+      case "matchLostItem":
+        // Just store the itemId - recipients computed at processing time
+        const existing = await EmailNotification.findOne({
+          type: 'matchLostItem',
+          relatedItem: payload.itemId,
+          status: { $in: ['pending', 'processing'] },
+        });
 
-        case "customEmail":
-          await sendEmail(payload.to, payload.subject, payload.body);
-          break;
+        if (!existing) {
+          await EmailNotification.create({
+            type: 'matchLostItem',
+            relatedItem: payload.itemId,
+            status: 'pending',
+          });
+          console.log(`📨 Email notification queued for item: ${payload.itemId}`);
+        } else {
+          console.log(`⏭️  Notification already queued for item: ${payload.itemId}`);
+        }
+        break;
 
-        // Add more job types as needed
-        default:
-          console.warn("Unknown email job type:", type);
-      }
-    } catch (err) {
-      console.error("Email job failed:", err);
+      case "customEmail":
+        await EmailNotification.create({
+          type: 'customEmail',
+          recipientEmail: payload.to,
+          subject: payload.subject,
+          body: payload.body,
+          status: 'pending',
+        });
+        console.log(`📨 Custom email notification queued`);
+        break;
+
+      default:
+        console.warn("Unknown email job type:", type);
     }
-  });
+  } catch (err) {
+    console.error("Failed to queue email notification:", err);
+  }
 }
 
 /**
- * Matches verified item with lost items and sends emails if similarity > threshold
- * @param {string} itemId - ID of the verified found item
+ * Processes pending notifications and sends emails
+ * Called by the scheduler every 2 hours
  */
-async function matchAndNotify(itemId) {
-  const item = await Item.findById(itemId);
+async function processPendingNotifications() {
+  try {
+    const pendingNotifications = await EmailNotification.find({
+      status: 'pending',
+      attempts: { $lt: 3 },
+    }).limit(50); // Process in batches
+
+    console.log(`📬 Processing ${pendingNotifications.length} pending notifications...`);
+
+    for (const notification of pendingNotifications) {
+      // Mark as processing to avoid duplicate processing
+      notification.status = 'processing';
+      notification.lastAttempt = new Date();
+      notification.attempts += 1;
+      await notification.save();
+
+      try {
+        if (notification.type === 'matchLostItem') {
+          await processMatchNotification(notification);
+        } else if (notification.type === 'customEmail') {
+          await sendEmail(
+            notification.recipientEmail,
+            notification.subject,
+            notification.body
+          );
+          notification.status = 'completed';
+          notification.emailsSent = 1;
+          notification.processedAt = new Date();
+          await notification.save();
+          console.log(`✅ Custom email sent to: ${notification.recipientEmail}`);
+        }
+      } catch (err) {
+        notification.error = err.message;
+        if (notification.attempts >= 3) {
+          notification.status = 'failed';
+        } else {
+          notification.status = 'pending'; // Retry on next run
+        }
+        await notification.save();
+        console.error(`❌ Failed to process notification ${notification._id}:`, err.message);
+      }
+    }
+
+    console.log('✅ Notification processing completed');
+  } catch (err) {
+    console.error('Error processing notifications:', err);
+  }
+}
+
+/**
+ * Process match notification - find recipients and send emails
+ * @param {Object} notification - EmailNotification document
+ */
+async function processMatchNotification(notification) {
+  const item = await Item.findById(notification.relatedItem);
   if (!item) {
-    return console.warn("Item not found for email match:", itemId);
+    throw new Error('Item not found');
   }
 
   if (!item.description) {
-    return console.warn("Item has no description to compare:", itemId);
+    throw new Error('Item has no description');
   }
 
   const lostItems = await LostItem.find({});
-  let notified = false;
+  let emailsSent = 0;
 
   for (const lostItem of lostItems) {
     const checker = [
       lostItem.itemName,
       lostItem.category,
-      lostItem.location,
-      lostItem.dateLost,
-      lostItem.description,
+      // lostItem.location,
+      // lostItem.dateLost,
+      // lostItem.description,
     ]
       .filter(Boolean)
       .join(" ")
@@ -65,26 +140,30 @@ async function matchAndNotify(itemId) {
     );
 
     if (similarity > 0.1) {
+      // Generate HTML email from template
+      const { subject, html } = getLostItemMatchEmail(lostItem, item);
+      
       await sendEmail(
         lostItem.email,
-        "Update: Lost Item Match Found!",
-        `Dear user,
-
-We believe we’ve found a possible match for your lost item: "${lostItem.itemName}".
-
-Please log in to your account for more details and to verify the match.
-
-Regards,  
-EasyFind Team`
+        subject,
+        html,
+        true // Set isHTML flag to true
       );
-      console.log("✅ Email sent to:", lostItem.email);
-      notified = true;
+      emailsSent++;
+      console.log(`✅ Email sent to: ${lostItem.email}`);
     }
   }
 
-  if (!notified) {
-    console.log("❌ No matching lost items found for item:", itemId);
-  }
+  // Mark as completed
+  notification.status = 'completed';
+  notification.emailsSent = emailsSent;
+  notification.processedAt = new Date();
+  await notification.save();
+
+  console.log(`✅ Processed item ${item._id}: ${emailsSent} emails sent`);
 }
 
-module.exports = dispatchEmailJob;
+module.exports = { 
+  dispatchEmailJob, 
+  processPendingNotifications 
+};

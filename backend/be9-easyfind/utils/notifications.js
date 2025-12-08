@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, body, isHTML = false) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -11,12 +11,14 @@ const sendEmail = async (to, subject, text) => {
       },
     });
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text,
-    });
+      [isHTML ? "html" : "text"]: body,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     console.log(`Email sent to ${to}`);
   } catch (error) {

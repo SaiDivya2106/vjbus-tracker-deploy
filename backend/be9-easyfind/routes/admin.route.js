@@ -7,7 +7,7 @@ const { upload, cloudinary } = require('../config/cloudinary')
 const  auth =require('../middlewares/admin-auth')
 const sendEmail = require("../utils/notifications");
 const stringSimilarity = require("string-similarity");
-const dispatchEmailJob = require("../utils/emailDispatcher");
+const { dispatchEmailJob } = require('../utils/emailDispatcher');
 
   /////////////////////////////////////////////// ADMIN ROUTES///////////////////////////
   // admin login
@@ -283,6 +283,33 @@ router.delete('/edit-item/:id', async (req, res) => {
   } catch (error) {
       console.error('Error deleting item:', error);
       res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Example usage in your route (around line 244)
+// When verifying/approving an item:
+router.patch('/verify/:id', async (req, res) => {
+  try {
+    const item = await Item.findByIdAndUpdate(
+      req.params.id,
+      { verified: true },
+      { new: true }
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    // Queue email notifications
+    await dispatchEmailJob('matchLostItem', { itemId: item._id });
+
+    res.json({ 
+      message: 'Item verified successfully',
+      item 
+    });
+  } catch (error) {
+    console.error('Error updating status:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 

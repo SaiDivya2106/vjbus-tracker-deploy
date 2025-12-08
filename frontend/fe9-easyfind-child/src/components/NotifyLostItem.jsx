@@ -235,9 +235,6 @@ function NotifyLostItems() {
         </div>
 
         <div className="mt-10">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Recently Found Items
-          </h2>
           <LostItems />
         </div>
       </div>

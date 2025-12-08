@@ -68,5 +68,9 @@ app.use("/api/items", userRoutes);
 
 // app.use("/api/security", securityRoutes);
 
+// Start email scheduler
+const { startEmailScheduler } = require('./utils/emailScheduler');
+startEmailScheduler();
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

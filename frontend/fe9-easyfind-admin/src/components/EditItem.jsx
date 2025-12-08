@@ -25,6 +25,8 @@ const EditItemPage = () => {
                 const res = await axios.get(`${import.meta.env.VITE_EASYFIND_BACKEND_URL}/api/items/admin/found`, {
                     withCredentials: true,
                 });
+                console.log('Fetched items:', res.data); // Debug log
+                console.log('First item image:', res.data[0]?.image); // Check image structure
                 setItems(res.data);
             } catch (err) {
                 setError('Failed to fetch items');
@@ -120,7 +122,22 @@ const EditItemPage = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredItems.map((item) => (
-                            <div key={item._id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div key={item._id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                                {/* Image Section */}
+                                {item.image?.url && (
+                                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+                                        <img 
+                                            src={item.image.url} 
+                                            alt={item.itemName}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                console.log('Image load error for item:', item._id);
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
@@ -168,8 +185,8 @@ const EditItemPage = () => {
 
                 {/* Edit Modal */}
                 {editItem && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-2xl">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
+                        <div className="bg-white rounded-2xl w-full max-w-2xl my-8">
                             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                                 <h3 className="text-xl font-semibold">Edit Item Details</h3>
                                 <button onClick={() => setEditItem(null)} className="text-gray-400 hover:text-gray-500">
@@ -178,6 +195,24 @@ const EditItemPage = () => {
                                     </svg>
                                 </button>
                             </div>
+
+                            {/* Image Preview Section */}
+                            {editItem.image?.url && (
+                                <div className="p-6 border-b border-gray-200 bg-gray-50">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Item Image</label>
+                                    <div className="flex justify-center">
+                                        <img 
+                                            src={editItem.image.url} 
+                                            alt={editItem.itemName}
+                                            className="max-h-64 w-auto object-contain rounded-lg border border-gray-300"
+                                            onError={(e) => {
+                                                console.log('Modal image error:', editItem);
+                                                e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Left Column */}

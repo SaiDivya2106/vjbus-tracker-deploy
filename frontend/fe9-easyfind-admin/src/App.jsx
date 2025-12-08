@@ -31,6 +31,7 @@ import ChangePassword from "./components/ChangePassword";
 import EditItem from "./components/EditItem"
 import GoogleLoginButton from './components/GoogleLoginButton';
 import ProtectedRoute from './contexts/ProtectedRoute'
+import NotFound from './components/NotFound';
 
 const drawerWidth = 240;
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
@@ -100,6 +101,7 @@ function AppContent() {
             <Route path="/admin/upload" element={<ProtectedRoute><UploadItem /></ProtectedRoute>} />
             <Route path="/admin/edit" element={<ProtectedRoute><EditItem/></ProtectedRoute>} />
             {/* <Route path="/admin/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} /> */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
       </Box>
