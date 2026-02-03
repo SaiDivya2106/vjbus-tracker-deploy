@@ -1,1 +1,0 @@
-# This file can be completely removed since embeddings are not being used 
