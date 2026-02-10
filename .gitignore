@@ -1,4 +1,4 @@
-ackend/be2/__pycache__
+backend/be2/__pycache__
 frontend/fe1/package-lock.json
 backend/auth-service/package-lock.json
 backend/auth-service/.env
@@ -21,6 +21,13 @@ frontend/fe1-complaints/.env
 .env
 *.env
 */.env
+
+# Explicitly ignore .env files with secrets
+backend/be8-undoubt/.env
+backend/be9-easyfind/.env
+frontend/audi-booking/.env
+frontend/fe4-vjbus/.env
+frontend/fe8-undoubt/.env
 
 
 # Logs
