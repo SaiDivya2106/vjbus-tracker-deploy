@@ -57,7 +57,7 @@ Web port: 3003 (frontend/fe1)
 
 Login to your user account. 
 Run ssh-keygen to generate ssh-key
-Save the ky in https://github.com/settings/keys 
+Save the key in https://github.com/settings/keys 
 
 ### Git initialisation 
 
@@ -65,10 +65,10 @@ Save the ky in https://github.com/settings/keys
   git config --global user.name "Your Name"
 
 
-Merge remote changes & keep history	`git pull --no-rebase`
-Rebase local commits on latest remote	`git pull --rebase`
-Only update if no conflicts exist	`git pull --ff-only`
-Discard local changes & force sync	`git reset --hard origin/main`
+Merge remote changes & keep history    `git pull --no-rebase`
+Rebase local commits on latest remote    `git pull --rebase`
+Only update if no conflicts exist    `git pull --ff-only`
+Discard local changes & force sync    `git reset --hard origin/main`
 
 ## Debugging
 
