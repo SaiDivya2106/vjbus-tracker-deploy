@@ -19,7 +19,7 @@ frontend/fe1-complaints/.env
 
 # Ignore env files
 .env
-*.env
+*.env.*
 */.env
 
 # Explicitly ignore .env files with secrets
