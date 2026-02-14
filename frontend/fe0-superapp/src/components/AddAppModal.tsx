@@ -22,7 +22,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 
 const iconOptions = [
@@ -81,10 +81,10 @@ interface AddAppModalProps {
     isOpen: boolean;
     onClose: () => void;
     onAdd: (data: any) => Promise<void>;
+    onDelete?: (id: string) => Promise<void>;
     initialData?: any;
 }
-
-export function AddAppModal({ isOpen, onClose, onAdd, initialData }: AddAppModalProps) {
+export function AddAppModal({ isOpen, onClose, onAdd, onDelete, initialData }: AddAppModalProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -154,6 +154,14 @@ export function AddAppModal({ isOpen, onClose, onAdd, initialData }: AddAppModal
 
         await onAdd(appData);
         onClose();
+    };
+
+    const handleDelete = async () => {
+        if (!initialData?.id || !onDelete) return;
+        if (window.confirm("Are you sure you want to delete this app? This action cannot be undone.")) {
+            await onDelete(initialData.id);
+            onClose();
+        }
     };
 
     return (
@@ -315,14 +323,32 @@ export function AddAppModal({ isOpen, onClose, onAdd, initialData }: AddAppModal
                             />
                         </div>
 
-                        <div className="flex justify-end gap-2 pt-4">
-                            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {initialData ? "Save Changes" : "Add App"}
-                            </Button>
+                        <div className="flex justify-between items-center pt-4 gap-2">
+                            {/* Left: Delete button (only in edit mode) */}
+                            <div>
+                                {initialData && onDelete && (
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        onClick={handleDelete}
+                                        disabled={isSubmitting}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete
+                                    </Button>
+                                )}
+                            </div>
+                            {/* Right: Cancel and Save Changes */}
+                            <div className="flex gap-2">
+                                <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {initialData ? "Save Changes" : "Add App"}
+                                </Button>
+                            </div>
                         </div>
                     </form>
                 </Form>

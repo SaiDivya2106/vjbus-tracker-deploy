@@ -179,6 +179,15 @@ const Index = () => {
     setEditingApp(null);
   };
 
+  // Admin: Delete app
+  const handleDeleteApp = async (id: string) => {
+    await fetch(`${import.meta.env.VITE_API_URL}/apps/${id}`, {
+      method: 'DELETE',
+    });
+    refetch();
+    setEditingApp(null);
+  };
+
   const handleEditClick = (app: App) => {
     setEditingApp(app);
     setIsAddAppOpen(true);
@@ -631,6 +640,7 @@ const Index = () => {
           setEditingApp(null);
         }}
         onAdd={handleSaveApp}
+        onDelete={editingApp ? handleDeleteApp : undefined}
         initialData={editingApp}
       />
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { getApps, addApp, updateApp, setAppStatus } from './db.js';
+import { getApps, addApp, updateApp, setAppStatus, deleteApp } from './db.js';
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.use(express.json());
 app.get('/api/apps', async (req, res) => {
     try {
         const apps = await getApps();
+        console.log("Fetched apps:", apps.length);
         res.json(apps);
     } catch (error) {
         console.error("Error getting apps:", error);
@@ -29,6 +30,7 @@ app.get('/api/apps', async (req, res) => {
 app.post('/api/apps', async (req, res) => {
     try {
         await addApp(req.body);
+        console.log("Added app:", req.body);
         res.json({ success: true });
     } catch (error) {
         console.error("Error adding app:", error);
@@ -40,6 +42,7 @@ app.post('/api/apps', async (req, res) => {
 app.put('/api/apps', async (req, res) => {
     try {
         await updateApp(req.body);
+        console.log("Updated app:", req.body);
         res.json({ success: true });
     } catch (error) {
         console.error("Error updating app:", error);
@@ -53,9 +56,23 @@ app.post('/api/apps/:id/status', async (req, res) => {
         const { id } = req.params;
         const { isenabled } = req.body;
         await setAppStatus(id, isenabled);
+        console.log(`Updated app ${id} status to:`, isenabled);
         res.json({ success: true });
     } catch (error) {
         console.error("Error updating app status:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete app
+app.delete('/api/apps/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await deleteApp(id);
+        console.log(`Deleted app with id: ${id}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting app:", error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

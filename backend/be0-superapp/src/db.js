@@ -1,3 +1,8 @@
+// Delete app by id
+export async function deleteApp(id) {
+    const db = await openDb();
+    await db.run('DELETE FROM apps WHERE id = ?', id);
+}
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import path from 'path';
