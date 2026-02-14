@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../styles/Login.css";
 import '../components/NavigationBar.jsx'; // Import NavigationBar for consistent styling
+// import dotenv from "dotenv";
+// dotenv.config();
+
 
 const API_URL = import.meta.env.VITE_AUTH_SERVER_URL; // Use .env for backend API URL
 
@@ -44,37 +47,37 @@ const Login = () => {
   };
 
   // --- Function to update user state based on the 'user' cookie and localStorage ---
-  const updateUserStateFromCookie = () => {
+  const updateUserStateFromCookie = async () => {
     console.log("Login.js: updateUserStateFromCookie called");
-    const userCookie = getCookieValue("user");
-    if (userCookie) {
-      let parsedUser = null;
-      try {
-        parsedUser = JSON.parse(userCookie);
-      } catch (e) {
-        console.log("Login.js: Cookie not direct JSON, attempting JWT decode.");
-        if (userCookie.split('.').length === 3) {
-          try {
-            parsedUser = decodeJwt(userCookie);
-          } catch (jwtError) {
-            console.error("Login.js: Error decoding JWT from user cookie:", jwtError);
-          }
-        }
-      }
-      if (parsedUser) {
+
+    try {
+      const response = await fetch(`${API_URL}/check-auth`, {
+        credentials: "include", // important for cookies
+      });
+
+      const data = await response.json();
+
+      console.log("Auth response:", data);
+
+      if (data.logged_in && data.user) {
+        const user = data.user;
+
         setUser({
-          name: parsedUser.name || parsedUser.given_name || parsedUser.family_name || 'Student',
-          email: parsedUser.email || ''
+          name: user.name || user.family_name || "Student",
+          email: user.email || "",
+          picture: user.picture || "",
         });
-        // Dispatch login event for NavigationBar
-        window.dispatchEvent(new Event('user-login'));
+
+        window.dispatchEvent(new Event("user-login"));
       } else {
         setUser(null);
-        window.dispatchEvent(new Event('user-logout'));
+        window.dispatchEvent(new Event("user-logout"));
       }
-    } else {
+
+    } catch (error) {
+      console.error("Auth check failed:", error);
       setUser(null);
-      window.dispatchEvent(new Event('user-logout'));
+      window.dispatchEvent(new Event("user-logout"));
     }
   };
 
