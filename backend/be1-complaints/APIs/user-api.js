@@ -167,9 +167,7 @@ userApp.post(
             it_details,
           }
         : {}),
-      // timestamp: new Date().toISOString(),
-      timestamp: new Date(),
-
+      timestamp: new Date().toISOString(),
       likes: 0,
       dislikes: 0,
       status: "Pending",
@@ -622,14 +620,7 @@ userApp.post(
         id: new Date().getTime(),
         text: trimmedText,
         role: "student", // Student comment
-        // timestamp: new Date().toISOString(),
-
-
-
-
-
-        timestamp: new Date(),
-
+        timestamp: new Date().toISOString(),
       };
 
       // Update complaint: add comment, change status to Reopened, update lastCommentAt
@@ -711,116 +702,6 @@ userApp.post(
       });
     } catch (error) {
       console.error("Error reopening complaint:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  })
-);
-
-// -------------------- ADD REPLY TO COMMENT (STUDENT) --------------------
-userApp.post(
-  "/complaints/:complaint_id/comment/:comment_id/reply",
-  verifyGoogleToken,
-  asyncHandler(async (req, res) => {
-    const { complaint_id, comment_id } = req.params;
-    const { text } = req.body;
-
-    // Use verified token email from middleware
-    const userEmailFromToken = req.user && req.user.email;
-
-    if (!complaint_id || !comment_id || !text || !userEmailFromToken) {
-      return res.status(400).json({ message: "Complaint ID, comment ID, reply text, and authenticated user are required" });
-    }
-
-    const trimmedText = text.trim();
-    if (!trimmedText || trimmedText.length < 1) {
-      return res.status(400).json({ message: "Reply must not be empty" });
-    }
-
-    // Sentiment and meaningfulness checks
-    const result = sentiment.analyze(trimmedText);
-    if (result.score < -3 || containsOffensiveLanguage(trimmedText)) {
-      return res.status(400).json({ message: "Your reply contains offensive language. Please revise it." });
-    }
-
-    if (isMeaninglessComplaint(trimmedText)) {
-      return res.status(400).json({ message: "Your reply seems meaningless. Please provide valid text." });
-    }
-
-    try {
-      const complaint = await complaintsCollectionObj.findOne({ complaint_id });
-      if (!complaint) return res.status(404).json({ message: "Complaint not found" });
-
-      // Only complaint owner is allowed to reply to admin comments
-      if (complaint.user_id !== userEmailFromToken) {
-        return res.status(403).json({ message: "Only the complaint owner can reply to admin comments" });
-      }
-
-      const targetComment = (complaint.comments || []).find(c => String(c.id) === String(comment_id));
-      if (!targetComment) return res.status(404).json({ message: "Target comment not found" });
-
-      const reply = {
-        id: new Date().getTime(),
-        text: trimmedText,
-        role: "student",
-        timestamp: new Date().toISOString(),
-        email: userEmailFromToken
-      };
-
-      const updateResult = await complaintsCollectionObj.updateOne(
-        { complaint_id },
-        {
-          $push: { "comments.$[c].replies": reply },
-          $set: { lastCommentAt: new Date().toISOString() }
-        },
-        { arrayFilters: [{ "c.id": Number(comment_id) }] }
-      );
-
-      if (updateResult.modifiedCount === 0) {
-        return res.status(500).json({ message: "Failed to add reply to comment" });
-      }
-
-      const updatedComplaint = await complaintsCollectionObj.findOne({ complaint_id });
-
-      res.status(200).json({ message: "Reply added successfully", complaint: updatedComplaint });
-
-      // Notify the admin who made the original comment (if email exists)
-      setImmediate(async () => {
-        try {
-          if (targetComment.email) {
-            const transporter = nodemailer.createTransport({
-              service: "gmail",
-              auth: {
-                user: process.env.ADMIN_EMAIL,
-                pass: process.env.ADMIN_PASS,
-              },
-            });
-
-            const mailOptions = {
-              from: process.env.ADMIN_EMAIL,
-              to: targetComment.email,
-              subject: `Reply to your comment on request (${complaint.title})`,
-              html: `
-                <p>Dear Admin,</p>
-                <p>The student has replied to your comment on the request ong>)titled "<strong>${complaint.title}</strong>".</p>
-                <p><strong>Reply:</strong></p>
-                <blockquote style="border-left: 4px solid #6a1b9a; padding-left: 10px; color: #333;">
-                  ${trimmedText}
-                </blockquote>
-                <p>Please review the reply by visiting the admin panel.</p>
-                <p>Best Regards,<br>Thrive</p>
-              `,
-            };
-
-            await transporter.sendMail(mailOptions);
-            console.log(`📧 Reply notification sent to admin (${targetComment.email})`);
-          }
-        } catch (err) {
-          console.error("⚠️ Error sending reply notification:", err);
-        }
-      });
-
-    } catch (error) {
-      console.error("Error adding reply:", error);
       res.status(500).json({ message: "Server error" });
     }
   })

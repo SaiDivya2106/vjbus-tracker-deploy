@@ -4,7 +4,6 @@ import '../components/NavigationBar.jsx'; // Import NavigationBar for consistent
 // import dotenv from "dotenv";
 // dotenv.config();
 
-
 const API_URL = import.meta.env.VITE_AUTH_SERVER_URL; // Use .env for backend API URL
 
 const Login = () => {
@@ -68,16 +67,17 @@ const Login = () => {
           picture: user.picture || "",
         });
 
+        // Dispatch login event for NavigationBar
         window.dispatchEvent(new Event("user-login"));
       } else {
         setUser(null);
         window.dispatchEvent(new Event("user-logout"));
-      }
 
+      } 
     } catch (error) {
       console.error("Auth check failed:", error);
       setUser(null);
-      window.dispatchEvent(new Event("user-logout"));
+      window.dispatchEvent(new Event('user-logout'));
     }
   };
 

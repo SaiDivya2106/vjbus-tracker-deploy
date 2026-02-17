@@ -71,10 +71,11 @@ const SubmitPage = () => {
     }
     const dataToSend = { ...formData, mail: email };
     console.log('Form Data:', dataToSend);
-    let res = await axios.post(import.meta.env.VITE_WALL_URL + '/api/user-check-data', dataToSend);
+
+    let res = await axios.post(import.meta.env.VITE_WALL_API_URL + '/api/user-check-data', dataToSend);
     if (res.data.success === true) {
       alert("Data is saved successfully");
-      window.location.href = `${import.meta.env.VITE_WALL_URL}/responses`;
+      window.location.href = "/responses";
     }
   };
 
