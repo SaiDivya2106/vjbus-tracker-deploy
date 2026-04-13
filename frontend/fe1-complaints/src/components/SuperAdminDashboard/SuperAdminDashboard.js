@@ -457,10 +457,12 @@ const SuperAdminDashboard = () => {
               </div>
             </div>
 
-            <div className="detail-row">
-              <div className="detail-label">Note:</div>
-              <div className="detail-value">{fullViewComplaint?.flagged?.note}</div>
-            </div>
+            {fullViewComplaint?.flagged?.note && (
+              <div className="detail-row">
+                <div className="detail-label">Note:</div>
+                <div className="detail-value">{fullViewComplaint?.flagged?.note}</div>
+              </div>
+            )}
 
             <div className="d-flex justify-content-center">
               <button

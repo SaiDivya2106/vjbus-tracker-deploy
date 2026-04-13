@@ -63,7 +63,7 @@ if (isExperimental) {
       const adminsCollectionObj = dbObj.collection('adminsCollection');
       const flaggedusersCollectionObj = dbObj.collection('flaggedusersCollection');
       const superAdminCollectionObj = dbObj.collection('superAdminCollection')
-      const assistantsCollectionObj = dbObj.collection('assistantsCollection'); // New collection for assistants
+      const assistantsCollectionObj = dbObj.collection('assistantCollection'); // New collection for assistants
       app.set('complaintsCollectionObj', complaintsCollectionObj);
       app.set('adminsCollectionObj', adminsCollectionObj);
       app.set('flaggedusersCollectionObj', flaggedusersCollectionObj);

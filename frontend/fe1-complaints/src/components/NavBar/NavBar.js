@@ -7,7 +7,7 @@ import "./NavBar.css";
 const NavBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isAssistant, logout } = useAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false); // ✅ track super admin
@@ -117,7 +117,7 @@ const NavBar = () => {
               </li>
             )}
 
-            {isAdmin && (
+            {(isAdmin || isAssistant) && (
               <li className="nav-item">
                 <NavLink
                   className="nav-link"

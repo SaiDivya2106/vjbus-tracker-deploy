@@ -319,7 +319,7 @@ import { FaSquarePollVertical, FaUserPen } from "react-icons/fa6";
 import { HiOutlineThumbUp, HiOutlineThumbDown } from "react-icons/hi";
 import { FaCalendarAlt, FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { Card, Button, Row, Col, Form, Modal } from "react-bootstrap";
+import { Card, Button, Row, Col, Form, Modal, Dropdown } from "react-bootstrap";
 import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import { FileX } from "lucide-react";
@@ -364,6 +364,45 @@ const socket = io(process.env.REACT_APP_COMPLAINTS_APP_BE_URL);
   const [isReassign, setIsReassign] = useState(false);
   const [currentComplaint, setCurrentComplaint] = useState(null);
 
+  // Workload Detail Modal State
+  const [showWorkloadModal, setShowWorkloadModal] = useState(false);
+  const [workloadComplaints, setWorkloadComplaints] = useState([]);
+  const [workloadTitle, setWorkloadTitle] = useState("");
+  const [workloadLoading, setWorkloadLoading] = useState(false);
+  const [workloadCategoriesHint, setWorkloadCategoriesHint] = useState([]);
+
+  const handleWorkloadClick = async (assistant, statusType) => {
+    setWorkloadTitle(`${assistant.name || assistant.email} - ${statusType} Complaints`);
+    setShowWorkloadModal(true);
+    setWorkloadLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      let url = `${baseUrl}/admin-api/assistant-complaints?email=${assistant.email}`;
+      if (statusType === "Pending") url += `&status=Pending`;
+      else if (statusType === "Solved") url += `&status=Resolved`;
+      
+      const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
+      let data = res.data.complaints || [];
+      if (statusType === "Ongoing/Reopened") {
+        data = data.filter(c => c.status === "Ongoing" || c.status === "Reopened");
+      }
+      
+      // Calculate what other categories are taking up their time before filtering
+      const categoriesPresent = [...new Set(data.map(c => c.category))].filter(Boolean);
+      setWorkloadCategoriesHint(categoriesPresent.filter(cat => cat !== currentComplaint?.category));
+
+      // Keep only current category filter correctly!
+      if (currentComplaint?.category) {
+        data = data.filter(c => c.category === currentComplaint.category);
+      }
+      setWorkloadComplaints(data);
+    } catch (e) {
+       console.error("Failed to fetch workload complaints:", e);
+    } finally {
+       setWorkloadLoading(false);
+    }
+  };
+
   const fetchAssistants = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -373,7 +412,11 @@ const socket = io(process.env.REACT_APP_COMPLAINTS_APP_BE_URL);
       // Assume backend returns workload info, or default to 0
       const assistantsWithWorkload = res.data.assistants.map(ast => ({
         ...ast,
-        activeComplaints: ast.activeComplaints || 0
+        activeComplaints: ast.activeComplaints || 0,
+        pendingCount: ast.pendingCount || 0,
+        ongoingCount: ast.ongoingCount || 0,
+        resolvedCount: ast.resolvedCount || 0,
+        reopenedCount: ast.reopenedCount || 0
       }));
       setAssistants(assistantsWithWorkload);
     } catch (error) {
@@ -390,12 +433,20 @@ const socket = io(process.env.REACT_APP_COMPLAINTS_APP_BE_URL);
 const getAssistantsForCategory = (category) => {
   if (!category) return [];
 
+  const normalizedCategory = category.trim().toLowerCase();
+
   return assistants.filter(ast => {
-    return (
-      ast.category &&
-      ast.category.trim().toLowerCase() ===
-      category.trim().toLowerCase()
-    );
+    // 1️⃣ Check ast.categories (Array)
+    if (ast.categories && Array.isArray(ast.categories)) {
+      return ast.categories.some(cat => cat.trim().toLowerCase() === normalizedCategory);
+    }
+    
+    // 2️⃣ Check ast.category (String) - fallback for manual DB entries
+    if (ast.category && typeof ast.category === "string") {
+      return ast.category.trim().toLowerCase() === normalizedCategory;
+    }
+
+    return false;
   });
 };
 
@@ -431,7 +482,7 @@ const fetchAssistantCategories = async () => {
     const token = localStorage.getItem("authToken");
 
     const res = await axios.get(
-      `${baseUrl}/admin-api/assistant-categories?email=${user.email}`,
+      `${baseUrl}/admin-api/assistant-categories?email=${user.email.toLowerCase()}`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -556,42 +607,13 @@ const categories = isAssistant
 
 
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [assignmentFilter, setAssignmentFilter] = useState("All"); // All, Assigned, Unassigned, AssignedByMe
 
   useEffect(() => {
     if (isAdmin || isAssistant) { // ✅ Fetch if Admin OR Assistant
-      fetchComplaints(selectedCategory, statusFilter);
+      fetchComplaints(selectedCategory, statusFilter, assignmentFilter);
     }
-  }, [isAdmin, isAssistant, selectedCategory, statusFilter,sortOption]);
-
-  // const fetchComplaints = async (category, status) => {
-  //   setLoading(true);
-  //   setError(false);
-
-  //   try {
-  //     let url = `${baseUrl}/admin-api/filter-complaints`;
-  //     const params = new URLSearchParams();
-  //     if (category && category !== "All") params.append("category", category);
-  //     if (status && status !== "All") params.append("status", status);
-
-  //     const token = localStorage.getItem("authToken");
-  //     const response = await axios.get(`${url}?${params.toString()}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     const complaintsData = response?.data?.complaints ?? [];
-  //     if (Array.isArray(complaintsData)) {
-  //       setComplaints(complaintsData);
-  //     } else {
-  //       throw new Error("Invalid complaints data");
-  //     }
-  //   } catch (err) {
-  //     console.error("❌ Error fetching complaints:", err);
-  //     setError(true);
-  //     setComplaints([]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  }, [isAdmin, isAssistant, selectedCategory, statusFilter, assignmentFilter, sortOption]);
 
 
 
@@ -676,7 +698,7 @@ const categories = isAssistant
   // };
 
 
-const fetchComplaints = async (category, status) => {
+const fetchComplaints = async (category, status, assignmentStatus = "All") => {
   setLoading(true);
   setError(false);
 
@@ -685,30 +707,28 @@ const fetchComplaints = async (category, status) => {
 
     let response;
 
-    if (isAssistant) {
-      response = await axios.get(
-        `${baseUrl}/admin-api/assistant-complaints?email=${user.email}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-    } else {
+    if (isAdmin && !isAssistant) {
+      // ✅ Admin ONLY (Main) View: Show all complaints for their category
       const params = new URLSearchParams();
-
-      if (category && category !== "All") {
-        params.append("category", category);
-      }
-
-      if (status && status !== "All") {
-        params.append("status", status);
-      }
+      if (category && category !== "All") params.append("category", category);
+      if (status && status !== "All") params.append("status", status);
+      if (assignmentStatus && assignmentStatus !== "All") params.append("assignmentFilter", assignmentStatus);
 
       response = await axios.get(
         `${baseUrl}/admin-api/filter-complaints?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+    } else if (isAssistant) {
+      // ✅ Assistant View (even if they also happen to be Admin): Show only their assigned complaints
+      response = await axios.get(
+        `${baseUrl}/admin-api/assistant-complaints?email=${user.email.toLowerCase()}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } else {
+      // Not authorized for anything
+      setComplaints([]);
+      setLoading(false);
+      return;
     }
 
     let complaintsData = response?.data?.complaints ?? [];
@@ -864,6 +884,68 @@ const fetchComplaints = async (category, status) => {
               <option value="Resolved">Resolved</option>
             </Form.Select>
 
+          {!isAssistant && (() => {
+            const getAssignmentFilterLabel = () => {
+              if (assignmentFilter === "All") return "All Complaints";
+              if (assignmentFilter === "Assigned") return "Assigned Complaints";
+              if (assignmentFilter === "Unassigned") return "Unassigned";
+              const ast = assistants.find(a => a.email === assignmentFilter);
+              return ast?.name ? ast.name : assignmentFilter;
+            };
+
+            const uniqueAssistantsForMenu = (() => {
+              const catsToCheck = selectedCategory !== "All" ? [selectedCategory] : categories;
+              const filtered = assistants.filter(ast => 
+                catsToCheck.some(cat => 
+                  ast.categories?.some(c => c.toLowerCase() === cat.toLowerCase()) || 
+                  ast.category?.toLowerCase() === cat.toLowerCase()
+                )
+              );
+              const unique = [];
+              const seen = new Set();
+              for (const ast of filtered) {
+                if (!seen.has(ast.email)) {
+                  seen.add(ast.email);
+                  unique.push(ast);
+                }
+              }
+              return unique;
+            })();
+
+            return (
+              <Dropdown onSelect={(e) => setAssignmentFilter(e)}>
+                <Dropdown.Toggle 
+                  variant="outline-secondary" 
+                  className="filter-dropdown-toggle me-3 py-2 text-start"
+                  style={{ minWidth: "190px", backgroundColor: "#fff", borderColor: "#cfd7ff", color: "#333", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  {getAssignmentFilterLabel()}
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className="shadow-sm border-0" style={{ borderRadius: '10px' }}>
+                  <Dropdown.Item eventKey="All">All Complaints</Dropdown.Item>
+                  <Dropdown.Item eventKey="Assigned">Assigned Complaints</Dropdown.Item>
+                  <Dropdown.Item eventKey="Unassigned">Unassigned</Dropdown.Item>
+                  
+                  {uniqueAssistantsForMenu.length > 0 && (
+                    <div className="nested-dropdown mt-2">
+                       <Dropdown.Divider />
+                       <div className="nested-dropdown-trigger px-3 py-1 text-dark d-flex justify-content-between align-items-center" style={{ cursor: 'default', fontWeight: 'bold' }}>
+                         Filter by Member <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>▶</span>
+                       </div>
+                       <div className="nested-dropdown-menu shadow rounded border-0 bg-white">
+                         {uniqueAssistantsForMenu.map(ast => (
+                           <Dropdown.Item key={ast.email} eventKey={ast.email} className="py-2 px-3">
+                             {ast.name ? ast.name : ast.email}
+                           </Dropdown.Item>
+                         ))}
+                       </div>
+                    </div>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+            );
+          })()}
 
           {!isAssistant && (
             <Button
@@ -1140,8 +1222,8 @@ const fetchComplaints = async (category, status) => {
                     </small>
                   ) : null}
 
-                  {/* Show Assign Button only for Admins - if assistants exist for this category */}
-                  {!isAssistant && getAssistantsForCategory(complaint.category).length > 0 && (
+                  {/* Show Assign Button only for Main Admins (not Assistants) */}
+                  {(isAdmin && !isAssistant) && getAssistantsForCategory(complaint.category).length > 0 && (
                     complaint.assignedAssistant ? (
 <div className="mt-1">
   <small className="text-muted d-block">
@@ -1197,23 +1279,30 @@ const fetchComplaints = async (category, status) => {
                   )}
 
 {complaint.assistantRemarks && (
-  <small className="text-primary d-block mt-1">
-    Remark: {
-      // Remove 'by assistant by email' pattern if present
-      (() => {
-        const remark = complaint.assistantRemarks;
-        // Regex: Status updated to (.*) by assistant by (.+)
-        const match = remark.match(/^(.*) by assistant by (.+)$/i);
-        if (match) {
-          return `${match[1]} by ${match[2]}`;
-        }
-        return remark;
-      })()
-    }
-    {complaint.lastUpdatedBy && !["assistant", "Assistant"].includes(complaint.lastUpdatedBy.toLowerCase()) && (
-      <> by {complaint.lastUpdatedBy}</>
-    )}
-  </small>
+  <div className="mt-2 px-2 py-1 rounded" style={{ backgroundColor: "#f3fdf5", borderLeft: "3px solid #28a745" }}>
+    <small className="d-block text-dark" style={{ fontSize: "0.8rem", lineHeight: "1.4" }}>
+      <strong className="text-success">Last Update: </strong> 
+      {
+        (() => {
+          let remark = complaint.assistantRemarks || "";
+          
+          // Scrub out "by assistant" entirely wherever it might appear
+          remark = remark.replace(/by assistant/gi, "").replace(/\s+/g, " ").trim();
+          
+          // E.g., if it became "Status updated to Ongoing by 22071a..."
+          // Let's also clean up double "by by" if that happened
+          remark = remark.replace(/by\s+by/gi, "by");
+
+          return remark;
+        })()
+      }
+      {complaint.lastUpdatedBy && !complaint.assistantRemarks.includes(complaint.lastUpdatedBy) && (
+        <span className="text-muted fw-semibold ps-1">
+          {`by ${complaint.lastUpdatedBy}`}
+        </span>
+      )}
+    </small>
+  </div>
 )}
 
 
@@ -1366,15 +1455,13 @@ const fetchComplaints = async (category, status) => {
 
 
       <option key={ast.email} value={ast.email}>
-  {ast.name && ast.name !== ast.email
-    ? `${ast.name} (${ast.email})`
-    : ast.email
-  }
-  {" – "}
-  {ast.activeComplaints || 0} active{" "}
-  {(ast.activeComplaints || 0) === 1 ? "complaint" : "complaints"}
-  {(ast.activeComplaints || 0) > 10 ? " ⚠️" : ""}
-</option>
+        {ast.name && ast.name !== ast.email
+          ? `${ast.name} (${ast.email})`
+          : ast.email
+        }
+        {" – "}
+        {ast.pendingCount || 0} pending, {ast.ongoingCount || 0} ongoing, {ast.resolvedCount || 0} solved
+      </option>
 
     ))}
 </Form.Select>
@@ -1387,11 +1474,36 @@ const fetchComplaints = async (category, status) => {
             {[...getAssistantsForCategory(currentComplaint?.category)]
               .sort((a, b) => (a.activeComplaints || 0) - (b.activeComplaints || 0))
               .map(ast => (
-                <div key={ast.email} className="d-flex justify-content-between">
-                  <span>{ast.name || ast.email}:</span>
-                  <strong style={{ color: (ast.activeComplaints || 0) > 10 ? '#ff6b6b' : '#51cf66' }}>
-                    {ast.activeComplaints || 0} active
-                  </strong>
+                <div key={ast.email} className="mb-2 p-2 border-bottom">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <strong>{ast.name || ast.email}:</strong>
+                    <span className="badge bg-light text-dark" style={{ border: '1px solid #ddd' }}>
+                      {ast.activeComplaints || 0} Active
+                    </span>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2 text-muted" style={{ fontSize: '0.8rem' }}>
+                    <span 
+                      className="badge bg-white text-warning border border-warning" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleWorkloadClick(ast, 'Pending')}
+                    >
+                      ⏳ Pending: <strong>{ast.pendingCount || 0}</strong>
+                    </span>
+                    <span 
+                      className="badge bg-white text-primary border border-primary" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleWorkloadClick(ast, 'Ongoing/Reopened')}
+                    >
+                      🚀 Ongoing/Reopened: <strong>{(ast.ongoingCount || 0) + (ast.reopenedCount || 0)}</strong>
+                    </span>
+                    <span 
+                      className="badge bg-white text-success border border-success" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleWorkloadClick(ast, 'Solved')}
+                    >
+                      ✅ Solved: <strong>{ast.resolvedCount || 0}</strong>
+                    </span>
+                  </div>
                 </div>
               ))}
           </div>
@@ -1423,6 +1535,64 @@ const fetchComplaints = async (category, status) => {
     >
       {isReassign ? "Reassign Complaint" : "Assign Complaint"}
     </Button>
+  </Modal.Footer>
+</Modal>
+
+<Modal show={showWorkloadModal} onHide={() => setShowWorkloadModal(false)} centered size="lg" dialogClassName="workload-modal">
+  <Modal.Header closeButton className="border-bottom pb-3">
+    <Modal.Title className="fw-bold text-dark w-100 text-center fs-4">{workloadTitle}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+    {workloadLoading ? (
+      <div className="text-center py-4"><div className="spinner-border text-primary" role="status"></div></div>
+    ) : workloadComplaints.length === 0 ? (
+      <div className="text-center py-4">
+        <p className="text-muted m-0">
+          No complaints found for this status in <strong>{currentComplaint?.category}</strong>.
+        </p>
+        {workloadCategoriesHint.length > 0 && (
+          <small className="text-muted mt-2 d-block">
+            These active complaints are from: {workloadCategoriesHint.join(", ")}
+          </small>
+        )}
+      </div>
+    ) : (
+      <div className="list-group border-0">
+        {workloadComplaints.map(c => (
+          <div 
+            key={c.complaint_id} 
+            className="list-group-item list-group-item-action flex-column align-items-start mb-3 p-3 shadow-sm workload-item"
+            style={{ borderRadius: '12px', border: '1px solid #e0e5f0', cursor: 'pointer', transition: 'all 0.2s ease-in-out', backgroundColor: '#fff' }}
+            onClick={() => {
+                setShowWorkloadModal(false);
+                navigate(`/complaints-details/${c.complaint_id}`);
+            }}
+          >
+            <div className="d-flex w-100 justify-content-between mb-2">
+              <h6 className="mb-0 fw-bold fs-5" style={{ color: '#0056b3' }}>{c.title}</h6>
+              <small className="text-secondary fw-semibold">{new Date(c.timestamp).toLocaleDateString()}</small>
+            </div>
+            <p className="mb-3 text-secondary" style={{ fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {c.description}
+            </p>
+            <small className="text-dark d-flex align-items-center">
+              <strong>Status:</strong> <span className="ms-1 me-2 text-muted">{c.status}</span> <span className="mx-2 text-muted">|</span> 
+              <strong>Complaint ID:</strong> <span className="ms-1" style={{ fontFamily: 'monospace', color: '#495057' }}>{c.complaint_id.slice(-6).toUpperCase()}</span>
+            </small>
+          </div>
+        ))}
+        {workloadCategoriesHint.length > 0 && (
+          <div className="text-center mt-2 p-2 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px border #e9ecef' }}>
+            <small className="text-muted">
+              <strong>Note:</strong> The remaining active complaints are from: <strong>{workloadCategoriesHint.join(", ")}</strong>
+            </small>
+          </div>
+        )}
+      </div>
+    )}
+  </Modal.Body>
+  <Modal.Footer className="border-top pt-3 justify-content-center">
+    <Button variant="secondary" className="px-5 py-2 rounded-pill fw-bold" onClick={() => setShowWorkloadModal(false)} style={{ backgroundColor: '#6c757d', border: 'none' }}>Close</Button>
   </Modal.Footer>
 </Modal>
 

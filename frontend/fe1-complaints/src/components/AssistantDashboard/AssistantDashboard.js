@@ -107,7 +107,16 @@ const [statusFilter, setStatusFilter] = useState("All");
                                 <p><strong>User:</strong> {complaint.user_id}</p>
                                 <p><strong>Date:</strong> {new Date(complaint.timestamp).toLocaleDateString()}</p>
                                 {complaint.assignedBy && <p><strong>Assigned By:</strong> {complaint.assignedBy}</p>}
-                                {complaint.assistantRemarks && <p><strong>Last Remark:</strong> {complaint.assistantRemarks}</p>}
+                                {complaint.assistantRemarks && (
+                                    <p><strong>Last Remark:</strong> {
+                                        (() => {
+                                            let remark = complaint.assistantRemarks || "";
+                                            remark = remark.replace(/by assistant/gi, "").replace(/\s+/g, " ").trim();
+                                            remark = remark.replace(/by\s+by/gi, "by");
+                                            return remark;
+                                        })()
+                                    }</p>
+                                )}
                             </div>
 
                             <div className="action-area">

@@ -120,13 +120,9 @@ const ComplaintForm = () => {
       setSuggestedCategories(suggestions);
     }
 
-    // Existing logic (keep this)
-    if (name === "connectionType" && value === "WiFi") {
-      const isHostel =
-        formData.location === "Boys Hostel" ||
-        formData.location === "Girls Hostel";
-      setWifiAtHostelWarning(isHostel);
-    }
+    // Dynamic warning logic for WiFi in Hostels
+    const isHostel = updatedData.location === "Boys Hostel" || updatedData.location === "Girls Hostel";
+    setWifiAtHostelWarning(isHostel && updatedData.connectionType === "WiFi");
   };
 
 
