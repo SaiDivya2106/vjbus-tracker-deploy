@@ -1,0 +1,39 @@
+name: vjbus-app
+
+services:
+  be4-vjbus:
+    build:
+      context: ../backend/be4-vjbus
+      dockerfile: Dockerfile
+    container_name: vjbus-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - FLASK_ENV=production
+      - BE_HOST=0.0.0.0
+      - BE_PORT=3000
+    networks:
+      - vjbus-network
+
+  fe4-vjbus:
+    build:
+      context: ../frontend/fe4-vjbus
+      dockerfile: Dockerfile
+    container_name: vjbus-frontend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - FLASK_ENV=production
+      - FE_HOST=0.0.0.0
+      - FE_PORT=4000
+      - BE_SOCKET_URL=ws://103.248.208.119:3000   # production WS url
+    depends_on:
+      - be4-vjbus
+    networks:
+      - vjbus-network
+
+networks:
+  vjbus-network:
+    driver: bridge
