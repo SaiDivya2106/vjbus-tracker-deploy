@@ -29,7 +29,7 @@ jobs:
       # ─── BACKEND ───────────────────────────────────────────
       - name: Install backend dependencies
         working-directory: backend/be1-complaints
-        run: npm ci
+        run: npm install
 
       - name: Lint backend
         working-directory: backend/be1-complaints
@@ -38,7 +38,7 @@ jobs:
       # ─── FRONTEND ──────────────────────────────────────────
       - name: Install frontend dependencies
         working-directory: frontend/fe1-complaints
-        run: npm ci
+        run: npm install
 
       - name: Lint frontend
         working-directory: frontend/fe1-complaints
