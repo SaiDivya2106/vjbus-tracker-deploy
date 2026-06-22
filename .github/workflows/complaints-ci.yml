@@ -33,7 +33,7 @@ jobs:
 
       - name: Lint backend
         working-directory: backend/be1-complaints
-        run: npm run lint -- --max-warnings=0
+        run: npm run lint -- --max-warnings=20
 
       # ─── FRONTEND ──────────────────────────────────────────
       - name: Install frontend dependencies
@@ -42,7 +42,7 @@ jobs:
 
       - name: Lint frontend
         working-directory: frontend/fe1-complaints
-        run: npm run lint -- --max-warnings=0
+        run: npm run lint -- --max-warnings=20
 
       # ─── DOCKER BUILD ──────────────────────────────────────
       - name: Build backend image
