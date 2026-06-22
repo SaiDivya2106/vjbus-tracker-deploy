@@ -11,7 +11,7 @@ MongoClient.connect('mongodb://localhost:27017').then(async client => {
     );
     console.log(`Updated ${result1.modifiedCount} records in assistantCollection.`);
 
-    // Also fix any already-assigned complaints that got the bad email
+    // Also fix any already-assigned complaints that got the bad email..
     const result2 = await db.collection('complaintsCollection').updateMany(
       { assignedAssistant: '22071a190@vnrvjiet.in' },
       { $set: { assignedAssistant: '22071a1290@vnrvjiet.in' } }
