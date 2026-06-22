@@ -7,18 +7,17 @@ on:
       - "backend/be1-complaints/**"
       - "frontend/fe1-complaints/**"
       - "deploy/docker-compose.complaints.yml"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
     paths:
       - "backend/be1-complaints/**"
       - "frontend/fe1-complaints/**"
+      - ".github/workflows/**"
 
 jobs:
-  build-and-lint:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+  lint:
+    runs-on: ubuntu-latest        # ← GitHub's server for lint (free & fast)
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +32,7 @@ jobs:
 
       - name: Lint backend
         working-directory: backend/be1-complaints
-        run: npm run lint 
+        run: npm run lint
 
       # ─── FRONTEND ──────────────────────────────────────────
       - name: Install frontend dependencies
@@ -42,43 +41,16 @@ jobs:
 
       - name: Lint frontend
         working-directory: frontend/fe1-complaints
-        run: npm run lint 
-
-      # ─── DOCKER BUILD ──────────────────────────────────────
-      - name: Build backend image
-        run: docker build -t complaints-backend ./backend/be1-complaints
-
-      - name: Build frontend image
-        run: |
-          docker build -t complaints-frontend \
-            --build-arg VITE_API_URL=https://complaints.vjstartup.com/be/api \
-            ./frontend/fe1-complaints
-
-      # ─── PUSH TO GHCR ──────────────────────────────────────
-      - name: Login to GitHub Container Registry
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push images to GHCR
-        if: github.event_name == 'push'
-        run: |
-          docker tag complaints-backend ghcr.io/headiie/complaints-backend:latest
-          docker tag complaints-frontend ghcr.io/headiie/complaints-frontend:latest
-          docker push ghcr.io/headiie/complaints-backend:latest
-          docker push ghcr.io/headiie/complaints-frontend:latest
+        run: npm run lint
 
   deploy:
-    needs: build-and-lint
+    needs: lint                   # ← only deploy if lint passes
     if: github.event_name == 'push'
-    runs-on: self-hosted
+    runs-on: self-hosted          # ← your server builds + deploys directly
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy complaints app containers
+      - name: Build and Deploy
         run: |
           docker compose -f deploy/docker-compose.complaints.yml down
           docker compose -f deploy/docker-compose.complaints.yml up -d --build
