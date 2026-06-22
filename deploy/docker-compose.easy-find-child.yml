@@ -1,4 +1,4 @@
-name: lostandfound-app
+name: easyfind-child-app
 
 services:
   mongodb:
@@ -29,7 +29,7 @@ services:
 
   backend:
     build:
-      context: ../backend/be-lostandfound
+      context: ../backend/be9-easyfind        # ← changed
       dockerfile: Dockerfile
     container_name: lostandfound-backend
     restart: unless-stopped
@@ -56,7 +56,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend/fe-lostandfound
+      context: ../frontend/fe9-easyfind-child  # ← changed
       dockerfile: Dockerfile
     container_name: lostandfound-frontend
     restart: unless-stopped

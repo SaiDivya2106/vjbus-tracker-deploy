@@ -1,4 +1,4 @@
-name: lostandfound-ci
+name: easyfind-child-ci
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     paths:
       - "backend/be9-easyfind/**"
       - "frontend/fe9-easyfind-child/**"
-      - "deploy/docker-compose.lostandfound.yml"
+      - "deploy/docker-compose.easy-find-child.yml"
       - ".github/workflows/easy-find-child-ci.yml"
   pull_request:
     branches: [main]
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          docker compose -f deploy/docker-compose.lostandfound.yml down
-          docker compose -f deploy/docker-compose.lostandfound.yml up -d --build
+          docker compose -f deploy/docker-compose.easy-find-child.yml down
+          docker compose -f deploy/docker-compose.easy-find-child.yml up -d --build
           docker image prune -f
-          docker compose -f deploy/docker-compose.lostandfound.yml ps
+          docker compose -f deploy/docker-compose.easy-find-child.yml ps
