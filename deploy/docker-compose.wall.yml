@@ -1,57 +1,59 @@
-name: campus-app
+name: wall-app
 
 services:
   mongodb:
     image: mongo:7
-    container_name: campus-mongo
+    container_name: wall-mongo
     restart: unless-stopped
     ports:
-      - "27320:27017"
+      - "27322:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_DB}
     volumes:
-      - campus-mongodata:/data/db
+      - wall-mongodata:/data/db
     networks:
-      - campus-network
+      - wall-network
 
   backend:
     build:
-      context: ../backend/be0-campus
+      context: ../backend/be5-wall
       dockerfile: Dockerfile
-    container_name: campus-backend
+    container_name: wall-backend
     restart: unless-stopped
     ports:
-      - "5002:5000"
+      - "5004:5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
       - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - JWT_SECRET=${JWT_SECRET}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
     depends_on:
       - mongodb
     networks:
-      - campus-network
+      - wall-network
 
   frontend:
     build:
-      context: ../frontend/fe0-campus
+      context: ../frontend/fe5-wall
       dockerfile: Dockerfile
-    container_name: campus-frontend
+    container_name: wall-frontend
     restart: unless-stopped
     ports:
-      - "3312:80"
+      - "3314:80"
     depends_on:
       - backend
     networks:
-      - campus-network
+      - wall-network
 
 volumes:
-  campus-mongodata:
+  wall-mongodata:
 
 networks:
-  campus-network:
+  wall-network:
     driver: bridge

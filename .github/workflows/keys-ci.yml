@@ -1,0 +1,52 @@
+name: keys-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/be8-keys/**"
+      - "frontend/fe8-keys/**"
+      - "deploy/docker-compose.keys.yml"
+      - ".github/workflows/keys-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/be8-keys/**"
+      - "frontend/fe8-keys/**"
+      - ".github/workflows/keys-ci.yml"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        working-directory: backend/be8-keys
+        run: npm install
+
+      - name: Install frontend dependencies
+        working-directory: frontend/fe8-keys
+        run: npm install
+
+      - name: Lint frontend
+        working-directory: frontend/fe8-keys
+        run: npm run lint
+
+  deploy:
+    needs: lint
+    if: github.event_name == 'push'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Deploy
+        run: |
+          docker compose -f deploy/docker-compose.keys.yml down
+          docker compose -f deploy/docker-compose.keys.yml up -d --build
+          docker image prune -f
+          docker compose -f deploy/docker-compose.keys.yml ps

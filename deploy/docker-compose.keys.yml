@@ -1,0 +1,57 @@
+keys-backend:
+    build:
+      context: ../backend/be8-keys
+      dockerfile: Dockerfile
+    container_name: keys-backend
+    restart: unless-stopped
+    ports:
+      - "5006:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://${KEYS_MONGO_USER}:${KEYS_MONGO_PASSWORD}@keys-mongodb:27017/${KEYS_MONGO_DB}?authSource=admin
+      - JWT_SECRET=${KEYS_JWT_SECRET}
+      - CLIENT_URL=${KEYS_CLIENT_URL}
+      # Add your nodemailer/email-provider env vars here, e.g.:
+      # - SMTP_HOST=${KEYS_SMTP_HOST}
+      # - SMTP_USER=${KEYS_SMTP_USER}
+      # - SMTP_PASS=${KEYS_SMTP_PASS}
+    depends_on:
+      - keys-mongodb
+    networks:
+      - keys-network
+
+  keys-mongodb:
+    image: mongo:7
+    container_name: keys-mongo
+    restart: unless-stopped
+    ports:
+      - "27324:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${KEYS_MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${KEYS_MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${KEYS_MONGO_DB}
+    volumes:
+      - keys-mongodata:/data/db
+    networks:
+      - keys-network
+
+  keys-frontend:
+    build:
+      context: ../frontend/fe8-keys
+      dockerfile: Dockerfile
+    container_name: keys-frontend
+    restart: unless-stopped
+    ports:
+      - "3316:80"
+    depends_on:
+      - keys-backend
+    networks:
+      - keys-network
+
+volumes:
+  keys-mongodata:
+
+networks:
+  keys-network:
+    driver: bridge

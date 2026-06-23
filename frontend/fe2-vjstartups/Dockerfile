@@ -1,10 +1,10 @@
 # Stage 1 - Build
-FROM node:20-alpine AS build
+FROM oven/bun:1 AS build
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+COPY package.json bun.lockb ./
+RUN bun install
 COPY . .
-RUN npm run build
+RUN bun run build
 
 # Stage 2 - Serve
 FROM node:20-alpine

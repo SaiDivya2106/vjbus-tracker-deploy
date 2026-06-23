@@ -1,19 +1,19 @@
-name: campus-ci
+name: vjstartups-ci
 
 on:
   push:
     branches: [main]
     paths:
-      - "backend/be0-campus/**"
-      - "frontend/fe0-campus/**"
-      - "deploy/docker-compose.campus.yml"
-      - ".github/workflows/campus-ci.yml"
+      - "backend/be2-vjstartups/**"
+      - "frontend/fe2-vjstartups/**"
+      - "deploy/docker-compose.vjstartups.yml"
+      - ".github/workflows/vjstartups-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - "backend/be0-campus/**"
-      - "frontend/fe0-campus/**"
-      - ".github/workflows/campus-ci.yml"
+      - "backend/be2-vjstartups/**"
+      - "frontend/fe2-vjstartups/**"
+      - ".github/workflows/vjstartups-ci.yml"
 
 jobs:
   lint:
@@ -27,20 +27,22 @@ jobs:
 
       # ─── BACKEND ─────────────────────────────────
       - name: Install backend dependencies
-        working-directory: backend/be0-campus
+        working-directory: backend/be2-vjstartups
         run: npm install
 
       - name: Lint backend
-        working-directory: backend/be0-campus
+        working-directory: backend/be2-vjstartups
         run: npm run lint
 
       # ─── FRONTEND ────────────────────────────────
       - name: Install frontend dependencies
-        working-directory: frontend/fe0-campus
-        run: npm install
+        working-directory: frontend/fe2-vjstartups
+        run: |
+          npm install -g bun
+          bun install
 
       - name: Lint frontend
-        working-directory: frontend/fe0-campus
+        working-directory: frontend/fe2-vjstartups
         run: npm run lint
 
   deploy:
@@ -52,7 +54,7 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          docker compose -f deploy/docker-compose.campus.yml down
-          docker compose -f deploy/docker-compose.campus.yml up -d --build
+          docker compose -f deploy/docker-compose.vjstartups.yml down
+          docker compose -f deploy/docker-compose.vjstartups.yml up -d --build
           docker image prune -f
-          docker compose -f deploy/docker-compose.campus.yml ps
+          docker compose -f deploy/docker-compose.vjstartups.yml ps

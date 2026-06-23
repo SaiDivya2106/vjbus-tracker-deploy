@@ -1,57 +1,60 @@
-name: campus-app
+name: vjstartups-app
 
 services:
   mongodb:
     image: mongo:7
-    container_name: campus-mongo
+    container_name: vjstartups-mongo
     restart: unless-stopped
     ports:
-      - "27320:27017"
+      - "27321:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_DB}
     volumes:
-      - campus-mongodata:/data/db
+      - vjstartups-mongodata:/data/db
     networks:
-      - campus-network
+      - vjstartups-network
 
   backend:
     build:
-      context: ../backend/be0-campus
+      context: ../backend/be2-vjstartups
       dockerfile: Dockerfile
-    container_name: campus-backend
+    container_name: vjstartups-backend
     restart: unless-stopped
     ports:
-      - "5002:5000"
+      - "5003:5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
       - MONGO_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET=${JWT_SECRET}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
     depends_on:
       - mongodb
     networks:
-      - campus-network
+      - vjstartups-network
 
   frontend:
     build:
-      context: ../frontend/fe0-campus
+      context: ../frontend/fe2-vjstartups
       dockerfile: Dockerfile
-    container_name: campus-frontend
+    container_name: vjstartups-frontend
     restart: unless-stopped
     ports:
-      - "3312:80"
+      - "3313:80"
     depends_on:
       - backend
     networks:
-      - campus-network
+      - vjstartups-network
 
 volumes:
-  campus-mongodata:
+  vjstartups-mongodata:
 
 networks:
-  campus-network:
+  vjstartups-network:
     driver: bridge
