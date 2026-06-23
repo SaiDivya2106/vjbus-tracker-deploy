@@ -11,6 +11,7 @@ module.exports = {
   parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   settings: { react: { version: "18.2" } },
   plugins: ["react-refresh"],
+  reportUnusedDisableDirectives: false,    // ← moved here (top level)
   rules: {
     "react/prop-types": "off",
     "react/no-unescaped-entities": "off",
@@ -23,6 +24,5 @@ module.exports = {
     "no-undef": "off",
     "no-console": "off",
     "no-self-assign": "off",
-     "reportUnusedDisableDirectives": false,
   },
 };
