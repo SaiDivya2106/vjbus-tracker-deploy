@@ -7,13 +7,13 @@ on:
       - "backend/be1-complaints/**"
       - "frontend/fe1-complaints/**"
       - "deploy/docker-compose.complaints.yml"
-      - ".github/workflows/**"
+      - ".github/workflows/complaints-ci.yml"
   pull_request:
     branches: [main]
     paths:
       - "backend/be1-complaints/**"
       - "frontend/fe1-complaints/**"
-      - ".github/workflows/**"
+      - ".github/workflows/complaints-ci.ymls"
 
 jobs:
   lint:
