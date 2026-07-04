@@ -3,7 +3,7 @@
 let map;
 let markers = {};
 // Match the WebSocket URL with your simulator and server
-const socket = io("wss://dev-bus.vjstartup.com", {
+const socket = io("https://dev-bus.vjstartup.com", {
     transports: ["websocket"],
     reconnection: true,
     reconnectionAttempts: 5,
@@ -12,17 +12,13 @@ const socket = io("wss://dev-bus.vjstartup.com", {
 const fixedLatLng = [17.539896, 78.386511];
 
 // Custom bus icon
-const busIcon = L.icon({
-    iconUrl: 'https://dev-bus.vjstartup.com/bus.png',
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-
-    
-
+const busIcon = L.divIcon({
+    html: '<div style="font-size:32px; line-height:32px;">🚌</div>',
+    className: 'bus-emoji-icon',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
 });
-L.marker([17.539896, 78.386511], {
-    icon: testIcon
-}).addTo(map);
+
 
 // Wait for DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", function() {
@@ -88,7 +84,7 @@ function addFixedMarker() {
  * Subscribe to all available routes
  */
 function subscribeToAllRoutes() {
-    fetch("https://dev-bus.vjstartup.com/bus-be/get_all_routes")
+    fetch("http://localhost:6104/get_all_routes")
         .then(response => response.json())
         .then(routes => {
             console.log("Available routes:", routes);
@@ -134,7 +130,7 @@ function initializeSocketListeners() {
  * Fetch current active connections
  */
 function fetchActiveConnections() {
-    fetch("https://dev-bus.vjstartup.com/bus-be/get_all_locations")
+    fetch("http://localhost:6104/get_all_locations")
         .then(response => response.json())
         .then(activeRoutes => {
             console.log("Active routes:", activeRoutes);

@@ -120,15 +120,23 @@ function logout() {
 /**
  * Fetch logs from server
  */
-function fetchLogs() {
-    fetch("/get_logs")
-        .then(response => response.json())
-        .then(data => {
-            allLogs = data;
-            populateRouteDropdown();
-            applyFilters();
-        })
-        .catch(error => console.error("Error fetching data:", error));
+async function fetchLogs() {
+    try {
+        const response = await fetch("http://localhost:6104/proxy/get_logs");
+
+        console.log("Status:", response.status);
+        console.log("OK:", response.ok);
+
+        const data = await response.json();
+        console.log("Data:", data);
+
+        allLogs = data;
+        populateRouteDropdown();
+        applyFilters();
+
+    } catch (error) {
+        console.error("Fetch failed:", error);
+    }
 }
 
 /**
@@ -270,7 +278,7 @@ function displayLogs(logs) {
  * Redirect to live location page
  */
 function redirectToLiveLocation() {
-    window.location.href = "/superAdmin";
+    window.location.href = "/allBus";
 }
 
 /**
