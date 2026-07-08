@@ -5,3 +5,4 @@ flask-socketio==5.5.1
 geopy
 python-dotenv
 requests
+google-auth
