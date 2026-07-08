@@ -42,20 +42,14 @@ else:
     print("ERROR: all_start_timings not found in .env")
     all_start_timings = {}
 
-PORT = 6104
-CLIENT_ID = "719105319954-5alrrgdri16s96121ikn662p16ltp2nj.apps.googleusercontent.com"
+PORT = int(os.environ.get("PORT", 6104))
+CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # Check port availability
-def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(("localhost", port)) == 0
 
-if is_port_in_use(PORT):
-    print(f"❌ Flask is already running on port {PORT}. Exiting.")
-    sys.exit(1)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 # Database Functions

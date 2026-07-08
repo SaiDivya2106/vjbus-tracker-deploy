@@ -18,6 +18,7 @@ app.use(cors({
             "http://localhost:3203",
             "http://localhost:3104",
             "http://localhost:6104",
+            "https://vjbus-tracker.onrender.com",
             "https://dev-auth.vjstartup.com",
             "https://auth.vjstartup.com",
             "https://dev-bus.vjstartup.com",
@@ -126,7 +127,11 @@ function getCookieSettings(req) {
 
     // For localhost, do not set domain and do not use secure cookies
     // For production, set domain to .vjstartup.com and secure cookies
-    const cookieDomain = isLocalhost ? undefined : '.vjstartup.com';
+    const cookieDomain =
+    isLocalhost ? undefined :
+    req.hostname.endsWith(".onrender.com")
+        ? undefined
+        : ".vjstartup.com";
     const base = {
         domain: cookieDomain,
         path: '/',
@@ -303,7 +308,11 @@ app.get("/health", (req, res) => {
 
 // Start server only when executed directly, not when imported for tests
 if (require.main === module) {
-    app.listen(2999, () => console.log("Auth Server running on port 2999"));
+    const PORT = process.env.PORT || 2999;
+
+app.listen(PORT, () => {
+    console.log(`Auth Server running on port ${PORT}`);
+});
 }
 
 module.exports = app;
