@@ -48,7 +48,11 @@ CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 # Check port availability
 
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="fe4-vjbus/templates",
+    static_folder="fe4-vjbus/static"
+)
 CORS(app, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
@@ -658,3 +662,30 @@ def proxy_get_logs():
 if __name__ == "__main__":
     thread.start()
     socketio.run(app, host="0.0.0.0", port=PORT, debug=True)
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/driver")
+def driver():
+    return render_template("driver.html")
+
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
+
+@app.route("/chat")
+def chat():
+    return render_template("chat.html")
+
+@app.route("/allBus")
+def allBus():
+    return render_template("allBus.html")
+@app.route('/favicon.png')
+def icon():
+    return send_file("fe4-vjbus/favicon.png", mimetype="image/png")
+
+@app.route('/bus.png')
+def marker():
+    return send_file("fe4-vjbus/bus.png", mimetype="image/png")
