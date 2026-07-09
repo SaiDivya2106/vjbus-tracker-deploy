@@ -1,7 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 import geopy
-from flask import Flask, request, jsonify,render_template, json
+from flask_socketio import SocketIO, join_room, leave_room,send_file
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, send
 import math
@@ -657,12 +657,6 @@ def proxy_get_logs():
             "error": str(e)
         }), 500
 
-
-
-if __name__ == "__main__":
-    thread.start()
-    socketio.run(app, host="0.0.0.0", port=PORT, debug=True)
-
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -682,6 +676,7 @@ def chat():
 @app.route("/allBus")
 def allBus():
     return render_template("allBus.html")
+
 @app.route('/favicon.png')
 def icon():
     return send_file("fe4-vjbus/favicon.png", mimetype="image/png")
@@ -689,3 +684,10 @@ def icon():
 @app.route('/bus.png')
 def marker():
     return send_file("fe4-vjbus/bus.png", mimetype="image/png")
+
+
+
+if __name__ == "__main__":
+    thread.start()
+    socketio.run(app, host="0.0.0.0", port=PORT, debug=True)
+
