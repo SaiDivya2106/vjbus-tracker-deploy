@@ -671,11 +671,7 @@ def get_google_client_id():
     return jsonify({
         "apiKey": os.getenv("GOOGLE_CLIENT_ID")
     })
-@app.route("/get-google-client-id")
-def get_google_client_id():
-    return jsonify({
-        "apiKey": os.getenv("GOOGLE_CLIENT_ID")
-    })
+
 
 @app.route("/")
 def home():
