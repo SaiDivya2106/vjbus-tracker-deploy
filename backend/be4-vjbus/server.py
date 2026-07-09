@@ -694,8 +694,6 @@ def icon():
 def marker():
     return send_file("fe4-vjbus/bus.png", mimetype="image/png")
 
-
-
 if __name__ == "__main__":
     thread.start()
     socketio.run(app, host="0.0.0.0", port=PORT, debug=True)
