@@ -129,10 +129,9 @@ function addFixedMarker() {
 async function getRoutes() {
     try {
         console.log("Fetching routes...");
-        const res = await fetch("/get-all-routes");
-        const text = await res.text();
-       const data = JSON.parse(text);
-routes = Object.keys(data);
+        const res = await fetch("/proxy/get_all_routes");
+       const data = await res.json();
+routes = data;
 console.log("Routes fetched:", routes);
         console.log("Routes fetched:", routes);
     } catch (err) {
@@ -142,6 +141,32 @@ console.log("Routes fetched:", routes);
     
     // After fetching routes, fetch active routes
     await fetchActiveRoutes();
+}
+
+async function getAllLocations() {
+    try {
+        const res = await fetch(`${API_URL}/proxy/get_all_locations`);
+        const locations = await res.json();
+
+        console.log("Current Bus Locations:", locations);
+
+        locations.forEach((bus) => {
+            if (!markers[bus.route_id]) {
+                markers[bus.route_id] = L.marker(
+                    [bus.latitude, bus.longitude],
+                    { icon: busIcon }
+                ).addTo(map);
+            } else {
+                markers[bus.route_id].setLatLng([
+                    bus.latitude,
+                    bus.longitude
+                ]);
+            }
+        });
+
+    } catch (err) {
+        console.error("Error fetching locations:", err);
+    }
 }
 
 async function fetchActiveRoutes() {
@@ -441,7 +466,7 @@ function login_logout(event) {
 function handleCredentialResponse(response) {
     const token = response.credential;
     
-    fetch(`${API_URL}/auth/google`, {
+    fetch(`${API_URL}/proxy/auth/google`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -471,7 +496,7 @@ async function logout(event) {
     if (!confirm("Are you sure you want to log out?")) return;
 
     try {
-        const response = await fetch(`${API_URL}/logout`, {
+        const response = await fetch(`${API_URL}/proxy/logout`, {
             method: "POST",
             credentials: "include"
         });
