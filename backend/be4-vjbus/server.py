@@ -665,6 +665,17 @@ def proxy_get_logs():
             "success": False,
             "error": str(e)
         }), 500
+    
+@app.route("/get-google-client-id")
+def get_google_client_id():
+    return jsonify({
+        "apiKey": os.getenv("GOOGLE_CLIENT_ID")
+    })
+@app.route("/get-google-client-id")
+def get_google_client_id():
+    return jsonify({
+        "apiKey": os.getenv("GOOGLE_CLIENT_ID")
+    })
 
 @app.route("/")
 def home():
@@ -693,6 +704,8 @@ def icon():
 @app.route('/bus.png')
 def marker():
     return send_file("fe4-vjbus/bus.png", mimetype="image/png")
+
+
 
 if __name__ == "__main__":
     thread.start()
