@@ -49,7 +49,7 @@ app.use(cors({
 app.options("*", cors());
 app.use(cookieParser());
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 // ✅ Load public apps from environment variable
 // Format in .env: PUBLIC_APPS=wall,events,marketplace
