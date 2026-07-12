@@ -595,35 +595,14 @@ def proxy_get_all_locations():
 
 @app.route("/proxy/auth/google", methods=["POST"])
 def proxy_google():
-    response = requests.post(
-        "https://auth.vjstartup.com/auth/google",
-        json=request.get_json(),
-        headers={
-            "Content-Type": "application/json",
-            "Origin": request.headers.get("Origin", "")
-        }
-    )
-
-    flask_response = app.response_class(
-        response.content,
-        status=response.status_code,
-        mimetype=response.headers.get("Content-Type")
-    )
-
-    if "Set-Cookie" in response.headers:
-        flask_response.headers.add(
-            "Set-Cookie",
-            response.headers["Set-Cookie"]
-        )
-
-    return flask_response
-
+    print("Origin received by Flask:", request.headers.get("Origin"))
+    
 
 @app.route("/proxy/logout", methods=["POST"])
 def proxy_logout():
     try:
         response = requests.post(
-            "https://dev-auth.vjstartup.com/logout",
+            "https://auth.vjstartup.com/logout",
             timeout=10
         )
         return response.content, response.status_code
