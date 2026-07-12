@@ -129,7 +129,7 @@ function addFixedMarker() {
 async function getRoutes() {
     try {
         console.log("Fetching routes...");
-        const res = await fetch(`${API_URL}/proxy/get_all_routes`);
+        const res = await fetch(`${API_URL}/proxy/get-all-routes`);
         const data = await res.json();
         routes = data;
         console.log("Routes fetched:", routes);
@@ -144,7 +144,7 @@ async function getRoutes() {
 
 async function getAllLocations() {
     try {
-        const res = await fetch(`${API_URL}/proxy/get_all_locations`);
+        const res = await fetch(`${API_URL}/proxy/get-all-locations`);
         const locations = await res.json();
 
         console.log("Current Bus Locations:", locations);
