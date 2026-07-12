@@ -129,10 +129,9 @@ function addFixedMarker() {
 async function getRoutes() {
     try {
         console.log("Fetching routes...");
-        const res = await fetch("/proxy/get_all_routes");
-       const data = await res.json();
-routes = data;
-console.log("Routes fetched:", routes);
+        const res = await fetch(`${API_URL}/proxy/get_all_routes`);
+        const data = await res.json();
+        routes = data;
         console.log("Routes fetched:", routes);
     } catch (err) {
         console.error("Error fetching routes:", err);
@@ -198,7 +197,7 @@ async function fetchActiveRoutes() {
 // ===== UTILITY FUNCTIONS =====
 async function getGoogleClientId() {
     try {
-        const res = await fetch('/get-google-client-id');
+        const res = await fetch(`${API_URL}/get-google-client-id`);
         const data = await res.json();
         GOOGLE_CLIENT_ID = data.apiKey;
         console.log("Google Client ID fetched successfully");
@@ -688,7 +687,7 @@ function getUserLocation(callback) {
 
 async function getDistanceTime(origin, destination) {
     try {
-        const response = await fetch('/get-tom-tom-api-key');
+        const response = await fetch(`${API_URL}/get-tom-tom-api-key`);
         const data = await response.json();
         const apiKey = data.apiKey;
         
