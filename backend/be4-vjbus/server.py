@@ -584,7 +584,7 @@ def proxy_get_all_routes():
     )
     return jsonify(response.json()), response.status_code
 
-@app.route("/proxy/get_all_locations", methods=["GET"])
+@app.route("/proxy/get-all-locations", methods=["GET"])
 def proxy_get_all_locations():
     response = requests.get(
         "https://dev-bus.vjstartup.com/get-all-locations",
@@ -596,18 +596,27 @@ def proxy_get_all_locations():
 @app.route("/proxy/auth/google", methods=["POST"])
 def proxy_google():
     response = requests.post(
-    "https://dev-auth.vjstartup.com/auth/google",
+        "https://dev-auth.vjstartup.com/auth/google",
         json=request.get_json(),
         headers={
-            "Content-Type":"application/json"
+            "Content-Type": "application/json",
+            "Origin": request.headers.get("Origin", "")
         }
     )
 
-    return (
+    flask_response = app.response_class(
         response.content,
-        response.status_code,
-        response.headers.items()
+        status=response.status_code,
+        mimetype=response.headers.get("Content-Type")
     )
+
+    if "Set-Cookie" in response.headers:
+        flask_response.headers.add(
+            "Set-Cookie",
+            response.headers["Set-Cookie"]
+        )
+
+    return flask_response
 
 
 @app.route("/proxy/logout", methods=["POST"])
