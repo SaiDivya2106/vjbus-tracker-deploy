@@ -179,7 +179,7 @@ app.post("/auth/google", async (req, res) => {
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: process.env.CLIENT_ID,
         });
 
         const payload = ticket.getPayload();
@@ -212,10 +212,13 @@ app.post("/auth/google", async (req, res) => {
         res.json({ token: userToken, user: { email, name, picture ,family_name} });
 
     } catch (error) {
-        console.error("❌ Google Token Verification Failed:", error);
-        res.status(401).json({ error: "Invalid Token" });
-    }
-});
+    console.error(error);
+    console.error(error.stack);
+
+    res.status(500).json({
+        error: error.message
+    });
+}
 
 
 
