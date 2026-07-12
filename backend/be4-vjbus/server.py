@@ -10,6 +10,8 @@ from flask import (
     json,
     send_file
 )
+import requests
+from flask import request, jsonify
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, send
@@ -595,7 +597,29 @@ def proxy_get_all_locations():
 
 @app.route("/proxy/auth/google", methods=["POST"])
 def proxy_google():
-    print("Origin received by Flask:", request.headers.get("Origin"))
+    try:
+        print("Origin:", request.headers.get("Origin"))
+
+        response = requests.post(
+            "https://auth.vjstartup.com/auth/google",
+            json=request.json,
+            headers={
+                "Origin": request.headers.get("Origin", "")
+            },
+            timeout=15
+        )
+
+        flask_response = jsonify(response.json())
+        flask_response.status_code = response.status_code
+
+        # Forward cookies from auth server
+        if "set-cookie" in response.headers:
+            flask_response.headers["Set-Cookie"] = response.headers["set-cookie"]
+
+        return flask_response
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
 
 @app.route("/proxy/logout", methods=["POST"])
