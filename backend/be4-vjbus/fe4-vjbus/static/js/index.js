@@ -473,7 +473,18 @@ function handleCredentialResponse(response) {
         },
         body: JSON.stringify({ token })
     })
-    .then(res => res.json())
+    .then(async (res) => {
+    const text = await res.text();
+
+    console.log("Status:", res.status);
+    console.log("Response:", text);
+
+    if (!res.ok) {
+        throw new Error(text);
+    }
+
+    return JSON.parse(text);
+})
     .then(data => {
         if (data.user) {
             fill_tracking_info();
