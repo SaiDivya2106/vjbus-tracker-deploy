@@ -596,7 +596,7 @@ def proxy_get_all_locations():
 @app.route("/proxy/auth/google", methods=["POST"])
 def proxy_google():
     response = requests.post(
-        "https://dev-auth.vjstartup.com/auth/google",
+        "https://auth.vjstartup.com/auth/google",
         json=request.get_json(),
         headers={
             "Content-Type": "application/json",
