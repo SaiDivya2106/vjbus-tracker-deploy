@@ -576,12 +576,33 @@ def health():
         "timestamp": datetime.now().isoformat()
     }), 200
 
+@app.route("/proxy/get_all_routes", methods=["GET"])
+def proxy_get_all_routes():
+    response = requests.get(
+        "https://dev-bus.vjstartup.com/get_all_routes",
+        timeout=10
+    )
+    return jsonify(response.json()), response.status_code
+
+@app.route("/proxy/get_all_locations", methods=["GET"])
+def proxy_get_all_locations():
+    response = requests.get(
+        "https://dev-bus.vjstartup.com/get_all_locations",
+        timeout=10
+    )
+    return jsonify(response.json()), response.status_code
+
 
 @app.route("/auth/google", methods=["POST"])
 def auth_google():
     try:
         data = request.get_json()
+
+        print("Received data:", data)
+
         token = data.get("token")
+
+        print("Token:", token[:50] if token else None)
 
         if not token:
             return jsonify({
@@ -589,24 +610,26 @@ def auth_google():
                 "error": "Token missing"
             }), 400
 
+
         idinfo = id_token.verify_oauth2_token(
             token,
             grequests.Request(),
             CLIENT_ID
         )
 
-        user = {
-            "email": idinfo.get("email"),
-            "name": idinfo.get("name"),
-            "picture": idinfo.get("picture")
-        }
 
-        print("Google Login Success:", user)
+        print("Google Info:", idinfo)
+
 
         return jsonify({
             "success": True,
-            "user": user
+            "user": {
+                "email": idinfo["email"],
+                "name": idinfo.get("name"),
+                "picture": idinfo.get("picture")
+            }
         })
+
 
     except Exception as e:
         import traceback
@@ -615,15 +638,27 @@ def auth_google():
         return jsonify({
             "success": False,
             "error": str(e)
-        }), 401
-@app.route("/get_all_locations", methods=["GET"])
-def api_get_all_locations():
-    return jsonify(all_locations)
+        }),401
 
 
-@app.route("/get_all_routes", methods=["GET"])
-def api_get_all_routes():
-    return jsonify(list(all_drivers.keys()))
+@app.route("/proxy/logout", methods=["POST"])
+def proxy_logout():
+    try:
+        response = requests.post(
+            "https://dev-bus.vjstartup.com/logout",
+            timeout=10
+        )
+        return response.content, response.status_code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/get-tom-tom-api-key")
+def get_tomtom_api_key():
+    return jsonify({
+        "apiKey": os.getenv("TOMTOM_API_KEY")
+    })
+
+
 
 @app.route("/get_logs", methods=["GET"])
 def get_logs():
@@ -666,12 +701,13 @@ def proxy_get_logs():
             "error": str(e)
         }), 500
     
+
+
 @app.route("/get-google-client-id")
 def get_google_client_id():
     return jsonify({
         "apiKey": os.getenv("GOOGLE_CLIENT_ID")
     })
-
 
 @app.route("/")
 def home():
