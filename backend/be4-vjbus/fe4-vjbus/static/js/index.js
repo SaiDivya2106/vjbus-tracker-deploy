@@ -199,7 +199,7 @@ async function getGoogleClientId() {
     try {
         const res = await fetch(`${API_URL}/get-google-client-id`);
         const data = await res.json();
-        CLIENT_ID = data.apiKey;
+        GOOGLE_CLIENT_ID = data.apiKey;
         console.log("Google Client ID fetched successfully");
     } catch (error) {
         console.error("Error fetching Google Client ID", error);
@@ -516,29 +516,36 @@ async function logout(event) {
 }
 
 function initializeGoogleSignIn() {
+    console.log("Initializing Google Sign-In");
+    console.log("GOOGLE_CLIENT_ID =", GOOGLE_CLIENT_ID);
+
+    const signInButton = document.getElementById("g_id_signin");
+    console.log("Button div:", signInButton);
+
     if (!GOOGLE_CLIENT_ID) {
-        console.error("Google Client ID not available!");
+        console.error("Google Client ID missing");
         return;
     }
-    
-    try {
-        google.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: handleCredentialResponse,
-            hosted_domain: "vnrvjiet.in",
-            ux_mode: "popup"
-        });
-        
-        const signInButton = document.getElementById("g_id_signin");
-        if (signInButton) {
-            google.accounts.id.renderButton(
-                signInButton,
-                { theme: "outline", size: "large" }
-            );
-        }
-    } catch (error) {
-        console.error("Error initializing Google Sign-In:", error);
+
+    if (!signInButton) {
+        console.error("g_id_signin div not found");
+        return;
     }
+
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+        hosted_domain: "vnrvjiet.in",
+        ux_mode: "popup"
+    });
+
+    google.accounts.id.renderButton(signInButton, {
+        theme: "outline",
+        size: "large",
+        width: 250
+    });
+
+    console.log("Google button rendered");
 }
 
 // ===== LOGIN MODAL FUNCTIONS =====
