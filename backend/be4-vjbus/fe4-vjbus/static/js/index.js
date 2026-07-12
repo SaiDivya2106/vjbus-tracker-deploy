@@ -199,7 +199,7 @@ async function getGoogleClientId() {
     try {
         const res = await fetch(`${API_URL}/get-google-client-id`);
         const data = await res.json();
-        GOOGLE_CLIENT_ID = data.apiKey;
+        CLIENT_ID = data.apiKey;
         console.log("Google Client ID fetched successfully");
     } catch (error) {
         console.error("Error fetching Google Client ID", error);
@@ -523,7 +523,7 @@ function initializeGoogleSignIn() {
     
     try {
         google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
+            client_id: CLIENT_ID,
             callback: handleCredentialResponse,
             hosted_domain: "vnrvjiet.in",
             ux_mode: "popup"
