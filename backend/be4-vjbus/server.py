@@ -576,10 +576,10 @@ def health():
         "timestamp": datetime.now().isoformat()
     }), 200
 
-@app.route("/proxy/get_all_routes", methods=["GET"])
+@app.route("/proxy/get-all-routes", methods=["GET"])
 def proxy_get_all_routes():
     response = requests.get(
-        "https://dev-bus.vjstartup.com/get_all_routes",
+        "https://dev-bus.vjstartup.com/get-all-routes",
         timeout=10
     )
     return jsonify(response.json()), response.status_code
@@ -587,7 +587,7 @@ def proxy_get_all_routes():
 @app.route("/proxy/get_all_locations", methods=["GET"])
 def proxy_get_all_locations():
     response = requests.get(
-        "https://dev-bus.vjstartup.com/get_all_locations",
+        "https://dev-bus.vjstartup.com/get-all-locations",
         timeout=10
     )
     return jsonify(response.json()), response.status_code
