@@ -48,8 +48,8 @@ callback(null, false); // ❌ Reject the request
     },
     credentials: true   // ✅ Allow cross-origin cookies
 }));
-app.options("*", cors());
-app.use(cookieParser());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
