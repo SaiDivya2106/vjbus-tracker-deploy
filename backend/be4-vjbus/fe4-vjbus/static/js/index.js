@@ -464,8 +464,8 @@ function login_logout(event) {
 
 function handleCredentialResponse(response) {
     const token = response.credential;
-    
-    fetch(`${API_URL}/proxy/auth/google`, {
+
+    fetch("https://auth.vjstartup.com/auth/google", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -474,17 +474,17 @@ function handleCredentialResponse(response) {
         body: JSON.stringify({ token })
     })
     .then(async (res) => {
-    const text = await res.text();
+        const text = await res.text();
 
-    console.log("Status:", res.status);
-    console.log("Response:", text);
+        console.log("Status:", res.status);
+        console.log("Response:", text);
 
-    if (!res.ok) {
-        throw new Error(text);
-    }
+        if (!res.ok) {
+            throw new Error(text);
+        }
 
-    return JSON.parse(text);
-})
+        return JSON.parse(text);
+    })
     .then(data => {
         if (data.user) {
             fill_tracking_info();
@@ -506,7 +506,7 @@ async function logout(event) {
     if (!confirm("Are you sure you want to log out?")) return;
 
     try {
-        const response = await fetch(`${API_URL}/proxy/logout`, {
+        const response = await fetch("https://auth.vjstartup.com/logout", {
             method: "POST",
             credentials: "include"
         });
