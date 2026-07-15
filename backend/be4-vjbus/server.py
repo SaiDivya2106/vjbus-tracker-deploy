@@ -10,8 +10,6 @@ from flask import (
     json,
     send_file
 )
-import requests
-from flask import request, jsonify
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, send
@@ -32,7 +30,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
 from dotenv import load_dotenv
 import os
-
+import requests
+from flask import request, jsonify
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -595,43 +594,8 @@ def proxy_get_all_locations():
     return jsonify(response.json()), response.status_code
 
 
-@app.route("/proxy/auth/google", methods=["POST"])
-def proxy_google():
-    try:
-        print("Origin:", request.headers.get("Origin"))
 
-        response = requests.post(
-            "https://auth.vjstartup.com/auth/google",
-            json=request.json,
-            headers={
-                "Origin": request.headers.get("Origin", "")
-            },
-            timeout=15
-        )
 
-        flask_response = jsonify(response.json())
-        flask_response.status_code = response.status_code
-
-        # Forward cookies from auth server
-        if "set-cookie" in response.headers:
-            flask_response.headers["Set-Cookie"] = response.headers["set-cookie"]
-
-        return flask_response
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-
-@app.route("/proxy/logout", methods=["POST"])
-def proxy_logout():
-    try:
-        response = requests.post(
-            "https://auth.vjstartup.com/logout",
-            timeout=10
-        )
-        return response.content, response.status_code
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
     
 @app.route("/get-tom-tom-api-key")
 def get_tomtom_api_key():
