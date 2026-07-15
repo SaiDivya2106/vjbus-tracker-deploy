@@ -12,6 +12,7 @@ app.use(cors({
     origin: function (origin, callback) {
         const allowedOrigins = [
             "http://localhost:3000", 
+            "http://127.0.0.1:3104",
             "http://localhost:4000", 
             "http://localhost:6000", 
             "http://localhost:3117",
@@ -41,7 +42,8 @@ app.use(cors({
         if (isAllowed || !origin) {
             callback(null, true); // ✅ Allow the request
         } else {
-            callback(new Error('Not allowed by CORS'), false); // ❌ Reject the request
+            console.log("Blocked Origin:", origin);
+callback(null, false); // ❌ Reject the request
         }
     },
     credentials: true   // ✅ Allow cross-origin cookies
@@ -66,13 +68,21 @@ console.log("🔧 Configured Public Apps:", PUBLIC_APPS);
 // Try to parse app name (subdomain) from a URL like https://passport.vjstartup.com
 function parseAppFromUrl(maybeUrl) {
     if (!maybeUrl) return undefined;
+
     try {
         const u = new URL(maybeUrl);
-        const host = u.hostname; // e.g., passport.vjstartup.com
-        const parts = host.split('.');
-        if (parts.length >= 3 && parts.slice(-2).join('.') === 'vjstartup.com') {
-            return parts[0]; // take the first label as app name
+        const host = u.hostname;
+
+        if (host === "vjbus-tracker.onrender.com") {
+            return "bus";
         }
+
+        const parts = host.split(".");
+
+        if (parts.length >= 3 && parts.slice(-2).join(".") === "vjstartup.com") {
+            return parts[0];
+        }
+
         return undefined;
     } catch {
         return undefined;
